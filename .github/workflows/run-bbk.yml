@@ -50,3 +50,9 @@ jobs:
           else
             python run_cloud.py
           fi
+
+      - name: Upload Processed Photos to Google Drive
+        env:
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: |
+          python upload_to_drive.py

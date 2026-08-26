@@ -3,3 +3,4 @@ google-auth
 pillow
 tqdm
 telethon
+google-api-python-client
