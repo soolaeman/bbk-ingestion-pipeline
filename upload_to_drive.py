@@ -2,7 +2,8 @@
 import os
 import sys
 from pathlib import Path
-from google.oauth2.service_account import Credentials
+from google.oauth2.service_account import Credentials as ServiceAccountCredentials
+from google.oauth2.credentials import Credentials as UserCredentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
@@ -22,10 +23,6 @@ def main():
         print("[-] Error: Env 'GDRIVE_FOLDER_ID' tidak ditemukan!")
         return
 
-    if not SERVICE_ACCOUNT_FILE.exists():
-        print(f"[-] Error: File credentials tidak ditemukan di {SERVICE_ACCOUNT_FILE}")
-        return
-
     if not WEBP_DIR.exists():
         print(f"[-] Info: Folder {WEBP_DIR} tidak ditemukan atau kosong. Tidak ada foto untuk di-upload.")
         return
@@ -38,7 +35,29 @@ def main():
 
     print(f"[+] Menghubungkan ke Google Drive API...")
     scopes = ["https://www.googleapis.com/auth/drive"]
-    creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=scopes)
+
+    # Coba gunakan OAuth2 User Credentials (Refresh Token) jika ada di Env
+    client_id = os.getenv("GDRIVE_CLIENT_ID")
+    client_secret = os.getenv("GDRIVE_CLIENT_SECRET")
+    refresh_token = os.getenv("GDRIVE_REFRESH_TOKEN")
+
+    if client_id and client_secret and refresh_token:
+        print("[+] Menggunakan Autentikasi Akun Pribadi (OAuth2 Refresh Token)...")
+        creds = UserCredentials(
+            token=None,
+            refresh_token=refresh_token,
+            client_id=client_id,
+            client_secret=client_secret,
+            token_uri="https://oauth2.googleapis.com/token",
+            scopes=scopes
+        )
+    else:
+        print("[+] Menggunakan Autentikasi Service Account lokal...")
+        if not SERVICE_ACCOUNT_FILE.exists():
+            print(f"[-] Error: File credentials tidak ditemukan di {SERVICE_ACCOUNT_FILE} dan OAuth Env tidak diset!")
+            return
+        creds = ServiceAccountCredentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=scopes)
+
     service = build("drive", "v3", credentials=creds)
 
     print(f"[+] Mulai mengunggah {len(webp_files)} foto ke Google Drive (Folder ID: {folder_id})...")
