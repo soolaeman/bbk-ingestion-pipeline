@@ -1,0 +1,13 @@
+# Abaikan folder foto hasil download (sangat besar)
+exports/
+
+# Abaikan database sesi Telegram lokal
+*.session
+
+# Abaikan file teks rahasia
+credentials.json
+session_base64.txt
+generate_session_string.py
+
+# Abaikan cache Python
+__pycache__/
