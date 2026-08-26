@@ -2,8 +2,8 @@ name: BBK Daily Automation
 
 on:
   schedule:
-    # Berjalan otomatis setiap hari jam 06:00 WIB (23:00 UTC hari sebelumnya)
-    - cron: '0 23 * * *'
+    # Berjalan otomatis setiap 3 jam sekali
+    - cron: '0 */3 * * *'
   workflow_dispatch:
     # Memunculkan tombol manual "Run workflow" di halaman GitHub Actions
     inputs:
