@@ -3,6 +3,7 @@
 import sys
 import json
 import argparse
+import asyncio
 
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -24,7 +25,6 @@ from config_telethon import (
 
 # ================= CONFIG (Jalur Disesuaikan) =================
 
-# Base directory is the folder containing this script (relative)
 BASE_DIR = Path(__file__).parent
 EXPORT_ROOT = BASE_DIR / "exports"
 
@@ -58,20 +58,21 @@ def parse_local(dt_str):
     return dt.replace(tzinfo=LOCAL_TZ)
 
 if args.date:
-    start_local = parse_local(args.date)
+    start_local = parse_local(args.date).replace(hour=0, minute=0, second=0, microsecond=0)
     end_local = start_local + timedelta(days=1)
 elif args.start and args.end:
-    start_local = parse_local(args.start)
-    end_local = parse_local(args.end) + timedelta(days=1)
+    start_local = parse_local(args.start).replace(hour=0, minute=0, second=0, microsecond=0)
+    end_local = parse_local(args.end).replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
 else:
+    # OTOMATIS: Ambil dari jam 00:00:00 H-1 hingga akhir hari ini (WIB)
     now_local = datetime.now(LOCAL_TZ)
-    end_local = now_local
-    start_local = end_local - timedelta(days=1)
+    start_local = (now_local - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    end_local = (now_local + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
 
 START_DATE = start_local.astimezone(timezone.utc)
 END_DATE = end_local.astimezone(timezone.utc)
 
-print(f"WIB: {start_local} -> {end_local}")
+print(f"WIB Range: {start_local.strftime('%Y-%m-%d %H:%M:%S')} -> {end_local.strftime('%Y-%m-%d %H:%M:%S')}")
 
 # ================= TELETHON =================
 
@@ -86,7 +87,6 @@ async def fetch_group(src_code, chat_id):
     out_dir.mkdir(parents=True, exist_ok=True)
 
     messages = []
-    
     pbar = tqdm(desc=f"Scanning [{src_code}]", unit=" msg", leave=False)
 
     async for msg in client.iter_messages(chat_id, offset_date=END_DATE):
@@ -123,5 +123,4 @@ async def main():
     await client.disconnect()
 
 if __name__ == "__main__":
-    import asyncio
     asyncio.run(main())
