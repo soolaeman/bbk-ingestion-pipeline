@@ -64,7 +64,7 @@ SOURCE_MAP = {
     "ON": "https://t.me/c/3420173563", "RB": "https://t.me/c/2405866006",
     "KG": "https://t.me/c/2375036806",
     "SK": "https://t.me/c/3506626675",
-    "RK": "https://t.me/rizkitchen",
+    "RK": "https://t.me/c/4326430608",
 }
 
 # --- Fungsi utama untuk koneksi dan pemrosesan ---
