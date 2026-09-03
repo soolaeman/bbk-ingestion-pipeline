@@ -51,6 +51,9 @@ WAREHOUSE_MAP = {
     "ML": "PAMULANG BARAT, TANGSEL", "PY": "SETU, TANGSEL",
     "PE": "SAWANGAN, DEPOK", "WT": "KEDAUNG, TANGSEL",
     "ON": "KEDAUNG, TANGSEL", "RB": "PAMULANG BARAT, TANGSEL",
+    "KG": "PAMULANG BARAT, TANGSEL",
+    "SK": "SAWANGAN, DEPOK",
+    "RK": "RAWAKALONG, BOGOR",
 }
 
 SOURCE_MAP = {
@@ -59,6 +62,9 @@ SOURCE_MAP = {
     "ML": "https://t.me/c/2295735681", "PY": "https://t.me/c/2556966592",
     "PE": "https://t.me/c/2471308578", "WT": "https://t.me/c/2559367434",
     "ON": "https://t.me/c/3420173563", "RB": "https://t.me/c/2405866006",
+    "KG": "https://t.me/c/2375036806",
+    "SK": "https://t.me/c/3506626675",
+    "RK": "https://t.me/rizkitchen",
 }
 
 # --- Fungsi utama untuk koneksi dan pemrosesan ---

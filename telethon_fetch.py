@@ -41,6 +41,9 @@ SOURCE_MAP = {
     "WT": -1002559367434,
     "ON": -1003420173563,
     "RB": -1002405866006,
+    "RK": "rizkitchen",        # Rizki Kitchen (@rizkitchen)
+    "SK": -1003506626675,      # Sanjaya Kitchen (Sawangan)
+    "KG": -1002375036806,      # Kitchen Gembel (Pamulang Barat)
 }
 
 # ================= ARGUMENT =================
