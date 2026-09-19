@@ -11,3 +11,6 @@ generate_session_string.py
 
 # Abaikan cache Python
 __pycache__/
+
+# Excel files
+*.xlsx
