@@ -1,9 +1,4 @@
-# 🗺️ BBKitchen Ingestion Pipeline — Architecture & Plans
+﻿# 💡 BBKitchen Ingestion Pipeline — Strategic Plans Pointer
+> **Catatan:** Seluruh rencana ekspansi, model margin, dan RFC strategis BBKitchen dikonsolidasikan terpusat di **`Jarvis-OS`**.
 
-> **Domain Code:** BBK-IP  
-> **Deskripsi:** Arsip dokumen arsitektur teknis, RFC, roadmap fitur, dan perencanaan strategis unit BBKitchen Ingestion Pipeline.
-
----
-
-## 🧭 Standar Dokumen Rencana
-- Setiap rencana besar wajib mendokumentasikan konteks masalah, opsi arsitektur, rencana verifikasi, dan dependensi holding.
+👉 Buka bank rencana terpusat di: [`Jarvis-OS/domains/business/bbkitchen/docs/plans/`](../../Jarvis-OS/domains/business/bbkitchen/docs/plans/README.md)
