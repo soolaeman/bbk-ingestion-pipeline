@@ -14,3 +14,7 @@ __pycache__/
 
 # Excel files
 *.xlsx
+
+# Environment secrets
+.env
+.env.*
