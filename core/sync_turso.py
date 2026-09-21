@@ -45,53 +45,35 @@ def sync_master_tables():
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
-    print("=== Syncing Master Tables (Categories & Warehouses) to Turso ===")
+    print("=== Syncing Master Tables to Turso SSOT (categories & warehouses) ===")
     
-    # 1. Master Categories
+    # 1. Categories (Canonical SSOT)
     cat_rows = cur.execute("SELECT * FROM master_categories").fetchall()
-    create_cat_sql = """
-    CREATE TABLE IF NOT EXISTS master_categories (
-        term_id INTEGER PRIMARY KEY,
-        name TEXT NOT NULL,
-        slug TEXT NOT NULL UNIQUE,
-        parent_id INTEGER NOT NULL,
-        parent_slug TEXT,
-        description TEXT,
-        thumbnail TEXT
-    )"""
     upsert_cat_sql = """
-    INSERT INTO master_categories (term_id, name, slug, parent_id, parent_slug, description, thumbnail)
+    INSERT INTO categories (term_id, child_name, child_slug, parent_id, parent_slug, description, thumbnail)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT(term_id) DO UPDATE SET
-        name=excluded.name,
-        slug=excluded.slug,
+    ON CONFLICT(child_slug) DO UPDATE SET
+        term_id=excluded.term_id,
+        child_name=excluded.child_name,
         parent_id=excluded.parent_id,
         parent_slug=excluded.parent_slug,
         description=excluded.description,
         thumbnail=excluded.thumbnail
     """
     
-    # 2. Master Warehouses
+    # 2. Warehouses (Canonical SSOT)
     wh_rows = cur.execute("SELECT * FROM master_warehouses").fetchall()
-    create_wh_sql = """
-    CREATE TABLE IF NOT EXISTS master_warehouses (
-        code TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        hub_id TEXT NOT NULL,
-        location TEXT NOT NULL,
-        telegram_id TEXT
-    )"""
     upsert_wh_sql = """
-    INSERT INTO master_warehouses (code, name, hub_id, location, telegram_id)
+    INSERT INTO warehouses (warehouse_id, warehouse_name, hub_id, location, telegram_id)
     VALUES (?, ?, ?, ?, ?)
-    ON CONFLICT(code) DO UPDATE SET
-        name=excluded.name,
+    ON CONFLICT(warehouse_id) DO UPDATE SET
+        warehouse_name=excluded.warehouse_name,
         hub_id=excluded.hub_id,
         location=excluded.location,
         telegram_id=excluded.telegram_id
     """
 
-    stmts = [{"sql": create_cat_sql, "args": []}, {"sql": create_wh_sql, "args": []}]
+    stmts = []
     
     for r in cat_rows:
         args = [
@@ -120,9 +102,9 @@ def sync_master_tables():
     }
     res = requests.post(http_url, headers=headers, json=payload, timeout=30)
     if res.status_code == 200:
-        print(f"  Master tables synced OK ({len(cat_rows)} categories, {len(wh_rows)} warehouses).")
+        print(f"  Canonical SSOT tables synced OK ({len(cat_rows)} categories, {len(wh_rows)} warehouses).")
     else:
-        print(f"  [ERROR] Master tables sync failed ({res.status_code}): {res.text[:250]}")
+        print(f"  [ERROR] Canonical SSOT tables sync failed ({res.status_code}): {res.text[:250]}")
     conn.close()
 
 def sync_to_turso(min_sku=None, only_dirty=False, batch_size=25):
