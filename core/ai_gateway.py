@@ -89,10 +89,12 @@ class AIGateway:
             "Authorization": f"Bearer {self.groq_key}",
             "Content-Type": "application/json"
         }
+        # Ensure 'json' is explicitly in prompt for Groq strict compliance
+        guaranteed_prompt = prompt if "json" in prompt.lower() else f"{prompt}\n\nRespond strictly in valid JSON format."
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": prompt})
+        messages.append({"role": "user", "content": guaranteed_prompt})
 
         payload = {
             "model": model,

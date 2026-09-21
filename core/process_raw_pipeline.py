@@ -30,36 +30,45 @@ DB_PATH = os.path.join(
     "bbk.db"
 )
 
-# Canonical 13 Partner Hub mappings
-WAREHOUSE_MAPPING = {
-    "-1002479885293": ("GK", "Jakarta Barat (Hub Green Lake)"),
-    "-1001947492349": ("BB", "Tangerang Selatan (Hub Bintaro)"),
-    "-1002249769366": ("SM", "Tangerang (Hub Serpong BSD)"),
-    "-1002221612633": ("BL", "Tangerang (Hub Balaraja)"),
-    "-1002295735681": ("ML", "Malang (Hub Jawa Timur)"),
-    "-1002405866006": ("RB", "Jakarta Timur (Hub Rawamangun)"),
-    "-1002375036806": ("KG", "Jakarta Utara (Hub Kelapa Gading)"),
-    "-1002556966592": ("PY", "Payakumbuh (Hub Sumatera Barat)"),
-    "-1002471308578": ("PE", "Pekanbaru (Hub Riau)"),
-    "-1003506626675": ("SK", "Surakarta (Hub Solo Jateng)"),
-    "-1002559367434": ("WT", "Wates (Hub DI Yogyakarta)"),
-    "-1003420173563": ("ON", "Hub Online / Mitra"),
-    "-1004326430608": ("RK", "Surabaya (Hub Rungkut)"),
-    "DEFAULT": ("BK", "Jakarta (BBKitchen HQ)")
-}
+# SSOT Configurations Path
+CONFIG_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "..",
+    "Jarvis-OS",
+    "domains",
+    "business",
+    "bbkitchen",
+    "config"
+)
 
-OFFICIAL_CATEGORIES = [
-    ("chiller-freezer", "Chiller & Freezer"),
-    ("kompor-burner", "Kompor & Burner"),
-    ("oven-bakery", "Oven & Bakery"),
-    ("deep-fryer", "Deep Fryer"),
-    ("stainless-fabrication", "Stainless Fabrication"),
-    ("mesin-pemroses-makanan", "Mesin Pemroses Makanan"),
-    ("ice-maker-minuman", "Ice Maker & Minuman"),
-    ("washing-sink", "Washing & Sink"),
-    ("showcase-display", "Showcase & Display"),
-    ("exhaust-blower", "Exhaust & Blower")
-]
+def load_ssot_configs():
+    cat_file = os.path.join(CONFIG_DIR, "categories_ssot.json")
+    wh_file = os.path.join(CONFIG_DIR, "warehouses_ssot.json")
+    
+    cat_ssot = {}
+    if os.path.exists(cat_file):
+        with open(cat_file, "r", encoding="utf-8") as f:
+            cat_ssot = json.load(f)
+            
+    wh_ssot = {}
+    if os.path.exists(wh_file):
+        with open(wh_file, "r", encoding="utf-8") as f:
+            wh_ssot = json.load(f)
+            
+    return cat_ssot, wh_ssot
+
+CAT_SSOT, WH_SSOT = load_ssot_configs()
+OFFICIAL_SLUGS = set(CAT_SSOT.get("by_slug", {}).keys())
+
+def resolve_warehouse_partner(source_group: str) -> tuple:
+    partners = WH_SSOT.get("partners", {})
+    sg_str = str(source_group).strip()
+    for code, p in partners.items():
+        if p.get("telegram_id") and str(p.get("telegram_id")).strip() == sg_str:
+            return (p["code"], p["location"])
+    # Default fallback to main physical hub (Pamulang 2, Tangsel)
+    main_hub = partners.get("GK", {"code": "GK", "location": "PAMULANG 2, TANGSEL"})
+    return (main_hub["code"], main_hub["location"])
 
 SYSTEM_PROMPT = """Anda adalah Principal Catalog Architect & Senior Equipment Expert untuk BBKitchen (Penyedia Peralatan Dapur Komersial & Resto Second Terbesar di Indonesia).
 
@@ -71,7 +80,7 @@ ATURAN BISNIS MUTLAK:
    - Contoh ideal:
      * "Upright Chiller 2 Pintu Mastercool Second"
      * "Meja Stainless 2 Susun Second 150x70x85 cm"
-     * "Sink 1 Lubang Sayap Kiri Second 100 cm"
+     * "Single Sink Stainless 1 Lubang Sayap Kiri Second 100 cm"
      * "Kwali Range 2 Burner Second Blower"
      * "Combi Oven 6 Tray Rational Second"
    - Maksimal 60 karakter, Title Case.
@@ -79,17 +88,17 @@ ATURAN BISNIS MUTLAK:
    - DILARANG KERAS memuat angka harga, kata "JUAL", "DIJUAL", nomor WhatsApp, atau kata promosi murahan.
    - BRAND FILTER: Jangan gunakan kata "Stainless", "Heavy Duty", "Import", "Custom", "Ex Cafe", "Second" sebagai nama merk. Jika tidak bermerk resmi, sebutkan saja jenis bahannya (misal "Meja Stainless 2 Susun Second").
 
-2. CATEGORY SLUG (Pilih 1 yang paling tepat):
-   - "chiller-freezer" (Under counter, upright chiller, freezer, chest freezer)
-   - "kompor-burner" (Kwali range, burner stove, stock pot, griddle)
-   - "oven-bakery" (Deck oven, convection oven, combi oven, proofer)
-   - "deep-fryer" (Deep fryer gas / listrik)
-   - "stainless-fabrication" (Meja kerja stainless, wall shelf, sink table, exhaust hood)
-   - "mesin-pemroses-makanan" (Mixer, slicer, meat grinder, blender commercial)
-   - "ice-maker-minuman" (Ice cube machine, dispenser juice, coffee machine)
-   - "washing-sink" (Dishwasher commercial, grease trap, bak cuci piring)
-   - "showcase-display" (Cake showcase, warmer display)
-   - "exhaust-blower" (Blower centrifugal, exhaust fan)
+2. CATEGORY SLUG (PILIH 1 SLUG RESMI WOOCOMMERCE YANG PALING TEPAT):
+   - CHILLER: "undercounter-chiller", "upright-chiller", "chiller", "lainnya-chiller"
+   - FREEZER: "chest-freezer", "upright-freezer", "freezer", "lainnya-freezer"
+   - MEJA STAINLESS: "meja-1-susun-stainless", "meja-2-susun-stainless", "meja-3-susun-stainless", "meja-bumbu-stainless", "meja-kabinet-stainless", "meja-kompor-stainless", "meja-stainless", "lainnya-meja-stainless"
+   - SINK STAINLESS: "single-sink-stainless", "double-sink-stainless", "triple-sink-stainless", "sink-jumbo-stainless", "sink-stainless", "lainnya-sink"
+   - KOMPOR & COOKING: "kompor-1-tungku", "kompor-2-tungku", "kompor-3-tungku", "kompor-4-tungku", "kompor-6-tungku", "kompor-wok-kwali-range", "kompor-batu-lava", "kompor-grill-tepanyaki", "deep-fryer", "noodle-boiler", "oven", "kompor", "lainnya-kompor"
+   - RAK STAINLESS: "rak-1-susun-stainless", "rak-2-susun-stainless", "rak-3-susun-stainless", "rak-4-susun-stainless", "rak-5-susun-stainless", "wallshelf", "rak-stainless", "lainnya-rak-stainless"
+   - HOOD & VENTILASI: "hood", "blower", "ducting", "hood-stainless", "lainnya-hood"
+   - SHOWCASE: "showcase-1-pintu", "showcase-2-pintu", "cake-showcase", "showcase", "lainnya-showcase"
+   - ICE SYSTEM: "ice-bin", "ice-maker", "ice-system", "lainnya-ice-system"
+   - LAINNYA: "peralatan-dapur-bekas-lainnya"
 
 3. STRATEGIC PRICE ANCHORING:
    - "harga_modal": Angka bulat rupiah modal borongan yang tertulis di caption. Abaikan format titik/koma (misal "12.500.000" -> 12500000, "7,5jt" -> 7500000). Jika tidak disebutkan sama sekali di caption, isi null.
@@ -239,8 +248,8 @@ def process_single_item(gateway: AIGateway, row: dict, dry_run=False) -> dict:
     lokasi_gudang = row["lokasi_gudang"] or ""
 
     # Resolve Warehouse
-    hub_code, location_name = WAREHOUSE_MAPPING.get(source_group, WAREHOUSE_MAPPING["DEFAULT"])
-    if lokasi_gudang and "Hub" in lokasi_gudang:
+    hub_code, location_name = resolve_warehouse_partner(source_group)
+    if lokasi_gudang and any(h in lokasi_gudang for h in ["TANGSEL", "DEPOK", "HQ", "BOGOR"]):
         location_name = lokasi_gudang
 
     # AI Call
@@ -251,11 +260,11 @@ Ekstrak dan susun data katalog untuk kode unit {sku} sesuai panduan sistem."""
     
     parsed = gateway.generate_json(user_prompt, system_prompt=SYSTEM_PROMPT)
 
-    # Title & Branding
-    title_bersih = parsed.get("title_bersih", "").strip()
-    nama_alat = parsed.get("nama_alat", "Peralatan Dapur Komersial").strip()
-    brand = parsed.get("brand", "").strip()
-    dimensi = parsed.get("dimensi", "").strip()
+    # Title & Branding (Safe against None values from AI)
+    title_bersih = (parsed.get("title_bersih") or "").strip()
+    nama_alat = (parsed.get("nama_alat") or "Peralatan Dapur Komersial").strip()
+    brand = (parsed.get("brand") or "").strip()
+    dimensi = (parsed.get("dimensi") or "").strip()
 
     if title_bersih:
         title = title_bersih
@@ -296,9 +305,9 @@ Ekstrak dan susun data katalog untuk kode unit {sku} sesuai panduan sistem."""
     full_desc = build_full_description(parsed, pricing, location_name)
 
     # Categories
-    cat_slug = parsed.get("category_slug", "chiller-freezer")
-    if cat_slug not in [c[0] for c in OFFICIAL_CATEGORIES]:
-        cat_slug = "chiller-freezer"
+    cat_slug = parsed.get("category_slug", "peralatan-dapur-bekas-lainnya")
+    if cat_slug not in OFFICIAL_SLUGS:
+        cat_slug = "peralatan-dapur-bekas-lainnya"
 
     # Status
     status_unit = parsed.get("status_unit", "READY").upper()
@@ -329,7 +338,7 @@ Ekstrak dan susun data katalog untuk kode unit {sku} sesuai panduan sistem."""
         "durasi_terjual": None,
         "link_telegram": row["link_message"],
         "product_id_woo": None,
-        "is_dirty": 0,
+        "is_dirty": 1,
         "image_alt": f"{title} - BBKitchen Spesialis Alat Dapur Second",
         "image_title": title,
         "image_caption": f"{title} siap kirim dari {location_name}",
