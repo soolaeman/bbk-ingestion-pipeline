@@ -17,4 +17,11 @@ __pycache__/
 
 # Environment secrets
 .env
-.env.*
+.env.*
+
+# Scratch & Ephemeral Debugging (Quarantine Zone)
+.scratch/
+scratch/
+*.tmp
+*.dump
+
