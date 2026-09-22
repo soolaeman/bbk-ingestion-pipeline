@@ -97,8 +97,9 @@ Examples:
         # 1. Fetch
         print("\n--- 1. Fetching Telegram Messages ---")
         try:
-            import subprocess
-            subprocess.run(["python", os.path.join(os.path.dirname(__file__), "autonomous_telegram_sync.py")], check=False)
+            import asyncio
+            from telethon_fetch import main as telethon_main
+            asyncio.run(telethon_main())
         except Exception as e:
             print(f"[WARN] Fetch step skipped or encountered warning: {e}")
 

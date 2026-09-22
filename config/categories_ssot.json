@@ -1,0 +1,1055 @@
+{
+  "total_categories": 58,
+  "total_parents": 10,
+  "total_subcategories": 48,
+  "parents": [
+    {
+      "term_id": 105,
+      "name": "CHILLER",
+      "slug": "chiller",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Chiller bekas restoran cocok digunakan untuk cafe, bakery, minimarket, dan berbagai usaha kuliner. Tersedia pilihan upright chiller dan undercounter chiller dengan kondisi siap pakai dan harga lebih ekonomis.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/04/4.webp"
+    },
+    {
+      "term_id": 109,
+      "name": "FREEZER",
+      "slug": "freezer",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Freezer bekas restoran cocok digunakan untuk cafe, bakery, frozen food, minimarket, dan usaha kuliner. Tersedia berbagai pilihan freezer dengan kondisi siap pakai dan harga lebih ekonomis.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/04/4.webp"
+    },
+    {
+      "term_id": 113,
+      "name": "HOOD STAINLESS",
+      "slug": "hood-stainless",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori hood stainless bekas untuk kebutuhan dapur restoran, cafe, bakery, dan usaha kuliner. Tersedia berbagai pilihan hood siap pakai dengan harga lebih hemat untuk sistem sirkulasi dapur profesional.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/04/5.webp"
+    },
+    {
+      "term_id": 118,
+      "name": "ICE SYSTEM",
+      "slug": "ice-system",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori ice system bekas untuk kebutuhan restoran, cafe, bakery, dan usaha minuman. Tersedia berbagai perlengkapan pembuat dan penyimpanan es siap pakai dengan harga lebih hemat untuk kebutuhan dapur komersial.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/05/BB2015_1.webp"
+    },
+    {
+      "term_id": 122,
+      "name": "KOMPOR",
+      "slug": "kompor",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori kompor bekas untuk kebutuhan dapur restoran, cafe, bakery, dan usaha kuliner. Tersedia berbagai jenis kompor siap pakai dengan harga lebih hemat untuk mendukung operasional dapur komersial.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/04/3.webp"
+    },
+    {
+      "term_id": 137,
+      "name": "MEJA STAINLESS",
+      "slug": "meja-stainless",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori meja stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan sebagai area persiapan makanan dan operasional dapur komersial dengan kondisi siap pakai serta harga lebih hemat.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2025/11/Meja.webp"
+    },
+    {
+      "term_id": 35,
+      "name": "PERALATAN DAPUR BEKAS LAINNYA",
+      "slug": "peralatan-dapur-bekas-lainnya",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori Peralatan Dapur Bekas lainnya berisi berbagai alat dapur restoran bekas untuk cafe, bakery, dan usaha kuliner. Cocok untuk kebutuhan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/04/7.webp"
+    },
+    {
+      "term_id": 145,
+      "name": "RAK STAINLESS",
+      "slug": "rak-stainless",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori rak stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk penyimpanan perlengkapan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/04/2.webp"
+    },
+    {
+      "term_id": 153,
+      "name": "SHOWCASE",
+      "slug": "showcase",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori showcase bekas untuk kebutuhan cafe, bakery, restoran, dan usaha kuliner. Cocok digunakan untuk display makanan dan minuman dengan tampilan menarik, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2025/06/Showcase-Sanken-270L-2.webp"
+    },
+    {
+      "term_id": 158,
+      "name": "SINK STAINLESS",
+      "slug": "sink-stainless",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori sink stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area pencucian dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    }
+  ],
+  "subcategories": [
+    {
+      "term_id": 114,
+      "name": "BLOWER",
+      "slug": "blower",
+      "parent_id": 113,
+      "parent_slug": "hood-stainless",
+      "description": "Kategori blower bekas untuk kebutuhan ventilasi dapur restoran, cafe, bakery, dan usaha kuliner. Cocok untuk membantu sirkulasi udara dan pembuangan asap dapur komersial dengan harga lebih hemat dan kondisi siap pakai.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 156,
+      "name": "CAKE SHOWCASE",
+      "slug": "cake-showcase",
+      "parent_id": 153,
+      "parent_slug": "showcase",
+      "description": "Kategori cake showcase bekas untuk kebutuhan cafe, bakery. Cocok digunakan untuk display kue , kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 110,
+      "name": "CHEST FREEZER",
+      "slug": "chest-freezer",
+      "parent_id": 109,
+      "parent_slug": "freezer",
+      "description": "Chest freezer bekas restoran cocok digunakan untuk frozen food, cafe, minimarket, dan usaha kuliner. Tersedia berbagai ukuran freezer horizontal dengan kondisi siap pakai dan harga lebih ekonomis.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 108,
+      "name": "CHILLER LAINNYA",
+      "slug": "lainnya-chiller",
+      "parent_id": 105,
+      "parent_slug": "chiller",
+      "description": "Kategori chiller lainnya berisi berbagai jenis chiller bekas restoran, cafe, bakery, dan usaha kuliner yang tidak masuk kategori utama namun tetap layak pakai dan siap digunakan.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 129,
+      "name": "DEEP FRYER",
+      "slug": "deep-fryer",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori deep fryer bekas untuk kebutuhan restoran, cafe, fried chicken, dan usaha kuliner. Cocok digunakan untuk proses menggoreng dalam jumlah besar dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 160,
+      "name": "DOUBLE SINK STAINLESS",
+      "slug": "double-sink-stainless",
+      "parent_id": 158,
+      "parent_slug": "sink-stainless",
+      "description": "Kategori double sink stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area pencucian dapur komersial dengan dua bak sink, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 115,
+      "name": "DUCTING",
+      "slug": "ducting",
+      "parent_id": 113,
+      "parent_slug": "hood-stainless",
+      "description": "Kategori ducting bekas untuk kebutuhan instalasi ventilasi dapur restoran, cafe, bakery, dan usaha kuliner. Cocok untuk mendukung sistem pembuangan asap dapur komersial dengan harga lebih hemat dan kondisi siap pakai.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 111,
+      "name": "FREEZER LAINNYA",
+      "slug": "lainnya-freezer",
+      "parent_id": 109,
+      "parent_slug": "freezer",
+      "description": "Kategori freezer lainnya berisi berbagai jenis freezer bekas restoran, cafe, frozen food, dan usaha kuliner yang tidak masuk kategori utama namun tetap siap pakai.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 116,
+      "name": "HOOD",
+      "slug": "hood",
+      "parent_id": 113,
+      "parent_slug": "hood-stainless",
+      "description": "Kategori hood bekas untuk kebutuhan dapur restoran, cafe, bakery, dan usaha kuliner. Tersedia berbagai pilihan hood siap pakai untuk membantu sistem ventilasi dapur komersial dengan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 117,
+      "name": "HOOD STAINLESS LAINNYA",
+      "slug": "lainnya-hood",
+      "parent_id": 113,
+      "parent_slug": "hood-stainless",
+      "description": "Kategori hood stainless bekas lainnya berisi berbagai perlengkapan ventilasi dapur restoran, cafe, bakery, dan usaha kuliner. Cocok untuk kebutuhan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 119,
+      "name": "ICE BIN",
+      "slug": "ice-bin",
+      "parent_id": 118,
+      "parent_slug": "ice-system",
+      "description": "Kategori ice bin bekas untuk kebutuhan penyimpanan es pada restoran, cafe, bakery, dan usaha minuman. Cocok digunakan untuk dapur komersial dan bar dengan kondisi siap pakai serta harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 120,
+      "name": "ICE MAKER",
+      "slug": "ice-maker",
+      "parent_id": 118,
+      "parent_slug": "ice-system",
+      "description": "Kategori ice maker bekas untuk kebutuhan produksi es pada restoran, cafe, bakery, dan usaha minuman. Tersedia berbagai pilihan mesin es siap pakai dengan harga lebih hemat untuk kebutuhan dapur komersial.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 121,
+      "name": "ICE SYSTEM LAINNYA",
+      "slug": "lainnya-ice-system",
+      "parent_id": 118,
+      "parent_slug": "ice-system",
+      "description": "Kategori ice system lainnya berisi berbagai perlengkapan pembuat dan penyimpanan es untuk restoran, cafe, bakery, dan usaha minuman. Cocok untuk kebutuhan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 123,
+      "name": "KOMPOR 1 TUNGKU",
+      "slug": "kompor-1-tungku",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor 1 tungku bekas untuk kebutuhan dapur restoran, cafe, dan usaha kuliner. Cocok digunakan untuk operasional dapur komersial dengan desain praktis, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 124,
+      "name": "KOMPOR 2 TUNGKU",
+      "slug": "kompor-2-tungku",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor 2 tungku bekas untuk kebutuhan dapur restoran, cafe, dan usaha kuliner. Cocok untuk meningkatkan efisiensi memasak di dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 125,
+      "name": "KOMPOR 3 TUNGKU",
+      "slug": "kompor-3-tungku",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor 3 tungku bekas untuk kebutuhan dapur restoran, cafe, dan usaha kuliner. Cocok untuk operasional memasak skala komersial dengan kapasitas lebih besar, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 126,
+      "name": "KOMPOR 4 TUNGKU",
+      "slug": "kompor-4-tungku",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor 4 tungku bekas untuk kebutuhan dapur restoran, catering, dan usaha kuliner skala besar. Cocok untuk operasional memasak intensif dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 127,
+      "name": "KOMPOR 6 TUNGKU",
+      "slug": "kompor-6-tungku",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor 6 tungku bekas untuk kebutuhan dapur restoran, catering, dan usaha kuliner skala besar. Cocok untuk operasional memasak intensif dengan kapasitas tinggi, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 128,
+      "name": "KOMPOR BATU LAVA",
+      "slug": "kompor-batu-lava",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor batu lava bekas untuk kebutuhan restoran, cafe, steak house, dan usaha kuliner. Cocok digunakan untuk proses grilling dengan hasil masakan lebih merata, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 133,
+      "name": "KOMPOR GRILL TEPANYAKI",
+      "slug": "kompor-grill-tepanyaki",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor grill tepanyaki bekas untuk kebutuhan restoran, cafe, steak house, dan usaha kuliner. Cocok digunakan untuk proses grilling dan live cooking dengan kondisi siap pakai serta harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 136,
+      "name": "KOMPOR LAINNYA",
+      "slug": "lainnya-kompor",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor lainnya berisi berbagai perlengkapan memasak untuk restoran, cafe, bakery, dan usaha kuliner. Cocok untuk kebutuhan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 131,
+      "name": "KOMPOR WOK KWALI RANGE",
+      "slug": "kompor-wok-kwali-range",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori Kompor wok kwali range bekas untuk kebutuhan restoran, rumah makan, dan usaha kuliner. Cocok digunakan untuk proses memasak dengan wok pada dapur komersial, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 139,
+      "name": "MEJA 1 SUSUN STAINLESS",
+      "slug": "meja-1-susun-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja 1 susun stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan sebagai area persiapan makanan pada dapur komersial dengan desain praktis, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 138,
+      "name": "MEJA 2 SUSUN STAINLESS",
+      "slug": "meja-2-susun-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja 2 susun bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area persiapan dan penyimpanan perlengkapan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 140,
+      "name": "MEJA 3 SUSUN STAINLESS",
+      "slug": "meja-3-susun-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja 3 susun stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area persiapan dan penyimpanan perlengkapan dapur komersial dengan kapasitas lebih besar, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 141,
+      "name": "MEJA BUMBU STAINLESS",
+      "slug": "meja-bumbu-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja bumbu Stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area penyimpanan dan persiapan bumbu dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 142,
+      "name": "MEJA KABINET STAINLESS",
+      "slug": "meja-kabinet-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja kabinet stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area kerja sekaligus penyimpanan perlengkapan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 143,
+      "name": "MEJA KOMPOR STAINLESS",
+      "slug": "meja-kompor-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja kompor stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan sebagai penopang area memasak pada dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 144,
+      "name": "MEJA STAINLESS LAINNYA",
+      "slug": "lainnya-meja-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja stainless lainnya berisi berbagai perlengkapan meja dapur untuk restoran, cafe, bakery, dan usaha kuliner. Cocok untuk kebutuhan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 134,
+      "name": "NOODLE BOILER",
+      "slug": "noodle-boiler",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori noodle boiler bekas untuk kebutuhan restoran mie, cafe, dan usaha kuliner. Cocok digunakan untuk proses perebusan mie dengan cepat dan efisien pada dapur komersial, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 135,
+      "name": "OVEN",
+      "slug": "oven",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori oven bekas untuk kebutuhan bakery, cafe, restoran, dan usaha kuliner. Tersedia berbagai pilihan oven siap pakai untuk proses baking dan roasting dengan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 146,
+      "name": "RAK 1 SUSUN STAINLESS",
+      "slug": "rak-1-susun-stainless",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori rak 1 susun stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk penyimpanan perlengkapan dapur komersial dengan desain praktis, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 147,
+      "name": "RAK 2 SUSUN STAINLESS",
+      "slug": "rak-2-susun-stainless",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori rak 2 susun bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk penyimpanan perlengkapan dapur komersial dengan kapasitas lebih besar, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 148,
+      "name": "RAK 3 SUSUN STAINLESS",
+      "slug": "rak-3-susun-stainless",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori rak 3 stainless susun bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk penyimpanan perlengkapan dapur komersial dengan kapasitas lebih besar, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 149,
+      "name": "RAK 4 SUSUN STAINLESS",
+      "slug": "rak-4-susun-stainless",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori rak 4 susun stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk penyimpanan perlengkapan dapur komersial dengan kapasitas lebih banyak, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 150,
+      "name": "RAK 5 SUSUN STAINLESS",
+      "slug": "rak-5-susun-stainless",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori rak 5 susun stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk penyimpanan perlengkapan dapur komersial dengan kapasitas lebih besar, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 152,
+      "name": "RAK STAINLESS LAINNYA",
+      "slug": "lainnya-rak-stainless",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori rak stainless lainnya berisi berbagai perlengkapan rak dapur untuk restoran, cafe, bakery, dan usaha kuliner. Cocok untuk kebutuhan penyimpanan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 154,
+      "name": "SHOWCASE 1 PINTU",
+      "slug": "showcase-1-pintu",
+      "parent_id": 153,
+      "parent_slug": "showcase",
+      "description": "Kategori showcase 1 pintu bekas untuk kebutuhan cafe, bakery, restoran, dan usaha kuliner. Cocok digunakan untuk display makanan dan minuman dengan desain praktis, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 155,
+      "name": "SHOWCASE 2 PINTU",
+      "slug": "showcase-2-pintu",
+      "parent_id": 153,
+      "parent_slug": "showcase",
+      "description": "Kategori showcase 2 pintu bekas untuk kebutuhan cafe, bakery, restoran, dan usaha kuliner. Cocok digunakan untuk display makanan dan minuman dengan kapasitas lebih besar, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 157,
+      "name": "SHOWCASE LAINNYA",
+      "slug": "lainnya-showcase",
+      "parent_id": 153,
+      "parent_slug": "showcase",
+      "description": "Kategori showcase bekas lainnya berisi berbagai perlengkapan display makanan dan minuman untuk cafe, bakery, restoran, dan usaha kuliner. Cocok untuk kebutuhan usaha komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 159,
+      "name": "SINGLE SINK STAINLESS",
+      "slug": "single-sink-stainless",
+      "parent_id": 158,
+      "parent_slug": "sink-stainless",
+      "description": "Kategori single sink stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area pencucian dapur komersial dengan desain praktis, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 162,
+      "name": "SINK JUMBO STAINLESS",
+      "slug": "sink-jumbo-stainless",
+      "parent_id": 158,
+      "parent_slug": "sink-stainless",
+      "description": "Kategori sink jumbo stainless bekas untuk kebutuhan restoran, catering, bakery, dan usaha kuliner. Cocok digunakan untuk area pencucian peralatan dapur berukuran besar dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 163,
+      "name": "SINK STAINLESS LAINNYA",
+      "slug": "lainnya-sink",
+      "parent_id": 158,
+      "parent_slug": "sink-stainless",
+      "description": "Kategori sink stainless bekas lainnya berisi berbagai perlengkapan area pencucian untuk restoran, cafe, bakery, dan usaha kuliner. Cocok untuk kebutuhan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 161,
+      "name": "TRIPLE SINK STAINLESS",
+      "slug": "triple-sink-stainless",
+      "parent_id": 158,
+      "parent_slug": "sink-stainless",
+      "description": "Kategori triple sink stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area pencucian dapur komersial dengan tiga bak sink, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 107,
+      "name": "UNDERCOUNTER CHILLER",
+      "slug": "undercounter-chiller",
+      "parent_id": 105,
+      "parent_slug": "chiller",
+      "description": "Undercounter chiller bekas restoran cocok digunakan untuk cafe, bar, bakery, dan usaha kuliner dengan ruang terbatas. Tersedia berbagai ukuran dan kapasitas pendingin kondisi siap pakai dengan harga lebih ekonomis.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 106,
+      "name": "UPRIGHT CHILLER",
+      "slug": "upright-chiller",
+      "parent_id": 105,
+      "parent_slug": "chiller",
+      "description": "Upright chiller bekas restoran cocok digunakan untuk cafe, bakery, minimarket, dan usaha kuliner. Tersedia berbagai ukuran dan kapasitas pendingin dengan kondisi siap pakai dan harga lebih ekonomis.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 112,
+      "name": "UPRIGHT FREEZER",
+      "slug": "upright-freezer",
+      "parent_id": 109,
+      "parent_slug": "freezer",
+      "description": "Upright freezer bekas restoran cocok digunakan untuk cafe, bakery, frozen food, minimarket, dan usaha kuliner. Tersedia berbagai kapasitas freezer berdiri dengan kondisi siap pakai dan harga lebih ekonomis.",
+      "thumbnail": ""
+    },
+    {
+      "term_id": 151,
+      "name": "WALLSHELF",
+      "slug": "wallshelf",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori wallshelf stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan sebagai rak dinding penyimpanan perlengkapan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    }
+  ],
+  "by_slug": {
+    "blower": {
+      "term_id": 114,
+      "name": "BLOWER",
+      "slug": "blower",
+      "parent_id": 113,
+      "parent_slug": "hood-stainless",
+      "description": "Kategori blower bekas untuk kebutuhan ventilasi dapur restoran, cafe, bakery, dan usaha kuliner. Cocok untuk membantu sirkulasi udara dan pembuangan asap dapur komersial dengan harga lebih hemat dan kondisi siap pakai.",
+      "thumbnail": ""
+    },
+    "cake-showcase": {
+      "term_id": 156,
+      "name": "CAKE SHOWCASE",
+      "slug": "cake-showcase",
+      "parent_id": 153,
+      "parent_slug": "showcase",
+      "description": "Kategori cake showcase bekas untuk kebutuhan cafe, bakery. Cocok digunakan untuk display kue , kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "chest-freezer": {
+      "term_id": 110,
+      "name": "CHEST FREEZER",
+      "slug": "chest-freezer",
+      "parent_id": 109,
+      "parent_slug": "freezer",
+      "description": "Chest freezer bekas restoran cocok digunakan untuk frozen food, cafe, minimarket, dan usaha kuliner. Tersedia berbagai ukuran freezer horizontal dengan kondisi siap pakai dan harga lebih ekonomis.",
+      "thumbnail": ""
+    },
+    "chiller": {
+      "term_id": 105,
+      "name": "CHILLER",
+      "slug": "chiller",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Chiller bekas restoran cocok digunakan untuk cafe, bakery, minimarket, dan berbagai usaha kuliner. Tersedia pilihan upright chiller dan undercounter chiller dengan kondisi siap pakai dan harga lebih ekonomis.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/04/4.webp"
+    },
+    "lainnya-chiller": {
+      "term_id": 108,
+      "name": "CHILLER LAINNYA",
+      "slug": "lainnya-chiller",
+      "parent_id": 105,
+      "parent_slug": "chiller",
+      "description": "Kategori chiller lainnya berisi berbagai jenis chiller bekas restoran, cafe, bakery, dan usaha kuliner yang tidak masuk kategori utama namun tetap layak pakai dan siap digunakan.",
+      "thumbnail": ""
+    },
+    "deep-fryer": {
+      "term_id": 129,
+      "name": "DEEP FRYER",
+      "slug": "deep-fryer",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori deep fryer bekas untuk kebutuhan restoran, cafe, fried chicken, dan usaha kuliner. Cocok digunakan untuk proses menggoreng dalam jumlah besar dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "double-sink-stainless": {
+      "term_id": 160,
+      "name": "DOUBLE SINK STAINLESS",
+      "slug": "double-sink-stainless",
+      "parent_id": 158,
+      "parent_slug": "sink-stainless",
+      "description": "Kategori double sink stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area pencucian dapur komersial dengan dua bak sink, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "ducting": {
+      "term_id": 115,
+      "name": "DUCTING",
+      "slug": "ducting",
+      "parent_id": 113,
+      "parent_slug": "hood-stainless",
+      "description": "Kategori ducting bekas untuk kebutuhan instalasi ventilasi dapur restoran, cafe, bakery, dan usaha kuliner. Cocok untuk mendukung sistem pembuangan asap dapur komersial dengan harga lebih hemat dan kondisi siap pakai.",
+      "thumbnail": ""
+    },
+    "freezer": {
+      "term_id": 109,
+      "name": "FREEZER",
+      "slug": "freezer",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Freezer bekas restoran cocok digunakan untuk cafe, bakery, frozen food, minimarket, dan usaha kuliner. Tersedia berbagai pilihan freezer dengan kondisi siap pakai dan harga lebih ekonomis.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/04/4.webp"
+    },
+    "lainnya-freezer": {
+      "term_id": 111,
+      "name": "FREEZER LAINNYA",
+      "slug": "lainnya-freezer",
+      "parent_id": 109,
+      "parent_slug": "freezer",
+      "description": "Kategori freezer lainnya berisi berbagai jenis freezer bekas restoran, cafe, frozen food, dan usaha kuliner yang tidak masuk kategori utama namun tetap siap pakai.",
+      "thumbnail": ""
+    },
+    "hood": {
+      "term_id": 116,
+      "name": "HOOD",
+      "slug": "hood",
+      "parent_id": 113,
+      "parent_slug": "hood-stainless",
+      "description": "Kategori hood bekas untuk kebutuhan dapur restoran, cafe, bakery, dan usaha kuliner. Tersedia berbagai pilihan hood siap pakai untuk membantu sistem ventilasi dapur komersial dengan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "hood-stainless": {
+      "term_id": 113,
+      "name": "HOOD STAINLESS",
+      "slug": "hood-stainless",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori hood stainless bekas untuk kebutuhan dapur restoran, cafe, bakery, dan usaha kuliner. Tersedia berbagai pilihan hood siap pakai dengan harga lebih hemat untuk sistem sirkulasi dapur profesional.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/04/5.webp"
+    },
+    "lainnya-hood": {
+      "term_id": 117,
+      "name": "HOOD STAINLESS LAINNYA",
+      "slug": "lainnya-hood",
+      "parent_id": 113,
+      "parent_slug": "hood-stainless",
+      "description": "Kategori hood stainless bekas lainnya berisi berbagai perlengkapan ventilasi dapur restoran, cafe, bakery, dan usaha kuliner. Cocok untuk kebutuhan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "ice-bin": {
+      "term_id": 119,
+      "name": "ICE BIN",
+      "slug": "ice-bin",
+      "parent_id": 118,
+      "parent_slug": "ice-system",
+      "description": "Kategori ice bin bekas untuk kebutuhan penyimpanan es pada restoran, cafe, bakery, dan usaha minuman. Cocok digunakan untuk dapur komersial dan bar dengan kondisi siap pakai serta harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "ice-maker": {
+      "term_id": 120,
+      "name": "ICE MAKER",
+      "slug": "ice-maker",
+      "parent_id": 118,
+      "parent_slug": "ice-system",
+      "description": "Kategori ice maker bekas untuk kebutuhan produksi es pada restoran, cafe, bakery, dan usaha minuman. Tersedia berbagai pilihan mesin es siap pakai dengan harga lebih hemat untuk kebutuhan dapur komersial.",
+      "thumbnail": ""
+    },
+    "ice-system": {
+      "term_id": 118,
+      "name": "ICE SYSTEM",
+      "slug": "ice-system",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori ice system bekas untuk kebutuhan restoran, cafe, bakery, dan usaha minuman. Tersedia berbagai perlengkapan pembuat dan penyimpanan es siap pakai dengan harga lebih hemat untuk kebutuhan dapur komersial.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/05/BB2015_1.webp"
+    },
+    "lainnya-ice-system": {
+      "term_id": 121,
+      "name": "ICE SYSTEM LAINNYA",
+      "slug": "lainnya-ice-system",
+      "parent_id": 118,
+      "parent_slug": "ice-system",
+      "description": "Kategori ice system lainnya berisi berbagai perlengkapan pembuat dan penyimpanan es untuk restoran, cafe, bakery, dan usaha minuman. Cocok untuk kebutuhan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "kompor": {
+      "term_id": 122,
+      "name": "KOMPOR",
+      "slug": "kompor",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori kompor bekas untuk kebutuhan dapur restoran, cafe, bakery, dan usaha kuliner. Tersedia berbagai jenis kompor siap pakai dengan harga lebih hemat untuk mendukung operasional dapur komersial.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/04/3.webp"
+    },
+    "kompor-1-tungku": {
+      "term_id": 123,
+      "name": "KOMPOR 1 TUNGKU",
+      "slug": "kompor-1-tungku",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor 1 tungku bekas untuk kebutuhan dapur restoran, cafe, dan usaha kuliner. Cocok digunakan untuk operasional dapur komersial dengan desain praktis, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "kompor-2-tungku": {
+      "term_id": 124,
+      "name": "KOMPOR 2 TUNGKU",
+      "slug": "kompor-2-tungku",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor 2 tungku bekas untuk kebutuhan dapur restoran, cafe, dan usaha kuliner. Cocok untuk meningkatkan efisiensi memasak di dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "kompor-3-tungku": {
+      "term_id": 125,
+      "name": "KOMPOR 3 TUNGKU",
+      "slug": "kompor-3-tungku",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor 3 tungku bekas untuk kebutuhan dapur restoran, cafe, dan usaha kuliner. Cocok untuk operasional memasak skala komersial dengan kapasitas lebih besar, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "kompor-4-tungku": {
+      "term_id": 126,
+      "name": "KOMPOR 4 TUNGKU",
+      "slug": "kompor-4-tungku",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor 4 tungku bekas untuk kebutuhan dapur restoran, catering, dan usaha kuliner skala besar. Cocok untuk operasional memasak intensif dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "kompor-6-tungku": {
+      "term_id": 127,
+      "name": "KOMPOR 6 TUNGKU",
+      "slug": "kompor-6-tungku",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor 6 tungku bekas untuk kebutuhan dapur restoran, catering, dan usaha kuliner skala besar. Cocok untuk operasional memasak intensif dengan kapasitas tinggi, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "kompor-batu-lava": {
+      "term_id": 128,
+      "name": "KOMPOR BATU LAVA",
+      "slug": "kompor-batu-lava",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor batu lava bekas untuk kebutuhan restoran, cafe, steak house, dan usaha kuliner. Cocok digunakan untuk proses grilling dengan hasil masakan lebih merata, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "kompor-grill-tepanyaki": {
+      "term_id": 133,
+      "name": "KOMPOR GRILL TEPANYAKI",
+      "slug": "kompor-grill-tepanyaki",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor grill tepanyaki bekas untuk kebutuhan restoran, cafe, steak house, dan usaha kuliner. Cocok digunakan untuk proses grilling dan live cooking dengan kondisi siap pakai serta harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "lainnya-kompor": {
+      "term_id": 136,
+      "name": "KOMPOR LAINNYA",
+      "slug": "lainnya-kompor",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori kompor lainnya berisi berbagai perlengkapan memasak untuk restoran, cafe, bakery, dan usaha kuliner. Cocok untuk kebutuhan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "kompor-wok-kwali-range": {
+      "term_id": 131,
+      "name": "KOMPOR WOK KWALI RANGE",
+      "slug": "kompor-wok-kwali-range",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori Kompor wok kwali range bekas untuk kebutuhan restoran, rumah makan, dan usaha kuliner. Cocok digunakan untuk proses memasak dengan wok pada dapur komersial, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "meja-1-susun-stainless": {
+      "term_id": 139,
+      "name": "MEJA 1 SUSUN STAINLESS",
+      "slug": "meja-1-susun-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja 1 susun stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan sebagai area persiapan makanan pada dapur komersial dengan desain praktis, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "meja-2-susun-stainless": {
+      "term_id": 138,
+      "name": "MEJA 2 SUSUN STAINLESS",
+      "slug": "meja-2-susun-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja 2 susun bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area persiapan dan penyimpanan perlengkapan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "meja-3-susun-stainless": {
+      "term_id": 140,
+      "name": "MEJA 3 SUSUN STAINLESS",
+      "slug": "meja-3-susun-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja 3 susun stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area persiapan dan penyimpanan perlengkapan dapur komersial dengan kapasitas lebih besar, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "meja-bumbu-stainless": {
+      "term_id": 141,
+      "name": "MEJA BUMBU STAINLESS",
+      "slug": "meja-bumbu-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja bumbu Stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area penyimpanan dan persiapan bumbu dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "meja-kabinet-stainless": {
+      "term_id": 142,
+      "name": "MEJA KABINET STAINLESS",
+      "slug": "meja-kabinet-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja kabinet stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area kerja sekaligus penyimpanan perlengkapan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "meja-kompor-stainless": {
+      "term_id": 143,
+      "name": "MEJA KOMPOR STAINLESS",
+      "slug": "meja-kompor-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja kompor stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan sebagai penopang area memasak pada dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "meja-stainless": {
+      "term_id": 137,
+      "name": "MEJA STAINLESS",
+      "slug": "meja-stainless",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori meja stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan sebagai area persiapan makanan dan operasional dapur komersial dengan kondisi siap pakai serta harga lebih hemat.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2025/11/Meja.webp"
+    },
+    "lainnya-meja-stainless": {
+      "term_id": 144,
+      "name": "MEJA STAINLESS LAINNYA",
+      "slug": "lainnya-meja-stainless",
+      "parent_id": 137,
+      "parent_slug": "meja-stainless",
+      "description": "Kategori meja stainless lainnya berisi berbagai perlengkapan meja dapur untuk restoran, cafe, bakery, dan usaha kuliner. Cocok untuk kebutuhan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "noodle-boiler": {
+      "term_id": 134,
+      "name": "NOODLE BOILER",
+      "slug": "noodle-boiler",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori noodle boiler bekas untuk kebutuhan restoran mie, cafe, dan usaha kuliner. Cocok digunakan untuk proses perebusan mie dengan cepat dan efisien pada dapur komersial, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "oven": {
+      "term_id": 135,
+      "name": "OVEN",
+      "slug": "oven",
+      "parent_id": 122,
+      "parent_slug": "kompor",
+      "description": "Kategori oven bekas untuk kebutuhan bakery, cafe, restoran, dan usaha kuliner. Tersedia berbagai pilihan oven siap pakai untuk proses baking dan roasting dengan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "peralatan-dapur-bekas-lainnya": {
+      "term_id": 35,
+      "name": "PERALATAN DAPUR BEKAS LAINNYA",
+      "slug": "peralatan-dapur-bekas-lainnya",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori Peralatan Dapur Bekas lainnya berisi berbagai alat dapur restoran bekas untuk cafe, bakery, dan usaha kuliner. Cocok untuk kebutuhan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/04/7.webp"
+    },
+    "rak-1-susun-stainless": {
+      "term_id": 146,
+      "name": "RAK 1 SUSUN STAINLESS",
+      "slug": "rak-1-susun-stainless",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori rak 1 susun stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk penyimpanan perlengkapan dapur komersial dengan desain praktis, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "rak-2-susun-stainless": {
+      "term_id": 147,
+      "name": "RAK 2 SUSUN STAINLESS",
+      "slug": "rak-2-susun-stainless",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori rak 2 susun bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk penyimpanan perlengkapan dapur komersial dengan kapasitas lebih besar, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "rak-3-susun-stainless": {
+      "term_id": 148,
+      "name": "RAK 3 SUSUN STAINLESS",
+      "slug": "rak-3-susun-stainless",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori rak 3 stainless susun bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk penyimpanan perlengkapan dapur komersial dengan kapasitas lebih besar, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "rak-4-susun-stainless": {
+      "term_id": 149,
+      "name": "RAK 4 SUSUN STAINLESS",
+      "slug": "rak-4-susun-stainless",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori rak 4 susun stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk penyimpanan perlengkapan dapur komersial dengan kapasitas lebih banyak, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "rak-5-susun-stainless": {
+      "term_id": 150,
+      "name": "RAK 5 SUSUN STAINLESS",
+      "slug": "rak-5-susun-stainless",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori rak 5 susun stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk penyimpanan perlengkapan dapur komersial dengan kapasitas lebih besar, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "rak-stainless": {
+      "term_id": 145,
+      "name": "RAK STAINLESS",
+      "slug": "rak-stainless",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori rak stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk penyimpanan perlengkapan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2026/04/2.webp"
+    },
+    "lainnya-rak-stainless": {
+      "term_id": 152,
+      "name": "RAK STAINLESS LAINNYA",
+      "slug": "lainnya-rak-stainless",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori rak stainless lainnya berisi berbagai perlengkapan rak dapur untuk restoran, cafe, bakery, dan usaha kuliner. Cocok untuk kebutuhan penyimpanan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "showcase": {
+      "term_id": 153,
+      "name": "SHOWCASE",
+      "slug": "showcase",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori showcase bekas untuk kebutuhan cafe, bakery, restoran, dan usaha kuliner. Cocok digunakan untuk display makanan dan minuman dengan tampilan menarik, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": "https://origin.bukanbarukitchen.com/wp-content/uploads/2025/06/Showcase-Sanken-270L-2.webp"
+    },
+    "showcase-1-pintu": {
+      "term_id": 154,
+      "name": "SHOWCASE 1 PINTU",
+      "slug": "showcase-1-pintu",
+      "parent_id": 153,
+      "parent_slug": "showcase",
+      "description": "Kategori showcase 1 pintu bekas untuk kebutuhan cafe, bakery, restoran, dan usaha kuliner. Cocok digunakan untuk display makanan dan minuman dengan desain praktis, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "showcase-2-pintu": {
+      "term_id": 155,
+      "name": "SHOWCASE 2 PINTU",
+      "slug": "showcase-2-pintu",
+      "parent_id": 153,
+      "parent_slug": "showcase",
+      "description": "Kategori showcase 2 pintu bekas untuk kebutuhan cafe, bakery, restoran, dan usaha kuliner. Cocok digunakan untuk display makanan dan minuman dengan kapasitas lebih besar, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "lainnya-showcase": {
+      "term_id": 157,
+      "name": "SHOWCASE LAINNYA",
+      "slug": "lainnya-showcase",
+      "parent_id": 153,
+      "parent_slug": "showcase",
+      "description": "Kategori showcase bekas lainnya berisi berbagai perlengkapan display makanan dan minuman untuk cafe, bakery, restoran, dan usaha kuliner. Cocok untuk kebutuhan usaha komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "single-sink-stainless": {
+      "term_id": 159,
+      "name": "SINGLE SINK STAINLESS",
+      "slug": "single-sink-stainless",
+      "parent_id": 158,
+      "parent_slug": "sink-stainless",
+      "description": "Kategori single sink stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area pencucian dapur komersial dengan desain praktis, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "sink-jumbo-stainless": {
+      "term_id": 162,
+      "name": "SINK JUMBO STAINLESS",
+      "slug": "sink-jumbo-stainless",
+      "parent_id": 158,
+      "parent_slug": "sink-stainless",
+      "description": "Kategori sink jumbo stainless bekas untuk kebutuhan restoran, catering, bakery, dan usaha kuliner. Cocok digunakan untuk area pencucian peralatan dapur berukuran besar dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "sink-stainless": {
+      "term_id": 158,
+      "name": "SINK STAINLESS",
+      "slug": "sink-stainless",
+      "parent_id": 0,
+      "parent_slug": null,
+      "description": "Kategori sink stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area pencucian dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "lainnya-sink": {
+      "term_id": 163,
+      "name": "SINK STAINLESS LAINNYA",
+      "slug": "lainnya-sink",
+      "parent_id": 158,
+      "parent_slug": "sink-stainless",
+      "description": "Kategori sink stainless bekas lainnya berisi berbagai perlengkapan area pencucian untuk restoran, cafe, bakery, dan usaha kuliner. Cocok untuk kebutuhan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "triple-sink-stainless": {
+      "term_id": 161,
+      "name": "TRIPLE SINK STAINLESS",
+      "slug": "triple-sink-stainless",
+      "parent_id": 158,
+      "parent_slug": "sink-stainless",
+      "description": "Kategori triple sink stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan untuk area pencucian dapur komersial dengan tiga bak sink, kondisi siap pakai, dan harga lebih hemat.",
+      "thumbnail": ""
+    },
+    "undercounter-chiller": {
+      "term_id": 107,
+      "name": "UNDERCOUNTER CHILLER",
+      "slug": "undercounter-chiller",
+      "parent_id": 105,
+      "parent_slug": "chiller",
+      "description": "Undercounter chiller bekas restoran cocok digunakan untuk cafe, bar, bakery, dan usaha kuliner dengan ruang terbatas. Tersedia berbagai ukuran dan kapasitas pendingin kondisi siap pakai dengan harga lebih ekonomis.",
+      "thumbnail": ""
+    },
+    "upright-chiller": {
+      "term_id": 106,
+      "name": "UPRIGHT CHILLER",
+      "slug": "upright-chiller",
+      "parent_id": 105,
+      "parent_slug": "chiller",
+      "description": "Upright chiller bekas restoran cocok digunakan untuk cafe, bakery, minimarket, dan usaha kuliner. Tersedia berbagai ukuran dan kapasitas pendingin dengan kondisi siap pakai dan harga lebih ekonomis.",
+      "thumbnail": ""
+    },
+    "upright-freezer": {
+      "term_id": 112,
+      "name": "UPRIGHT FREEZER",
+      "slug": "upright-freezer",
+      "parent_id": 109,
+      "parent_slug": "freezer",
+      "description": "Upright freezer bekas restoran cocok digunakan untuk cafe, bakery, frozen food, minimarket, dan usaha kuliner. Tersedia berbagai kapasitas freezer berdiri dengan kondisi siap pakai dan harga lebih ekonomis.",
+      "thumbnail": ""
+    },
+    "wallshelf": {
+      "term_id": 151,
+      "name": "WALLSHELF",
+      "slug": "wallshelf",
+      "parent_id": 145,
+      "parent_slug": "rak-stainless",
+      "description": "Kategori wallshelf stainless bekas untuk kebutuhan restoran, cafe, bakery, dan usaha kuliner. Cocok digunakan sebagai rak dinding penyimpanan perlengkapan dapur komersial dengan kondisi siap pakai dan harga lebih hemat.",
+      "thumbnail": ""
+    }
+  }
+}

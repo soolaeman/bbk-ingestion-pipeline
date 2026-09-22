@@ -13,16 +13,9 @@ from ai_gateway import load_env
 load_env()
 sys.stdout.reconfigure(line_buffering=True)
 
-DB_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "..",
-    "Jarvis-OS",
-    "domains",
-    "business",
-    "bbkitchen",
-    "data",
-    "bbk.db"
-)
+LOCAL_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "bbk.db")
+JARVIS_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Jarvis-OS", "domains", "business", "bbkitchen", "data", "bbk.db")
+DB_PATH = JARVIS_DB_PATH if os.path.exists(JARVIS_DB_PATH) else LOCAL_DB_PATH
 
 import argparse
 
@@ -107,6 +100,67 @@ def sync_master_tables():
         print(f"  [ERROR] Canonical SSOT tables sync failed ({res.status_code}): {res.text[:250]}")
     conn.close()
 
+def sync_raw_pipeline(limit=None, batch_size=100):
+    http_url = get_turso_endpoint()
+    headers = get_headers()
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    query = "SELECT * FROM raw_pipeline ORDER BY kode_unit DESC"
+    if limit:
+        query += f" LIMIT {limit}"
+    rows = cur.execute(query).fetchall()
+    total = len(rows)
+    print(f"=== Syncing {total} raw_pipeline messages to Turso Edge DB ===")
+    if total == 0:
+        conn.close()
+        return
+
+    upsert_sql = """
+    INSERT INTO raw_pipeline (kode_unit, source_group, link_message, caption_raw, photo_urls, fetch_date, last_seen_date, lokasi_gudang, status_unit, is_processed)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(kode_unit) DO UPDATE SET
+        source_group = excluded.source_group,
+        link_message = excluded.link_message,
+        caption_raw = excluded.caption_raw,
+        photo_urls = excluded.photo_urls,
+        fetch_date = excluded.fetch_date,
+        last_seen_date = excluded.last_seen_date,
+        lokasi_gudang = excluded.lokasi_gudang,
+        status_unit = excluded.status_unit,
+        is_processed = excluded.is_processed
+    """
+
+    for i in range(0, total, batch_size):
+        batch = rows[i:i + batch_size]
+        stmts = []
+        for r in batch:
+            args = [
+                {"type": "text", "value": str(r["kode_unit"] or "")},
+                {"type": "text", "value": str(r["source_group"] or "")},
+                {"type": "text", "value": str(r["link_message"] or "")},
+                {"type": "text", "value": str(r["caption_raw"] or "")},
+                {"type": "text", "value": str(r["photo_urls"] or "")},
+                {"type": "text", "value": str(r["fetch_date"] or "")},
+                {"type": "text", "value": str(r["last_seen_date"] or "")},
+                {"type": "text", "value": str(r["lokasi_gudang"] or "")},
+                {"type": "text", "value": str(r["status_unit"] or "")},
+                {"type": "text", "value": str(r["is_processed"] if r["is_processed"] is not None else 1)}
+            ]
+            stmts.append({"sql": upsert_sql, "args": args})
+
+        payload = {
+            "requests": [{"type": "execute", "stmt": s} for s in stmts] + [{"type": "close"}]
+        }
+        res = requests.post(http_url, headers=headers, json=payload, timeout=30)
+        if res.status_code == 200:
+            print(f"  raw_pipeline batch [{min(i + batch_size, total)}/{total}] synced OK")
+        else:
+            print(f"  [ERROR] raw_pipeline batch failed ({res.status_code}): {res.text[:200]}")
+
+    conn.close()
+
 def sync_to_turso(min_sku=None, only_dirty=False, batch_size=25):
     http_url = get_turso_endpoint()
     headers = get_headers()
@@ -182,13 +236,18 @@ def sync_to_turso(min_sku=None, only_dirty=False, batch_size=25):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sync products and master tables to Turso Edge DB")
     parser.add_argument("--dirty", action="store_true", help="Sync only products marked with is_dirty=1")
-    parser.add_argument("--master", action="store_true", help="Sync master_categories and master_warehouses")
+    parser.add_argument("--master", action="store_true", help="Sync master_categories, master_warehouses, and raw_pipeline")
+    parser.add_argument("--raw", action="store_true", help="Sync raw_pipeline Telegram messages")
     parser.add_argument("--min-sku", type=str, default=None, help="Sync products starting from specific SKU")
     parser.add_argument("--all", action="store_true", help="Sync all products")
     args = parser.parse_args()
 
-    if args.master or (not args.dirty and not args.min_sku and not args.all):
+    if args.master or (not args.dirty and not args.min_sku and not args.all and not args.raw):
         sync_master_tables()
+        sync_raw_pipeline()
+
+    if args.raw:
+        sync_raw_pipeline()
 
     if args.dirty:
         sync_to_turso(only_dirty=True)

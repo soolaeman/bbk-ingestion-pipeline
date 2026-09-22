@@ -1,6 +1,9 @@
-gspread
-google-auth
-pillow
-tqdm
-telethon
-google-api-python-client
+# BBKitchen Sovereign Ingestion Pipeline Dependencies
+telethon>=1.34.0
+tqdm>=4.66.0
+pillow>=10.2.0
+requests>=2.31.0
+boto3>=1.34.0
+openai>=1.12.0
+google-generativeai>=0.4.0
+python-dotenv>=1.0.0

@@ -1,0 +1,166 @@
+{
+  "hubs": [
+    {
+      "id": "PAMULANG_2",
+      "display_name": "Pamulang 2, Tangsel",
+      "city": "Tangerang Selatan",
+      "address": "Jl. Surya Kencana No. 42, Pamulang 2, Tangerang Selatan",
+      "partner_codes": [
+        "GK",
+        "BB",
+        "SM",
+        "BL"
+      ]
+    },
+    {
+      "id": "SAWANGAN",
+      "display_name": "Sawangan, Depok",
+      "city": "Depok",
+      "address": "Jl. Raya Muchtar / Sawangan, Depok",
+      "partner_codes": [
+        "PE",
+        "SK"
+      ]
+    },
+    {
+      "id": "PAMULANG_BARAT",
+      "display_name": "Pamulang Barat, Tangsel",
+      "city": "Tangerang Selatan",
+      "address": "Jl. Raya Pajajaran No. 18, Pamulang Barat, Tangerang Selatan",
+      "partner_codes": [
+        "ML",
+        "RB",
+        "KG"
+      ]
+    },
+    {
+      "id": "KEDAUNG",
+      "display_name": "Kedaung, Tangsel",
+      "city": "Tangerang Selatan",
+      "address": "Jl. Aria Putra No. 55, Kedaung, Tangerang Selatan",
+      "partner_codes": [
+        "WT",
+        "ON"
+      ]
+    },
+    {
+      "id": "SETU",
+      "display_name": "Setu, Tangsel",
+      "city": "Tangerang Selatan",
+      "address": "Kawasan Pergudangan Setu No. 8, Setu, Tangerang Selatan",
+      "partner_codes": [
+        "PY"
+      ]
+    },
+
+    {
+      "id": "RAWAKALONG",
+      "display_name": "Rawakalong, Bogor",
+      "city": "Bogor",
+      "address": "Jl. Raya Rawakalong, Gunung Sindur / Bogor",
+      "partner_codes": [
+        "RK"
+      ]
+    }
+  ],
+  "partners": {
+    "BK": {
+      "code": "BK",
+      "name": "BBKitchen (HQ)",
+      "hub_id": "HQ",
+      "location": "BBKITCHEN (HQ)",
+      "telegram_id": "DEFAULT"
+    },
+    "GK": {
+      "code": "GK",
+      "name": "Griya Kitchen",
+      "hub_id": "PAMULANG_2",
+      "location": "PAMULANG 2, TANGSEL",
+      "telegram_id": "-1002479885293"
+    },
+    "BB": {
+      "code": "BB",
+      "name": "BB Equipment",
+      "hub_id": "PAMULANG_2",
+      "location": "PAMULANG 2, TANGSEL",
+      "telegram_id": "-1001947492349"
+    },
+    "SM": {
+      "code": "SM",
+      "name": "Suma Equipment",
+      "hub_id": "PAMULANG_2",
+      "location": "PAMULANG 2, TANGSEL",
+      "telegram_id": "-1002249769366"
+    },
+    "BL": {
+      "code": "BL",
+      "name": "Blandongan",
+      "hub_id": "PAMULANG_2",
+      "location": "PAMULANG 2, TANGSEL",
+      "telegram_id": "-1002221612633"
+    },
+    "ML": {
+      "code": "ML",
+      "name": "Mulia Logam",
+      "hub_id": "PAMULANG_BARAT",
+      "location": "PAMULANG BARAT, TANGSEL",
+      "telegram_id": "-1002295735681"
+    },
+    "RB": {
+      "code": "RB",
+      "name": "Raja Barkas",
+      "hub_id": "PAMULANG_BARAT",
+      "location": "PAMULANG BARAT, TANGSEL",
+      "telegram_id": "-1002405866006"
+    },
+    "KG": {
+      "code": "KG",
+      "name": "Kitchen Gembel",
+      "hub_id": "PAMULANG_BARAT",
+      "location": "PAMULANG BARAT, TANGSEL",
+      "telegram_id": "-1002375036806"
+    },
+    "PY": {
+      "code": "PY",
+      "name": "Pak Yogi",
+      "hub_id": "SETU",
+      "location": "SETU, TANGSEL",
+      "telegram_id": "-1002556966592"
+    },
+    "PE": {
+      "code": "PE",
+      "name": "Pulung Elite",
+      "hub_id": "SAWANGAN",
+      "location": "SAWANGAN, DEPOK",
+      "telegram_id": "-1002471308578"
+    },
+    "SK": {
+      "code": "SK",
+      "name": "Sanjaya Kitchen",
+      "hub_id": "SAWANGAN",
+      "location": "SAWANGAN, DEPOK",
+      "telegram_id": "-1003506626675"
+    },
+    "WT": {
+      "code": "WT",
+      "name": "Warehouse Thaif",
+      "hub_id": "KEDAUNG",
+      "location": "KEDAUNG, TANGSEL",
+      "telegram_id": "-1002559367434"
+    },
+    "ON": {
+      "code": "ON",
+      "name": "Onibuja Warehouse",
+      "hub_id": "KEDAUNG",
+      "location": "KEDAUNG, TANGSEL",
+      "telegram_id": "-1003420173563"
+    },
+    "RK": {
+      "code": "RK",
+      "name": "Rizkitchen",
+      "hub_id": "RAWAKALONG",
+      "location": "RAWAKALONG, BOGOR",
+      "telegram_id": "-1004326430608"
+    }
+  }
+}
