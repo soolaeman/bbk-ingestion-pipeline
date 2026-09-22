@@ -72,6 +72,20 @@ ATURAN BISNIS MUTLAK:
    - Maksimal 60 karakter, Title Case.
    - JANGAN mengulang nama merk atau kata "Second" dua kali!
    - DILARANG KERAS memuat angka harga, kata "JUAL", "DIJUAL", nomor WhatsApp, atau kata promosi murahan.
+   - BRAND & DIMENSI HIERARCHY:
+     * Unit Fabrikasi Stainless (Meja, Sink, Rak, Hood, Wallshelf, Kabinet): 99% custom tanpa merk. JANGAN cari merk! UTAMAKAN DIMENSI (PxLxT) & fitur susun/lubang (Contoh: "Meja Stainless 2 Susun Second 150x70x85 cm", "Double Sink Stainless Second 120x60 cm").
+     * Unit Mesin, Elektronik & Kompor (Chiller, Freezer, Kwali, Fryer, Oven, Showcase): Jika merk resmi tertera jelas di caption (GEA, Mastercool, Nayati, Getra, Escoffier, Rational), cantumkan merk. Jika merk pudar/tidak ada, JANGAN mengarang merk! Utamakan kapasitas & dimensi (Contoh: "Upright Chiller 2 Pintu Second 120x70x195 cm", "Kwali Range 2 Burner Second Blower").
+   - KAMUS SLANG & TYPO FONETIK GUDANG LOKAL:
+     * "shocess", "sokes", "sowkes", "chocase" -> Showcase
+     * "ciler", "ciller", "aprait", "anderconter" -> Chiller / Upright Chiller / Undercounter Chiller
+     * "prizer", "freser", "frizer" -> Freezer / Chest Freezer
+     * "sing", "singk", "bak cuci" -> Sink Stainless
+     * "kwali bloer", "kuali ren" -> Kwali Range Blower
+     * "dip frayer", "preyer gas" -> Deep Fryer
+     * "bekples", "beckplash" -> Backsplash
+     * "ambalan", "trap", "selping" -> Susun / Undershelf / Overshelf
+     * "greastrep", "gris trap" -> Grease Trap
+     * "stimer", "kukusan" -> Dimsum Steamer
    - BRAND FILTER: Jangan gunakan kata "Stainless", "Heavy Duty", "Import", "Custom", "Ex Cafe", "Second" sebagai nama merk. Jika tidak bermerk resmi, sebutkan saja jenis bahannya (misal "Meja Stainless 2 Susun Second").
 
 2. CATEGORY SLUG (PILIH 1 SLUG RESMI WOOCOMMERCE YANG PALING TEPAT):
@@ -306,6 +320,7 @@ Ekstrak dan susun data katalog untuk kode unit {sku} sesuai panduan sistem."""
 
     product_record = {
         "sku": sku,
+        "slug": slug,
         "title": title,
         "seo_title": f"{title} | BBKitchen",
         "category_slug": cat_slug,
