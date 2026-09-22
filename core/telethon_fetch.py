@@ -52,7 +52,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--date", help="YYYY-MM-DD")
 parser.add_argument("--start", help="YYYY-MM-DD")
 parser.add_argument("--end", help="YYYY-MM-DD")
-args = parser.parse_args()
+parser.add_argument("--days", type=int, help="Fetch messages from the last N days (e.g. --days 14)")
+args, unknown = parser.parse_known_args()
 
 # ================= DATE =================
 
@@ -60,7 +61,11 @@ def parse_local(dt_str):
     dt = datetime.fromisoformat(dt_str)
     return dt.replace(tzinfo=LOCAL_TZ)
 
-if args.date:
+if args.days:
+    now_local = datetime.now(LOCAL_TZ)
+    start_local = (now_local - timedelta(days=args.days)).replace(hour=0, minute=0, second=0, microsecond=0)
+    end_local = (now_local + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+elif args.date:
     start_local = parse_local(args.date).replace(hour=0, minute=0, second=0, microsecond=0)
     end_local = start_local + timedelta(days=1)
 elif args.start and args.end:
