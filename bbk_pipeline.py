@@ -34,9 +34,6 @@ Examples:
 
     # Command: fetch
     parser_fetch = subparsers.add_parser("fetch", help="Fetch raw messages from Telegram partner channels")
-    parser_fetch.add_argument("--days", type=int, default=None, help="Fetch messages from the last N days (e.g. --days 14)")
-    parser_fetch.add_argument("--start", type=str, default=None, help="Start date (YYYY-MM-DD)")
-    parser_fetch.add_argument("--end", type=str, default=None, help="End date (YYYY-MM-DD)")
     parser_fetch.add_argument("--limit", type=int, default=50, help="Maximum messages to fetch per channel")
 
     # Command: normalize

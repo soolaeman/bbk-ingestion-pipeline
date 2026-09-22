@@ -8,9 +8,19 @@ import os
 import sys
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dotenv import load_dotenv
 import boto3
 from botocore.config import Config
 from tqdm import tqdm
+
+# Load .env
+env_paths = [
+    Path(__file__).resolve().parent / ".env",
+    Path(__file__).resolve().parent.parent / ".env",
+]
+for p in env_paths:
+    if p.exists():
+        load_dotenv(p)
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -24,7 +34,13 @@ POSSIBLE_PATHS = [
 ]
 SOURCE_DIR = next((p for p in POSSIBLE_PATHS if p.exists()), POSSIBLE_PATHS[0])
 STATE_FILE = Path(__file__).parent / "r2_uploaded_cache.txt"
-BUCKET_NAME = "bbk-assets"
+LEGACY_STATE_FILE = Path(__file__).parent.parent / "archive" / "legacy_gsheet_pipeline" / "r2_uploaded_cache.txt"
+BUCKET_NAME = os.getenv("R2_BUCKET", "bbk-assets")
+
+# Default R2 credentials fallback
+DEFAULT_ACCOUNT_ID = "60e1d09df95bb97b2f4f107386d302a9"
+DEFAULT_ACCESS_KEY = "51bf8015c9ff8ec55fc92df27f87fa3f"
+DEFAULT_SECRET_KEY = "b3bf8ee5b565a0c3f5ea7c166d333469df8fa68c783c27da2e2e71d34c0e6205"
 
 def get_r2_client(account_id, access_key, secret_key):
     return boto3.client(
@@ -36,8 +52,18 @@ def get_r2_client(account_id, access_key, secret_key):
     )
 
 def load_cached_uploads():
+    if not STATE_FILE.exists() and LEGACY_STATE_FILE.exists():
+        try:
+            import shutil
+            shutil.copy(LEGACY_STATE_FILE, STATE_FILE)
+        except Exception:
+            pass
+
     if STATE_FILE.exists():
         with open(STATE_FILE, "r", encoding="utf-8") as f:
+            return set(line.strip() for line in f if line.strip())
+    elif LEGACY_STATE_FILE.exists():
+        with open(LEGACY_STATE_FILE, "r", encoding="utf-8") as f:
             return set(line.strip() for line in f if line.strip())
     return set()
 
@@ -70,16 +96,11 @@ def main():
         print("    Pastikan Google Drive Anda terpasang (G:\\My Drive\\BBK_WEBP_MASTER).")
         return
 
-    # 2. Ambil Kredensial dari Environment atau Input
-    account_id = os.getenv("R2_ACCOUNT_ID")
-    access_key = os.getenv("R2_ACCESS_KEY_ID")
-    secret_key = os.getenv("R2_SECRET_ACCESS_KEY")
-
-    if not (account_id and access_key and secret_key):
-        print("\nSilakan masukkan kredensial Cloudflare R2 Anda:")
-        account_id = input("1. Account ID         : ").strip()
-        access_key = input("2. Access Key ID      : ").strip()
-        secret_key = input("3. Secret Access Key  : ").strip()
+    # 2. Ambil Kredensial dari Environment atau Default
+    account_id = os.getenv("R2_ACCOUNT_ID") or DEFAULT_ACCOUNT_ID
+    access_key = os.getenv("R2_ACCESS_KEY_ID") or DEFAULT_ACCESS_KEY
+    secret_key = os.getenv("R2_SECRET_ACCESS_KEY") or DEFAULT_SECRET_KEY
+    bucket_name = os.getenv("R2_BUCKET", BUCKET_NAME)
 
     if not (account_id and access_key and secret_key):
         print("[-] Error: Kredensial R2 tidak lengkap!")

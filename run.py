@@ -85,14 +85,18 @@ def main():
 
     # STEP 1: FETCH TELEGRAM RAW
     fetch_script = CORE_DIR / "telethon_fetch.py"
-    run_step("STEP 1/3 — FETCH RAW TELEGRAM & PHOTOS (Anti-Duplicate Link)", f"{PYTHON_EXE} {fetch_script} {fetch_args}")
+    run_step("STEP 1/4 — FETCH RAW TELEGRAM & PHOTOS (Anti-Duplicate Link)", f"{PYTHON_EXE} {fetch_script} {fetch_args}")
 
     # STEP 2: NORMALIZE WITH AI GATEWAY & WATERMARK WEBP
     pipeline_script = BASE_DIR / "bbk_pipeline.py"
-    run_step("STEP 2/3 — AI NORMALIZATION, SSOT & WEBP WATERMARK", f"{PYTHON_EXE} {pipeline_script} normalize")
+    run_step("STEP 2/4 — AI NORMALIZATION, SSOT & WEBP WATERMARK", f"{PYTHON_EXE} {pipeline_script} normalize")
 
     # STEP 3: SYNC TO TURSO CLOUD EDGE
-    run_step("STEP 3/3 — SYNC CATALOG & MASTERS TO TURSO CLOUD EDGE", f"{PYTHON_EXE} {pipeline_script} sync --dirty --master")
+    run_step("STEP 3/4 — SYNC CATALOG & MASTERS TO TURSO CLOUD EDGE", f"{PYTHON_EXE} {pipeline_script} sync --dirty --master")
+
+    # STEP 4: AUTO-UPLOAD MASTER WEBP TO CLOUDFLARE R2
+    sync_r2_script = CORE_DIR / "sync_photos_to_r2.py"
+    run_step("STEP 4/4 — AUTO-UPLOAD MASTER WEBP TO CLOUDFLARE R2 (bbk-assets)", f"{PYTHON_EXE} {sync_r2_script}")
 
     # Update last_success.txt
     with open(LAST_SUCCESS_FILE, "w", encoding="utf-8") as f:
