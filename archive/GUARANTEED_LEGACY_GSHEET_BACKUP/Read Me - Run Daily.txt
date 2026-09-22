@@ -1,0 +1,9 @@
+Cara Run
+Default (H-1)
+python run.py
+
+Specific Date
+python run.py --date 2026-05-13
+
+Date Range
+python run.py --start 2026-05-10 --end 2026-05-13
