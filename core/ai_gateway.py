@@ -11,18 +11,26 @@ import time
 import requests
 
 def load_env(env_path=None):
-    if env_path is None:
+    if env_path is not None and os.path.exists(env_path):
+        candidates = [env_path]
+    else:
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        env_path = os.path.join(base_dir, ".env")
-    if not os.path.exists(env_path):
-        return
-    with open(env_path, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            key, val = line.split("=", 1)
-            os.environ[key.strip()] = val.strip().strip("'").strip('"')
+        candidates = [
+            os.path.join(base_dir, "..", ".env"),
+            os.path.join(base_dir, ".env"),
+            os.path.join(os.getcwd(), ".env")
+        ]
+    
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            with open(candidate, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    key, val = line.split("=", 1)
+                    os.environ[key.strip()] = val.strip().strip("'").strip('"')
+            break
 
 load_env()
 
