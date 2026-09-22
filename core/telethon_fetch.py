@@ -67,18 +67,38 @@ def load_warehouse_locations():
 
 WAREHOUSE_LOCATIONS = load_warehouse_locations()
 
-# ================= TELETHON CLIENT =================
+# ================= TELETHON CLIENT & PRE-CHECK =================
 client = TelegramClient(
     SESSION_NAME,
     API_ID,
     API_HASH
 )
 
-async def fetch_group(src_code, chat_id, start_date, end_date):
+def get_existing_links():
+    """Mengambil seluruh Telegram link yang sudah terdaftar di database SSOT."""
+    if not DB_PATH.exists():
+        return set()
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    links = set(
+        r[0] for r in cur.execute("""
+            SELECT link_telegram FROM products WHERE link_telegram IS NOT NULL AND link_telegram != ''
+            UNION
+            SELECT link_message FROM raw_pipeline WHERE link_message IS NOT NULL AND link_message != ''
+        """).fetchall() if r[0]
+    )
+    conn.close()
+    return links
+
+async def fetch_group(src_code, chat_id, start_date, end_date, existing_links):
     out_dir = EXPORT_ROOT / src_code
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    chat_clean = str(chat_id).replace("-100", "").replace("-", "")
+    base_url = f"https://t.me/c/{chat_clean}"
+
     messages = []
+    skipped_dupes = 0
     pbar = tqdm(desc=f"Scanning [{src_code}]", unit=" msg", leave=False)
 
     async for msg in client.iter_messages(chat_id, offset_date=end_date):
@@ -88,6 +108,12 @@ async def fetch_group(src_code, chat_id, start_date, end_date):
         if msg.date < start_date:
             break
         if not msg.photo:
+            continue
+
+        # PRE-DOWNLOAD ANTI-DUPLICATE CHECK (Instant 0.001s skip, Zero Bandwidth Waste)
+        msg_link = f"{base_url}/{msg.id}"
+        if msg_link in existing_links:
+            skipped_dupes += 1
             continue
 
         photo_path = await msg.download_media(out_dir / f"{msg.id}.jpg")
@@ -107,7 +133,10 @@ async def fetch_group(src_code, chat_id, start_date, end_date):
     with open(out_dir / "result.json", "w", encoding="utf-8") as f:
         json.dump({"messages": messages}, f, ensure_ascii=False, indent=2)
 
-    print(f"[{src_code}] Berhasil mengambil {len(messages)} pesan bergambar.")
+    if messages:
+        print(f"[{src_code}] Mengambil {len(messages)} pesan baru ({skipped_dupes} duplikat di-skip).")
+    else:
+        print(f"[{src_code}] Bersih: 0 pesan baru ({skipped_dupes} duplikat di-skip).")
 
 # ================= ANTI-DUPLICATE INGESTION ENGINE =================
 
@@ -202,9 +231,13 @@ def ingest_exports_to_raw_pipeline():
     next_idx = max(max_prod, max_raw, 3097) + 1
     print(f"🔢 SKU selanjutnya dimulai dari: BBK{next_idx:04d}")
 
-    # 3. Master Google Drive folder for WebP output if exists
+    # 3. Pure Cloud Ephemeral WebP Buffer
+    ephemeral_webp = BASE_DIR.parent / ".temp_webp"
+    ephemeral_webp.mkdir(parents=True, exist_ok=True)
+
+    # Optional local mirror if Google Drive folder exists on machine
     drive_master = Path(r"C:\Users\Lenovo\My Drive\BBK_WEBP_MASTER")
-    drive_master.mkdir(parents=True, exist_ok=True)
+    has_drive = drive_master.exists()
 
     new_units_count = 0
     skipped_count = 0
@@ -235,8 +268,14 @@ def ingest_exports_to_raw_pipeline():
             photo_filenames = []
             for i, photo_path in enumerate(u["photos"], start=1):
                 webp_name = f"{kode}_{i}.webp"
-                dest_path = drive_master / webp_name
+                dest_path = ephemeral_webp / webp_name
                 process_watermark_and_webp(photo_path, dest_path)
+                if has_drive:
+                    try:
+                        import shutil
+                        shutil.copy(dest_path, drive_master / webp_name)
+                    except Exception:
+                        pass
                 photo_filenames.append(webp_name)
 
             photo_urls_str = "|".join(photo_filenames)
@@ -268,9 +307,11 @@ def ingest_exports_to_raw_pipeline():
 # ================= MAIN =================
 
 async def main_fetch(start_date, end_date):
+    existing_links = get_existing_links()
+    print(f"🛡️ Pre-Check SSOT: {len(existing_links)} link terdaftar (Anti-Duplicate Active).")
     await client.start()
     for src, chat_id in SOURCE_MAP.items():
-        await fetch_group(src, chat_id, start_date, end_date)
+        await fetch_group(src, chat_id, start_date, end_date, existing_links)
     await client.disconnect()
 
 def main():
