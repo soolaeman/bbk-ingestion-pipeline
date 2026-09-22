@@ -48,8 +48,12 @@ Examples:
     parser_sync.add_argument("--all", action="store_true", help="Sync all products")
     parser_sync.add_argument("--min-sku", type=str, default=None, help="Sync products from minimum SKU")
 
+    # Command: upload-r2
+    parser_r2 = subparsers.add_parser("upload-r2", help="Upload WebP photos to Cloudflare R2 bucket")
+    parser_r2.add_argument("--no-purge", action="store_true", help="Keep ephemeral buffer without purging")
+
     # Command: run-all
-    parser_all = subparsers.add_parser("run-all", help="Execute complete automated pipeline (fetch -> normalize -> sync)")
+    parser_all = subparsers.add_parser("run-all", help="Execute complete automated pipeline (fetch -> normalize -> sync -> upload-r2)")
 
     args = parser.parse_args()
 
@@ -58,7 +62,7 @@ Examples:
         sys.exit(1)
 
     if args.command == "fetch":
-        print("=== [STEP 1/3] Fetching from Telegram Channels ===")
+        print("=== [STEP 1/4] Fetching from Telegram Channels ===")
         try:
             from telethon_fetch import fetch_telegram_messages
             fetch_telegram_messages(limit=args.limit)
@@ -71,12 +75,12 @@ Examples:
                 print(f"[ERROR] Fetch execution failed: {e}")
 
     elif args.command == "normalize":
-        print("=== [STEP 2/3] Normalizing Raw Pipeline with SSOT ===")
+        print("=== [STEP 2/4] Normalizing Raw Pipeline with SSOT ===")
         from process_raw_pipeline import run_pipeline
         run_pipeline(dry_run=args.dry_run, limit=args.limit)
 
     elif args.command == "sync":
-        print("=== [STEP 3/3] Syncing to Turso Cloud Edge ===")
+        print("=== [STEP 3/4] Syncing to Turso Cloud Edge ===")
         from sync_turso import sync_to_turso, sync_master_tables
         if args.master or (not args.dirty and not args.all and not args.min_sku):
             sync_master_tables()
@@ -88,6 +92,11 @@ Examples:
             sync_to_turso(min_sku=args.min_sku)
         else:
             sync_to_turso(only_dirty=True)
+
+    elif args.command == "upload-r2":
+        print("=== [STEP 4/4] Uploading Master WebP Photos to Cloudflare R2 ===")
+        from sync_photos_to_r2 import main as r2_main
+        r2_main(auto_purge=not args.no_purge)
 
     elif args.command == "run-all":
         print("==================================================")
@@ -113,6 +122,14 @@ Examples:
         from sync_turso import sync_to_turso, sync_master_tables
         sync_master_tables()
         sync_to_turso(only_dirty=True)
+
+        # 4. Upload to Cloudflare R2 & Auto-Purge
+        print("\n--- 4. Syncing Master WebP Photos to Cloudflare R2 ---")
+        try:
+            from sync_photos_to_r2 import main as r2_main
+            r2_main(auto_purge=True)
+        except Exception as e:
+            print(f"[WARN] Cloudflare R2 sync step encountered notice: {e}")
 
         print("\n✅ Sovereign Pipeline Run Complete.")
 

@@ -74,21 +74,44 @@ client = TelegramClient(
     API_HASH
 )
 
+def load_r2_uploaded_cache():
+    cache_file = BASE_DIR / "r2_uploaded_cache.txt"
+    legacy_cache = BASE_DIR.parent / "archive" / "legacy_gsheet_pipeline" / "r2_uploaded_cache.txt"
+    uploaded = set()
+    if cache_file.exists():
+        with open(cache_file, "r", encoding="utf-8") as f:
+            uploaded.update(line.strip() for line in f if line.strip())
+    if legacy_cache.exists():
+        with open(legacy_cache, "r", encoding="utf-8") as f:
+            uploaded.update(line.strip() for line in f if line.strip())
+    return uploaded
+
 def get_existing_links():
-    """Mengambil seluruh Telegram link yang sudah terdaftar di database SSOT."""
+    """
+    Mengambil Telegram link yang sudah terdaftar DAN fotonya sudah verified ada di R2.
+    Jika ada unit di DB yang fotonya belum masuk R2, link TIDAK di-skip agar Cloud runner otomatis menambal foto (Self-Healing).
+    """
     if not DB_PATH.exists():
         return set()
+
+    r2_cache = load_r2_uploaded_cache()
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
-    links = set(
-        r[0] for r in cur.execute("""
-            SELECT link_telegram FROM products WHERE link_telegram IS NOT NULL AND link_telegram != ''
-            UNION
-            SELECT link_message FROM raw_pipeline WHERE link_message IS NOT NULL AND link_message != ''
-        """).fetchall() if r[0]
-    )
+
+    valid_links = set()
+    # 1. Dari products: Hanya skip jika fotonya sudah terverifikasi ada di Cloudflare R2
+    cur.execute("SELECT link_telegram, featured_image FROM products WHERE link_telegram IS NOT NULL AND link_telegram != ''")
+    for link, feat_img in cur.fetchall():
+        if not r2_cache or (feat_img and feat_img in r2_cache):
+            valid_links.add(link)
+
+    # 2. Dari raw_pipeline yang masih pending (is_processed = 0)
+    cur.execute("SELECT link_message FROM raw_pipeline WHERE is_processed = 0 AND link_message IS NOT NULL")
+    for row in cur.fetchall():
+        valid_links.add(row[0])
+
     conn.close()
-    return links
+    return valid_links
 
 async def fetch_group(src_code, chat_id, start_date, end_date, existing_links):
     out_dir = EXPORT_ROOT / src_code
@@ -116,7 +139,11 @@ async def fetch_group(src_code, chat_id, start_date, end_date, existing_links):
             skipped_dupes += 1
             continue
 
-        photo_path = await msg.download_media(out_dir / f"{msg.id}.jpg")
+        target_file = out_dir / f"{msg.id}.jpg"
+        if target_file.exists() and target_file.stat().st_size > 0:
+            photo_path = target_file
+        else:
+            photo_path = await msg.download_media(target_file)
 
         messages.append({
             "id": msg.id,
@@ -231,13 +258,9 @@ def ingest_exports_to_raw_pipeline():
     next_idx = max(max_prod, max_raw, 3097) + 1
     print(f"🔢 SKU selanjutnya dimulai dari: BBK{next_idx:04d}")
 
-    # 3. Pure Cloud Ephemeral WebP Buffer
+    # 3. Pure Cloud Ephemeral WebP Buffer (.temp_webp)
     ephemeral_webp = BASE_DIR.parent / ".temp_webp"
     ephemeral_webp.mkdir(parents=True, exist_ok=True)
-
-    # Optional local mirror if Google Drive folder exists on machine
-    drive_master = Path(r"C:\Users\Lenovo\My Drive\BBK_WEBP_MASTER")
-    has_drive = drive_master.exists()
 
     new_units_count = 0
     skipped_count = 0
@@ -264,18 +287,12 @@ def ingest_exports_to_raw_pipeline():
             kode = f"BBK{next_idx:04d}"
             next_idx += 1
 
-            # Watermark photos to WebP
+            # Watermark photos to WebP directly into ephemeral buffer
             photo_filenames = []
             for i, photo_path in enumerate(u["photos"], start=1):
                 webp_name = f"{kode}_{i}.webp"
                 dest_path = ephemeral_webp / webp_name
                 process_watermark_and_webp(photo_path, dest_path)
-                if has_drive:
-                    try:
-                        import shutil
-                        shutil.copy(dest_path, drive_master / webp_name)
-                    except Exception:
-                        pass
                 photo_filenames.append(webp_name)
 
             photo_urls_str = "|".join(photo_filenames)

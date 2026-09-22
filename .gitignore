@@ -1,5 +1,9 @@
-# Abaikan folder foto hasil download (sangat besar)
+# Abaikan folder foto hasil download (sangat besar) & buffer ephemeral
 exports/
+**/exports/
+core/exports/
+.temp_webp/
+*.webp
 
 # Abaikan database sesi Telegram lokal
 *.session
@@ -24,4 +28,8 @@ __pycache__/
 scratch/
 *.tmp
 *.dump
+r2_uploaded_cache.txt
+core/r2_uploaded_cache.txt
+last_success.txt
+
 
