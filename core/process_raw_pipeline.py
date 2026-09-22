@@ -20,11 +20,11 @@ from ai_gateway import AIGateway, load_env
 load_env()
 
 LOCAL_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "bbk.db")
-JARVIS_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Jarvis-OS", "domains", "business", "bbkitchen", "data", "bbk.db")
+JARVIS_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "Jarvis-OS", "domains", "business", "bbkitchen", "data", "bbk.db")
 DB_PATH = JARVIS_DB_PATH if os.path.exists(JARVIS_DB_PATH) else LOCAL_DB_PATH
 
 LOCAL_CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config")
-JARVIS_CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Jarvis-OS", "domains", "business", "bbkitchen", "config")
+JARVIS_CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "Jarvis-OS", "domains", "business", "bbkitchen", "config")
 CONFIG_DIR = JARVIS_CONFIG_DIR if os.path.exists(JARVIS_CONFIG_DIR) else LOCAL_CONFIG_DIR
 
 def load_ssot_configs():

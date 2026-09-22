@@ -14,7 +14,7 @@ load_env()
 sys.stdout.reconfigure(line_buffering=True)
 
 LOCAL_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "bbk.db")
-JARVIS_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Jarvis-OS", "domains", "business", "bbkitchen", "data", "bbk.db")
+JARVIS_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "Jarvis-OS", "domains", "business", "bbkitchen", "data", "bbk.db")
 DB_PATH = JARVIS_DB_PATH if os.path.exists(JARVIS_DB_PATH) else LOCAL_DB_PATH
 
 import argparse
