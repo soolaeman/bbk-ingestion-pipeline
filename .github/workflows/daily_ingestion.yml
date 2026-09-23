@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       command:
-        description: 'Command to run (run-all, fetch, normalize, sync)'
+        description: 'Command to run (run-all, fetch, normalize, sync, upload-r2)'
         required: false
         default: 'run-all'
         type: choice
@@ -16,6 +16,12 @@ on:
           - fetch
           - normalize
           - sync
+          - upload-r2
+      days:
+        description: 'Lookback days for Telegram fetch (default: 1, or enter 7, 14 for backlog)'
+        required: false
+        default: '1'
+        type: string
 
 jobs:
   ingest:
@@ -65,8 +71,9 @@ jobs:
           NEXT_PUBLIC_R2_PHOTO_BASE_URL: ${{ secrets.NEXT_PUBLIC_R2_PHOTO_BASE_URL }}
         run: |
           COMMAND="${{ github.event.inputs.command || 'run-all' }}"
-          echo "Executing BBKitchen Pipeline: python bbk_pipeline.py $COMMAND"
-          python bbk_pipeline.py "$COMMAND"
+          DAYS="${{ github.event.inputs.days || '1' }}"
+          echo "Executing BBKitchen Pipeline: python bbk_pipeline.py $COMMAND --days $DAYS"
+          python bbk_pipeline.py "$COMMAND" --days "$DAYS"
 
       - name: Pipeline Execution Summary
         if: always()

@@ -34,6 +34,7 @@ Examples:
 
     # Command: fetch
     parser_fetch = subparsers.add_parser("fetch", help="Fetch raw messages from Telegram partner channels")
+    parser_fetch.add_argument("--days", type=int, default=1, help="Number of lookback days for Telegram fetch")
     parser_fetch.add_argument("--limit", type=int, default=50, help="Maximum messages to fetch per channel")
 
     # Command: normalize
@@ -54,6 +55,7 @@ Examples:
 
     # Command: run-all
     parser_all = subparsers.add_parser("run-all", help="Execute complete automated pipeline (fetch -> normalize -> sync -> upload-r2)")
+    parser_all.add_argument("--days", type=int, default=1, help="Number of lookback days for Telegram fetch (default: 1)")
 
     args = parser.parse_args()
 
@@ -64,15 +66,10 @@ Examples:
     if args.command == "fetch":
         print("=== [STEP 1/4] Fetching from Telegram Channels ===")
         try:
-            from telethon_fetch import fetch_telegram_messages
-            fetch_telegram_messages(limit=args.limit)
-        except ImportError:
-            print("[INFO] telethon_fetch module not found or requires active Telethon session. Checking autonomous_telegram_sync...")
-            try:
-                import subprocess
-                subprocess.run(["python", os.path.join(os.path.dirname(__file__), "autonomous_telegram_sync.py")], check=True)
-            except Exception as e:
-                print(f"[ERROR] Fetch execution failed: {e}")
+            from telethon_fetch import main as telethon_main
+            telethon_main(days=args.days)
+        except Exception as e:
+            print(f"[ERROR] Fetch execution failed: {e}")
 
     elif args.command == "normalize":
         print("=== [STEP 2/4] Normalizing Raw Pipeline with SSOT ===")
@@ -104,11 +101,10 @@ Examples:
         print("==================================================")
         
         # 1. Fetch
-        print("\n--- 1. Fetching Telegram Messages ---")
+        print(f"\n--- 1. Fetching Telegram Messages (Lookback: {args.days} hari) ---")
         try:
-            import asyncio
             from telethon_fetch import main as telethon_main
-            asyncio.run(telethon_main())
+            telethon_main(days=args.days)
         except Exception as e:
             print(f"[WARN] Fetch step skipped or encountered warning: {e}")
 

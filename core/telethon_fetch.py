@@ -331,12 +331,13 @@ async def main_fetch(start_date, end_date):
         await fetch_group(src, chat_id, start_date, end_date, existing_links)
     await client.disconnect()
 
-def main():
+def main(days=None, args_list=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", help="YYYY-MM-DD")
     parser.add_argument("--start", help="YYYY-MM-DD")
     parser.add_argument("--end", help="YYYY-MM-DD")
-    args = parser.parse_args()
+    parser.add_argument("--days", type=int, default=None, help="Number of lookback days")
+    args, _ = parser.parse_known_args(args_list)
 
     def parse_local_dt(dt_str):
         return datetime.fromisoformat(dt_str).replace(tzinfo=LOCAL_TZ)
@@ -348,8 +349,9 @@ def main():
         start_local = parse_local_dt(args.start).replace(hour=0, minute=0, second=0, microsecond=0)
         end_local = parse_local_dt(args.end).replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
     else:
+        effective_days = days if days is not None else (args.days if args.days is not None else 1)
         now_local = datetime.now(LOCAL_TZ)
-        start_local = (now_local - timedelta(days=14)).replace(hour=0, minute=0, second=0, microsecond=0)
+        start_local = (now_local - timedelta(days=effective_days)).replace(hour=0, minute=0, second=0, microsecond=0)
         end_local = (now_local + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
 
     start_date = start_local.astimezone(timezone.utc)
