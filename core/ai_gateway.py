@@ -197,10 +197,10 @@ class AIGateway:
         """
         providers = [
             ("1. OpenAI (gpt-4o-mini)", lambda: self._call_openai(prompt, system_prompt, "gpt-4o-mini")),
-            ("2. Google AI Studio (gemini-2.5-flash)", lambda: self._call_gemini(prompt, system_prompt, "gemini-2.5-flash")),
-            ("2b. Google AI Studio (gemini-1.5-flash)", lambda: self._call_gemini(prompt, system_prompt, "gemini-1.5-flash")),
-            ("3. Groq Cloud (llama-3.3-70b-versatile)", lambda: self._call_groq(prompt, system_prompt, "llama-3.3-70b-versatile")),
-            ("3b. Groq Cloud (openai/gpt-oss-120b)", lambda: self._call_groq(prompt, system_prompt, "openai/gpt-oss-120b")),
+            ("2. Google AI Studio (gemini-3.6-flash)", lambda: self._call_gemini(prompt, system_prompt, "gemini-3.6-flash")),
+            ("2b. Google AI Studio (gemini-flash-latest)", lambda: self._call_gemini(prompt, system_prompt, "gemini-flash-latest")),
+            ("3. Groq Cloud (openai/gpt-oss-120b)", lambda: self._call_groq(prompt, system_prompt, "openai/gpt-oss-120b")),
+            ("3b. Groq Cloud (qwen3.8-27b)", lambda: self._call_groq(prompt, system_prompt, "qwen/qwen3.8-27b")),
             ("4. DeepSeek AI (deepseek-chat)", lambda: self._call_deepseek(prompt, system_prompt, "deepseek-chat")),
         ]
 
