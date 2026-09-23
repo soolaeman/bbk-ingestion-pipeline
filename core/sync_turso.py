@@ -19,8 +19,8 @@ DB_PATH = JARVIS_DB_PATH if os.path.exists(JARVIS_DB_PATH) else LOCAL_DB_PATH
 
 import argparse
 
-TURSO_URL = os.getenv("TURSO_DATABASE_URL", "libsql://bbk-soolaeman.aws-ap-northeast-1.turso.io")
-TURSO_TOKEN = os.getenv("TURSO_AUTH_TOKEN", "")
+TURSO_URL = os.getenv("TURSO_DATABASE_URL") or "libsql://bbk-soolaeman.aws-ap-northeast-1.turso.io"
+TURSO_TOKEN = os.getenv("TURSO_AUTH_TOKEN") or "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODk4MjI2ODcsImlkIjoiMDFhMGI5YmQtZTIwMS03ZjUxLWExMDQtMzk5NzlkNjAzMTNiIiwia2lkIjoickFjZFotQXpjdjkwZE5pLWd6aHF4ZWZPN1dzNTJnMjB3VmNtQld1bS1UcyIsInJpZCI6IjgwYzI0OTQ1LTRmMDctNGYwNy05YzJkLTdhYmFlZGFjMzNlYSJ9.qavUPG-VqnaFxPUHsi7OV_7uesPTMk2K3Tn35YueMnq4hR0KJDhZ-rc4zzCpatWWovjCCJQ0LTpINp_KRC2vCA"
 
 def get_turso_endpoint():
     return TURSO_URL.replace("libsql://", "https://").rstrip("/") + "/v2/pipeline"
