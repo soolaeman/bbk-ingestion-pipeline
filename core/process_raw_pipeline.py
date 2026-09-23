@@ -244,6 +244,109 @@ def build_full_description(parsed: dict, pricing: dict, location_name: str) -> s
 </div>"""
     return html
 
+def extract_product_fallback(caption: str, sku: str) -> dict:
+    """Deterministic fallback parser when AI is unavailable."""
+    dim_match = re.search(r'(\d{2,3}\s*[xX*]\s*\d{2,3}(?:\s*[xX*]\s*\d{2,3})?(?:\s*cm)?)', caption)
+    dimensi = dim_match.group(1).replace(" ", "") if dim_match else ""
+    
+    cap_lower = caption.lower()
+    cat_slug = "peralatan-dapur-bekas-lainnya"
+    nama_alat = "Peralatan Dapur Komersial"
+    brand = ""
+    
+    if "chiller" in cap_lower or "ciler" in cap_lower or "ciller" in cap_lower:
+        if "upright" in cap_lower or "aprait" in cap_lower:
+            cat_slug = "upright-chiller"
+            nama_alat = "Upright Chiller"
+        elif "undercounter" in cap_lower or "anderconter" in cap_lower:
+            cat_slug = "undercounter-chiller"
+            nama_alat = "Undercounter Chiller"
+        else:
+            cat_slug = "chiller"
+            nama_alat = "Chiller Komersial"
+    elif "freezer" in cap_lower or "prizer" in cap_lower or "freser" in cap_lower:
+        if "chest" in cap_lower:
+            cat_slug = "chest-freezer"
+            nama_alat = "Chest Freezer"
+        elif "upright" in cap_lower:
+            cat_slug = "upright-freezer"
+            nama_alat = "Upright Freezer"
+        else:
+            cat_slug = "freezer"
+            nama_alat = "Freezer Komersial"
+    elif "sink" in cap_lower or "singk" in cap_lower or "bak cuci" in cap_lower:
+        if "double" in cap_lower or "2 lubang" in cap_lower or "2 pot" in cap_lower:
+            cat_slug = "double-sink-stainless"
+            nama_alat = "Double Sink Stainless"
+        elif "triple" in cap_lower or "3 lubang" in cap_lower:
+            cat_slug = "triple-sink-stainless"
+            nama_alat = "Triple Sink Stainless"
+        else:
+            cat_slug = "single-sink-stainless"
+            nama_alat = "Single Sink Stainless"
+    elif "meja" in cap_lower:
+        if "3 susun" in cap_lower or "3 trap" in cap_lower or "3 tier" in cap_lower:
+            cat_slug = "meja-3-susun-stainless"
+            nama_alat = "Meja Stainless 3 Susun"
+        elif "2 susun" in cap_lower or "2 trap" in cap_lower or "2 tier" in cap_lower:
+            cat_slug = "meja-2-susun-stainless"
+            nama_alat = "Meja Stainless 2 Susun"
+        elif "kompor" in cap_lower:
+            cat_slug = "meja-kompor-stainless"
+            nama_alat = "Meja Kompor Stainless"
+        else:
+            cat_slug = "meja-stainless"
+            nama_alat = "Meja Stainless"
+    elif "kwali" in cap_lower or "kuali" in cap_lower or "wok" in cap_lower:
+        cat_slug = "kompor-wok-kwali-range"
+        nama_alat = "Kwali Range Blower"
+    elif "rak" in cap_lower or "rack" in cap_lower:
+        cat_slug = "rak-4-susun-stainless"
+        nama_alat = "Rak Stainless Susun"
+    elif "hood" in cap_lower:
+        cat_slug = "hood"
+        nama_alat = "Exhaust Hood Stainless"
+    elif "kabinet" in cap_lower or "cabinet" in cap_lower:
+        cat_slug = "meja-kabinet-stainless"
+        nama_alat = "Kabinet Stainless"
+    elif "wallshelf" in cap_lower or "rak dinding" in cap_lower:
+        cat_slug = "wallshelf"
+        nama_alat = "Wallshelf Stainless"
+        
+    for b in ["GEA", "Mastercool", "Nayati", "Getra", "Sander", "Krischef", "Berjaya", "Fomac", "Crown"]:
+        if b.lower() in cap_lower:
+            brand = b
+            break
+            
+    title_parts = [nama_alat]
+    if brand:
+        title_parts.append(brand)
+    title_parts.append("Second")
+    if dimensi:
+        title_parts.append(dimensi)
+    title_bersih = " ".join(title_parts)
+    modal = extract_modal_regex(caption)
+    
+    return {
+        "title_bersih": title_bersih,
+        "nama_alat": nama_alat,
+        "brand": brand,
+        "dimensi": dimensi,
+        "category_slug": cat_slug,
+        "kondisi_unit": "Bekas Siap Pakai",
+        "status_unit": "READY",
+        "harga_modal": modal if modal > 0 else None,
+        "estimasi_harga_baru": modal * 2 if modal > 0 else 10_000_000,
+        "yoast_keyword": f"{nama_alat.lower()} bekas",
+        "yoast_description": f"{title_bersih} kondisi siap pakai bergaransi.",
+        "spesifikasi_ringkas": [
+            f"Dimensi: {dimensi or 'Standar komersial'}",
+            "Material stainless steel food grade",
+            "Fungsi mekanikal & elektrikal teruji siap pakai",
+            "Unit lolos inspeksi quality control"
+        ]
+    }
+
 def process_single_item(gateway: AIGateway, row: dict, dry_run=False) -> dict:
     sku = row["kode_unit"]
     caption = row["caption_raw"] or ""
@@ -255,13 +358,26 @@ def process_single_item(gateway: AIGateway, row: dict, dry_run=False) -> dict:
     if lokasi_gudang and any(h in lokasi_gudang for h in ["TANGSEL", "DEPOK", "HQ", "BOGOR"]):
         location_name = lokasi_gudang
 
-    # AI Call
+    # AI Call with 3-attempt backoff retry & deterministic fallback
     user_prompt = f"""Caption Mentah Gudang:
 \"\"\"{caption}\"\"\"
 
 Ekstrak dan susun data katalog untuk kode unit {sku} sesuai panduan sistem."""
     
-    parsed = gateway.generate_json(user_prompt, system_prompt=SYSTEM_PROMPT)
+    parsed = None
+    for attempt in range(1, 4):
+        try:
+            parsed = gateway.generate_json(user_prompt, system_prompt=SYSTEM_PROMPT)
+            if parsed and isinstance(parsed, dict) and (parsed.get("title_bersih") or parsed.get("nama_alat")):
+                break
+        except Exception as err:
+            print(f"   [AI Attempt {attempt}/3 Warning] {err}")
+            if attempt < 3:
+                time.sleep(attempt * 3)
+
+    if not parsed or not isinstance(parsed, dict):
+        print(f"   [AI Fallback Engine] Generating deterministic catalog structure for {sku}...")
+        parsed = extract_product_fallback(caption, sku)
 
     # Title & Branding (Safe against None values from AI)
     title_bersih = (parsed.get("title_bersih") or "").strip()
@@ -417,8 +533,8 @@ def run_pipeline(dry_run=False, limit=None):
                 conn.commit()
 
             success_count += 1
-            # Polite pause to stay well within provider rate limits
-            time.sleep(0.4)
+            # Polite pause to stay well within provider rate limits (15 RPM)
+            time.sleep(1.2)
 
         except Exception as e:
             print(f"   [ERROR] Failed processing {sku}: {e}")

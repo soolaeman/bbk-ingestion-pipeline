@@ -91,29 +91,37 @@ def load_r2_uploaded_cache():
 
 def get_existing_links():
     """
-    Mengambil Telegram link yang sudah terdaftar DAN fotonya sudah verified ada di R2.
-    Jika ada unit di DB yang fotonya belum masuk R2, link TIDAK di-skip agar Cloud runner otomatis menambal foto (Self-Healing).
+    Mengambil Telegram link yang sudah terdaftar di Local DB dan Turso Edge DB.
     """
-    if not DB_PATH.exists():
-        return set()
-
-    r2_cache = load_r2_uploaded_cache()
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-
     valid_links = set()
-    # 1. Dari products: Hanya skip jika fotonya sudah terverifikasi ada di Cloudflare R2
-    cur.execute("SELECT link_telegram, featured_image FROM products WHERE link_telegram IS NOT NULL AND link_telegram != ''")
-    for link, feat_img in cur.fetchall():
-        if not r2_cache or (feat_img and feat_img in r2_cache):
-            valid_links.add(link)
+    r2_cache = load_r2_uploaded_cache()
 
-    # 2. Dari raw_pipeline yang masih pending (is_processed = 0)
-    cur.execute("SELECT link_message FROM raw_pipeline WHERE is_processed = 0 AND link_message IS NOT NULL")
-    for row in cur.fetchall():
-        valid_links.add(row[0])
+    # 1. Ambil dari SQLite Lokal jika ada
+    if DB_PATH.exists():
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            cur = conn.cursor()
+            cur.execute("SELECT link_telegram, featured_image FROM products WHERE link_telegram IS NOT NULL AND link_telegram != ''")
+            for link, feat_img in cur.fetchall():
+                if not r2_cache or (feat_img and feat_img in r2_cache):
+                    valid_links.add(link)
 
-    conn.close()
+            cur.execute("SELECT link_message FROM raw_pipeline WHERE is_processed = 0 AND link_message IS NOT NULL")
+            for row in cur.fetchall():
+                valid_links.add(row[0])
+            conn.close()
+        except Exception as e:
+            print(f"  [Notice] Local DB link check: {e}")
+
+    # 2. Ambil dari Turso Cloud SSOT (Proteksi mutlak untuk GitHub Actions runner)
+    try:
+        from sync_turso import fetch_turso_state
+        _, turso_links = fetch_turso_state()
+        valid_links.update(turso_links)
+    except Exception as e:
+        print(f"  [Notice] Turso cloud state fetch: {e}")
+
+    print(f"🛡️ Total link Telegram terdaftar di SSOT (Local + Turso): {len(valid_links)} link.")
     return valid_links
 
 async def fetch_group(src_code, chat_id, start_date, end_date, existing_links):
@@ -239,7 +247,7 @@ def ingest_exports_to_raw_pipeline():
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
 
-    # 1. Ambil seluruh Telegram link yang sudah pernah tercatat di DB (Anti-Duplikat Mutlak)
+    # 1. Ambil seluruh Telegram link yang sudah pernah tercatat di DB Lokal
     existing_links = set(
         r[0] for r in cur.execute("""
             SELECT link_telegram FROM products WHERE link_telegram IS NOT NULL AND link_telegram != ''
@@ -247,9 +255,19 @@ def ingest_exports_to_raw_pipeline():
             SELECT link_message FROM raw_pipeline WHERE link_message IS NOT NULL AND link_message != ''
         """).fetchall() if r[0]
     )
+
+    # 2. Ambil state dari Turso Cloud SSOT (Proteksi mutlak untuk cloud runner)
+    cloud_max_sku = 0
+    try:
+        from sync_turso import fetch_turso_state
+        cloud_max_sku, turso_links = fetch_turso_state()
+        existing_links.update(turso_links)
+    except Exception as e:
+        print(f"  [Notice] Turso cloud state check: {e}")
+
     print(f"📊 Total link Telegram yang sudah terdaftar di SSOT: {len(existing_links)} link.")
 
-    # 2. Hitung next SKU
+    # 3. Hitung next SKU
     cur.execute("SELECT MAX(CAST(SUBSTR(sku, 4) AS INTEGER)) FROM products WHERE sku LIKE 'BBK%'")
     row_prod = cur.fetchone()
     max_prod = row_prod[0] if row_prod and row_prod[0] is not None else 0
@@ -258,7 +276,7 @@ def ingest_exports_to_raw_pipeline():
     row_raw = cur.fetchone()
     max_raw = row_raw[0] if row_raw and row_raw[0] is not None else 0
 
-    next_idx = max(max_prod, max_raw, 3097) + 1
+    next_idx = max(max_prod, max_raw, cloud_max_sku, 3097) + 1
     print(f"🔢 SKU selanjutnya dimulai dari: BBK{next_idx:04d}")
 
     # 3. Pure Cloud Ephemeral WebP Buffer (.temp_webp)

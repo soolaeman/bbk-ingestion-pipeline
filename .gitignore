@@ -28,6 +28,9 @@ __pycache__/
 scratch/
 *.tmp
 *.dump
+*.db
+*.sqlite
+*.sqlite3
 r2_uploaded_cache.txt
 core/r2_uploaded_cache.txt
 last_success.txt

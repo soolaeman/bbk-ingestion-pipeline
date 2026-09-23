@@ -31,6 +31,68 @@ def get_headers():
         "Content-Type": "application/json"
     }
 
+def fetch_turso_state():
+    """
+    Fetches the highest SKU number and all existing Telegram links from Turso Edge DB.
+    Returns: (max_sku: int, existing_links: set)
+    """
+    http_url = get_turso_endpoint()
+    headers = get_headers()
+    
+    stmts = [
+        {"sql": "SELECT MAX(CAST(SUBSTR(sku, 4) AS INTEGER)) FROM products WHERE sku LIKE 'BBK%'"},
+        {"sql": "SELECT MAX(CAST(SUBSTR(kode_unit, 4) AS INTEGER)) FROM raw_pipeline WHERE kode_unit LIKE 'BBK%'"},
+        {"sql": "SELECT link_telegram FROM products WHERE link_telegram IS NOT NULL AND link_telegram != ''"},
+        {"sql": "SELECT link_message FROM raw_pipeline WHERE link_message IS NOT NULL AND link_message != ''"}
+    ]
+    
+    payload = {
+        "requests": [{"type": "execute", "stmt": s} for s in stmts] + [{"type": "close"}]
+    }
+    
+    max_sku = 0
+    existing_links = set()
+    
+    try:
+        res = requests.post(http_url, headers=headers, json=payload, timeout=20)
+        if res.status_code == 200:
+            data = res.json()
+            results = data.get("results", [])
+            
+            # Result 0: MAX(sku) from products
+            if len(results) > 0 and results[0].get("type") == "ok":
+                rows = results[0]["response"]["result"]["rows"]
+                if rows and rows[0] and rows[0][0].get("value") is not None:
+                    max_sku = max(max_sku, int(rows[0][0]["value"]))
+                    
+            # Result 1: MAX(kode_unit) from raw_pipeline
+            if len(results) > 1 and results[1].get("type") == "ok":
+                rows = results[1]["response"]["result"]["rows"]
+                if rows and rows[0] and rows[0][0].get("value") is not None:
+                    max_sku = max(max_sku, int(rows[0][0]["value"]))
+                    
+            # Result 2: links from products
+            if len(results) > 2 and results[2].get("type") == "ok":
+                rows = results[2]["response"]["result"]["rows"]
+                for r in rows:
+                    if r and r[0].get("value"):
+                        existing_links.add(str(r[0]["value"]).strip())
+                        
+            # Result 3: links from raw_pipeline
+            if len(results) > 3 and results[3].get("type") == "ok":
+                rows = results[3]["response"]["result"]["rows"]
+                for r in rows:
+                    if r and r[0].get("value"):
+                        existing_links.add(str(r[0]["value"]).strip())
+                        
+            print(f"  [Turso State] Cloud MAX SKU: BBK{max_sku:04d} | Known Telegram Links: {len(existing_links)}")
+        else:
+            print(f"  [WARN] Failed to fetch Turso state ({res.status_code}): {res.text[:150]}")
+    except Exception as e:
+        print(f"  [WARN] Exception while fetching Turso state: {e}")
+        
+    return max_sku, existing_links
+
 def sync_master_tables():
     http_url = get_turso_endpoint()
     headers = get_headers()
