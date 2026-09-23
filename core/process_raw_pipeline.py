@@ -23,6 +23,9 @@ LOCAL_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "
 JARVIS_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "Jarvis-OS", "domains", "business", "bbkitchen", "data", "bbk.db")
 DB_PATH = JARVIS_DB_PATH if os.path.exists(JARVIS_DB_PATH) else LOCAL_DB_PATH
 
+from db_init import ensure_db_schema
+ensure_db_schema(DB_PATH)
+
 LOCAL_CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config")
 JARVIS_CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "Jarvis-OS", "domains", "business", "bbkitchen", "config")
 CONFIG_DIR = JARVIS_CONFIG_DIR if os.path.exists(JARVIS_CONFIG_DIR) else LOCAL_CONFIG_DIR

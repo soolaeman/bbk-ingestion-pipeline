@@ -31,6 +31,9 @@ LOCAL_DB_PATH = BASE_DIR.parent / "bbk.db"
 JARVIS_DB_PATH = BASE_DIR.parent.parent / "Jarvis-OS" / "domains" / "business" / "bbkitchen" / "data" / "bbk.db"
 DB_PATH = JARVIS_DB_PATH if JARVIS_DB_PATH.exists() else LOCAL_DB_PATH
 
+from db_init import ensure_db_schema
+ensure_db_schema(DB_PATH)
+
 # Config SSOT Path Resolution
 LOCAL_CONFIG_DIR = BASE_DIR.parent / "config"
 JARVIS_CONFIG_DIR = BASE_DIR.parent.parent / "Jarvis-OS" / "domains" / "business" / "bbkitchen" / "config"
