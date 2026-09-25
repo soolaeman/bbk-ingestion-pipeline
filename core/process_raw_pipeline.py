@@ -49,12 +49,31 @@ def load_ssot_configs():
 CAT_SSOT, WH_SSOT = load_ssot_configs()
 OFFICIAL_SLUGS = set(CAT_SSOT.get("by_slug", {}).keys())
 
-def resolve_warehouse_partner(source_group: str) -> tuple:
+def resolve_warehouse_partner(source_group: str = "", link: str = "") -> tuple:
     partners = WH_SSOT.get("partners", {})
-    sg_str = str(source_group).strip()
+    sg_str = str(source_group or "").strip()
+    link_str = str(link or "").strip()
+
+    # 1. Direct partner code match (e.g. "WT", "SK", "RK", "KG", "GK", "BB", "SM", "BL", "ML", "RB", "PY", "PE", "ON")
+    if sg_str in partners:
+        p = partners[sg_str]
+        return (p["code"], p["location"])
+
+    # 2. Match by Telegram Channel ID directly
     for code, p in partners.items():
-        if p.get("telegram_id") and str(p.get("telegram_id")).strip() == sg_str:
+        tele_id = str(p.get("telegram_id") or "").strip()
+        if tele_id and (tele_id == sg_str or tele_id.replace("-100", "") == sg_str.replace("-100", "")):
             return (p["code"], p["location"])
+
+    # 3. Match by Link URL (e.g. https://t.me/c/2559367434/... -> matches -1002559367434 -> WT)
+    if link_str:
+        for code, p in partners.items():
+            tele_id = str(p.get("telegram_id") or "").strip()
+            if tele_id:
+                clean_id = tele_id.replace("-100", "").replace("-", "")
+                if f"/c/{clean_id}/" in link_str or f"/{clean_id}/" in link_str:
+                    return (p["code"], p["location"])
+
     # Default fallback to main physical hub (Pamulang 2, Tangsel)
     main_hub = partners.get("GK", {"code": "GK", "location": "PAMULANG 2, TANGSEL"})
     return (main_hub["code"], main_hub["location"])
@@ -353,8 +372,9 @@ def process_single_item(gateway: AIGateway, row: dict, dry_run=False) -> dict:
     source_group = str(row["source_group"] or "")
     lokasi_gudang = row["lokasi_gudang"] or ""
 
-    # Resolve Warehouse
-    hub_code, location_name = resolve_warehouse_partner(source_group)
+    # Resolve Warehouse (Code, SSOT, & Telegram link matching)
+    link_msg = row.get("link_message") or row.get("link_telegram") or ""
+    hub_code, location_name = resolve_warehouse_partner(source_group, link=link_msg)
     if lokasi_gudang and any(h in lokasi_gudang for h in ["TANGSEL", "DEPOK", "HQ", "BOGOR"]):
         location_name = lokasi_gudang
 
