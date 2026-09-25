@@ -16,6 +16,7 @@ from datetime import datetime
 # Add local path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from ai_gateway import AIGateway, load_env
+from normalize_engine import normalize_single_caption
 
 load_env()
 
@@ -369,137 +370,22 @@ def extract_product_fallback(caption: str, sku: str) -> dict:
 def process_single_item(gateway: AIGateway, row: dict, dry_run=False) -> dict:
     sku = row["kode_unit"]
     caption = row["caption_raw"] or ""
-    source_group = str(row["source_group"] or "")
-    lokasi_gudang = row["lokasi_gudang"] or ""
-
-    # Resolve Warehouse (Code, SSOT, & Telegram link matching)
+    source_group = str(row.get("source_group") or "")
+    lokasi_gudang = row.get("lokasi_gudang") or ""
     link_msg = row.get("link_message") or row.get("link_telegram") or ""
-    hub_code, location_name = resolve_warehouse_partner(source_group, link=link_msg)
-    if lokasi_gudang and any(h in lokasi_gudang for h in ["TANGSEL", "DEPOK", "HQ", "BOGOR"]):
-        location_name = lokasi_gudang
+    photo_urls = row.get("photo_urls") or ""
 
-    # AI Call with 3-attempt backoff retry & deterministic fallback
-    user_prompt = f"""Caption Mentah Gudang:
-\"\"\"{caption}\"\"\"
-
-Ekstrak dan susun data katalog untuk kode unit {sku} sesuai panduan sistem."""
-    
-    parsed = None
-    for attempt in range(1, 4):
-        try:
-            parsed = gateway.generate_json(user_prompt, system_prompt=SYSTEM_PROMPT)
-            if parsed and isinstance(parsed, dict) and (parsed.get("title_bersih") or parsed.get("nama_alat")):
-                break
-        except Exception as err:
-            print(f"   [AI Attempt {attempt}/3 Warning] {err}")
-            if attempt < 3:
-                time.sleep(attempt * 3)
-
-    if not parsed or not isinstance(parsed, dict):
-        print(f"   [AI Fallback Engine] Generating deterministic catalog structure for {sku}...")
-        parsed = extract_product_fallback(caption, sku)
-
-    # Title & Branding (Safe against None values from AI)
-    title_bersih = (parsed.get("title_bersih") or "").strip()
-    nama_alat = (parsed.get("nama_alat") or "Peralatan Dapur Komersial").strip()
-    brand = (parsed.get("brand") or "").strip()
-    dimensi = (parsed.get("dimensi") or "").strip()
-
-    if title_bersih:
-        title = title_bersih
-    else:
-        parts = [nama_alat]
-        if brand and brand.lower() not in nama_alat.lower():
-            parts.append(brand)
-        if "second" not in [p.lower() for p in parts]:
-            parts.append("Second")
-        if dimensi and len(dimensi) <= 15 and dimensi.lower() not in nama_alat.lower():
-            parts.append(dimensi)
-        title = " ".join(parts)
-
-    # Sanitize title: strip prices, phone numbers, clean multiple spaces
-    title = re.sub(r'(?i)(?:rp\.?\s*[\d.,]+|[\d.,]+\s*(?:jt|juta|k|rb|ribu))', '', title)
-    title = re.sub(r'\s+', ' ', title).strip()
-    if len(title) > 65:
-        title = title[:65].rsplit(" ", 1)[0]
-
-    # Clean Slug
-    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
-    link_unit = f"https://bukanbarukitchen.com/shop/{slug}/"
-
-
-    # Pricing & Anchoring
-    modal = parsed.get("harga_modal")
-    if not modal or not isinstance(modal, (int, float)) or modal <= 0:
-        modal = extract_modal_regex(caption)
-    
-    est_baru = parsed.get("estimasi_harga_baru")
-    if not est_baru or not isinstance(est_baru, (int, float)) or est_baru <= 0:
-        est_baru = 15_000_000
-    
-    pricing = calculate_margins_and_anchors(int(modal), int(est_baru))
-
-    # Descriptions
-    short_desc = f"{title} kondisi {parsed.get('kondisi_unit', 'Bekas Siap Pakai')}. Lokasi unit di {location_name}. Lolos inspeksi fungsi dan siap kirim bergaransi."
-    full_desc = build_full_description(parsed, pricing, location_name)
-
-    # Categories
-    cat_slug = parsed.get("category_slug", "peralatan-dapur-bekas-lainnya")
-    if cat_slug not in OFFICIAL_SLUGS:
-        cat_slug = "peralatan-dapur-bekas-lainnya"
-
-    # Status
-    status_unit = parsed.get("status_unit", "READY").upper()
-    if status_unit not in ["READY", "SOLD", "BOOKED", "DP"]:
-        status_unit = "READY"
-
-    # Yoast
-    yoast_kw = parsed.get("yoast_keyword", f"{nama_alat.lower()} bekas")[:60]
-    yoast_desc = parsed.get("yoast_description", short_desc)[:155]
-
-    product_record = {
-        "sku": sku,
-        "slug": slug,
-        "title": title,
-        "seo_title": f"{title} | BBKitchen",
-        "category_slug": cat_slug,
-        "status_unit": status_unit,
-        "status_pipeline": "PROCESSED",
-        "lokasi_unit": location_name,
-        "kondisi_unit": parsed.get("kondisi_unit", "Bekas Siap Pakai"),
-        "short_description": short_desc,
-        "full_description": full_desc,
-        "yoast_keyword": yoast_kw,
-        "yoast_description": yoast_desc,
-        "featured_image": f"{sku}_1.webp",
-        "photo_urls": row["photo_urls"] or f"{sku}_1.webp",
-        "tanggal_masuk": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "tanggal_terjual": None,
-        "durasi_terjual": None,
-        "link_telegram": row["link_message"],
-        "product_id_woo": None,
-        "is_dirty": 1,
-        "image_alt": f"{title} - BBKitchen Spesialis Alat Dapur Second",
-        "image_title": title,
-        "image_caption": f"{title} siap kirim dari {location_name}",
-        "image_description": short_desc,
-        "asal_gudang": hub_code,
-        "harga_modal": pricing["harga_modal"],
-        "harga_buka_wa": pricing["harga_buka_wa"],
-        "harga_deal_wa": pricing["harga_deal_wa"],
-        "harga_floor_wa": pricing["harga_floor_wa"],
-        "margin_floor": pricing["margin_floor"],
-        "margin_deal": pricing["margin_deal"],
-        "status_guardrail": pricing["status_guardrail"],
-        "last_checked_telegram": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "link_unit": link_unit,
-        "estimasi_harga_baru": pricing["estimasi_harga_baru"],
-        "harga_display_low": pricing["harga_display_low"],
-        "harga_display_high": pricing["harga_display_high"],
-        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    }
-    return product_record
+    # Execute complete 5-layer normalization engine
+    return normalize_single_caption(
+        raw_caption=caption,
+        sku=sku,
+        existing_slug=row.get("slug"),
+        source_group=source_group,
+        link_message=link_msg,
+        location_override=lokasi_gudang,
+        photo_urls=photo_urls,
+        gateway=gateway
+    )
 
 def run_pipeline(dry_run=False, limit=None):
     gateway = AIGateway()
