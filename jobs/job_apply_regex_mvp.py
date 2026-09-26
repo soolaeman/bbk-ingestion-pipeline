@@ -144,7 +144,7 @@ def apply_ssot_batch():
     slug_map = {r["sku"]: r["slug"] for r in existing_products if r["slug"]}
 
     # 2. Fetch all raw pipeline items
-    raw_rows = cur.execute("SELECT kode_unit, source_group, caption_raw, link_message FROM raw_pipeline ORDER BY CAST(SUBSTR(kode_unit, 4) AS INTEGER) ASC").fetchall()
+    raw_rows = cur.execute("SELECT kode_unit, source_group, caption_raw, link_message, photo_urls FROM raw_pipeline ORDER BY CAST(SUBSTR(kode_unit, 4) AS INTEGER) ASC").fetchall()
     total_raw = len(raw_rows)
     print(f"Total Raw Items to Process: {total_raw}")
 
@@ -157,6 +157,7 @@ def apply_ssot_batch():
         caption = r["caption_raw"] or ""
         source_grp = r["source_group"] or ""
         link_msg = r["link_message"] or ""
+        raw_photo_urls = r["photo_urls"] or ""
         existing_slug = slug_map.get(sku)
 
         # Check Human Override
@@ -271,7 +272,7 @@ def apply_ssot_batch():
         """, (
             sku, parsed["slug"], parsed["title"], f"{parsed['title']} | BBKitchen", parsed["category_slug"],
             parsed["status_unit"], "PROCESSED", location_name, parsed["kondisi_unit"], short_desc, full_desc,
-            yoast_kw, yoast_desc, featured_img, featured_img, link_msg, link_unit, hub_code,
+            yoast_kw, yoast_desc, featured_img, (raw_photo_urls or featured_img), link_msg, link_unit, hub_code,
             pricing["harga_modal"], pricing["harga_buka_wa"], pricing["harga_deal_wa"], pricing["harga_floor_wa"],
             pricing["margin_floor"], pricing["margin_deal"], pricing["status_guardrail"],
             pricing["estimasi_harga_baru"], pricing["harga_display_low"], pricing["harga_display_high"],
