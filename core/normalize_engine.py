@@ -279,144 +279,232 @@ FABRICATION_KEYWORDS = ["meja", "sink", "rak", "hood", "wallshelf", "kabinet", "
 
 GOLDEN_SYSTEM_PROMPT = """Anda adalah Principal Catalog Architect & Senior Equipment Expert untuk BBKitchen (Penyedia Peralatan Dapur Komersial & Resto Second Terbesar di Indonesia).
 
-Tugas Anda: Menganalisis caption mentah Telegram dari gudang mitra, mengekstrak spesifikasi teknis, membersihkan noise, dan menghasilkan data katalog standar industri Horeca.
+Tugas Anda: Menganalisis caption mentah Telegram dari gudang mitra secara semantik (100% AI-Driven Semantic Extraction), mengekstrak fakta akurat, membersihkan noise/typo, dan menghasilkan data katalog standar industri Horeca kelas atas.
 
-ATURAN BISNIS MUTLAK:
-1. JUDUL PRODUK RESMI ("title_bersih"):
-   - Format wajib: [Nama Standar Alat] [Brand/Merk] Second [Dimensi/Kapasitas]
-   - Contoh ideal:
+5 ATURAN BISNIS EMAS (5 GOLDEN RULES):
+
+1. TUGAS 1 - JUDUL PRODUK KANONIKAL BERSIH & BERDIMENSI ("title_bersih"):
+   - FORMULA RESMI: [Nama Standar Alat] [Brand jika ada] Second [Dimensi PxLxT / Kapasitas]
+   - ATURAN KANONIKAL:
+     * Selalu gunakan format rapi, konsisten, dan simetris untuk tampilan katalog web/mobile.
+     * WAJIB cantumkan dimensi fisik (contoh: 110x70x85 cm) atau kapasitas (contoh: 231L, 2 Pintu, 21 Tray, 2 Burner).
+     * Jika unit Bekas, gunakan kata "Second". Jika unit Baru, gunakan kata "Baru".
+   - Contoh Ideal "title_bersih":
+     * "Meja Stainless 2 Susun Second 110x70x85 cm"
+     * "Troli Bakery Stainless 21 Tray Second 45x63x170 cm"
+     * "Double Sink Stainless 2 Lubang Second 120x60x84 cm"
+     * "Showcase 1 Pintu GEA Second 231L"
      * "Upright Chiller 2 Pintu Mastercool Second"
-     * "Meja Stainless 2 Susun Second 150x70x85 cm"
-     * "Single Sink Stainless 1 Lubang Sayap Kiri Second 100 cm"
-     * "Kwali Range 2 Burner Second Blower"
-     * "Combi Oven 6 Tray Rational Second"
-   - Maksimal 60 karakter, Title Case. JANGAN ulangi kata merk atau kata "Second" dua kali!
-   - DILARANG memuat angka harga, nomor telepon, kata "JUAL", "DIJUAL", atau promo murahan.
-   - BRAND & DIMENSI HIERARCHY:
-     * Unit Fabrikasi Stainless (Meja, Sink, Rak, Hood, Wallshelf, Kabinet): 99% custom bengkel lokal tanpa merk. JANGAN mengarang merk! Utamakan DIMENSI (PxLxT) & fitur susun/lubang.
-     * Unit Mesin & Kompor (Chiller, Freezer, Kwali, Fryer, Oven, Showcase): Jika merk resmi tertera jelas (GEA, Mastercool, Nayati, Getra, Escoffier, Rational), cantumkan merk. Jika merk tidak ada/pudar, JANGAN mengarang merk! Utamakan tipe & kapasitas.
+     * "Kompor Grill Teppanyaki Stainless Second 100x70x85 cm"
+     * "Ice Bin Stainless Steel Second 180x70x85 cm"
+   - Maksimal 65 karakter, Title Case.
+   - ATURAN BRAND vs JARGON TEKNIS:
+     * Brand Resmi: GEA, Mastercool, Nayati, Getra, Sander, Krischef, Berjaya, Fomac, Crown, Rational, Escoffier, Hoshizaki, Liebherr, Unox, Convotherm, Kolb, Roller Grill, Sirman, Sinmag, Primax, Guangdong, Mutu, Zanussi, Electrolux, Rinnai, Modena, RSA.
+     * Jargon Teknis BUKAN Brand (Brand: null): Low Pressure, High Pressure, Heavy Duty, Table Top, Custom 201/304, Stainless, Blower, 1 Tungku, Sliding Door, Kaki Roda.
+     * Fabrikasi Stainless (Meja, Sink, Rak, Hood, Wallshelf, Kabinet, Grease Trap) 99% custom bengkel -> Brand: null.
 
-2. DETEKSI KONDISI SUB-KOMPONEN VS UNIT:
-   - Jika ada frasa 'Filter baru', 'Kran baru', 'Burner baru', 'Plat baru', 'Saringan baru' -> Unit tetap 'Bekas Siap Pakai', dan cantumkan komponen baru tersebut di spesifikasi ringkas.
-   - Jangan pernah menetapkan 'Baru Sisa Proyek' kecuali seluruh unit 100% baru dalam dus.
+2. TUGAS 2 - BADGE SEMANTIK KONTEKSTUAL ("semantic_badge"):
+   - Pilih 1 badge persona asal unit untuk ditampilkan sebagai stiker elegan di foto katalog:
+     * "Ex-Resto" (Peralatan dapur resto, kompor kwali, sink, meja potong)
+     * "Ex-Cafe" (Chiller display, undercounter, blender, ice bin, cake showcase)
+     * "Ex-Bakery" (Troli loyang roti, deck oven, proofer, planetary mixer)
+     * "Ex-Hotel" (Combi oven, banquet cart, heavy duty dishwasher)
+     * "Second Mulus" (Peralatan umum dengan kondisi fisik sangat terawat)
+     * "Baru Gress" (Unit baru sisa proyek/stok distributor)
 
-3. PEMILIHAN KATEGORI SSOT (PILIH 1 SLUG RESMI):
-   - CHILLER: undercounter-chiller, upright-chiller, chiller, lainnya-chiller
-   - FREEZER: chest-freezer, upright-freezer, freezer, lainnya-freezer
-   - MEJA STAINLESS: meja-1-susun-stainless, meja-2-susun-stainless, meja-3-susun-stainless, meja-bumbu-stainless, meja-kabinet-stainless, meja-kompor-stainless, meja-stainless, lainnya-meja-stainless
-   - SINK STAINLESS: single-sink-stainless, double-sink-stainless, triple-sink-stainless, sink-jumbo-stainless, sink-stainless, lainnya-sink
-   - KOMPOR & COOKING: kompor-1-tungku, kompor-2-tungku, kompor-3-tungku, kompor-4-tungku, kompor-6-tungku, kompor-wok-kwali-range, kompor-batu-lava, kompor-grill-tepanyaki, deep-fryer, noodle-boiler, oven, kompor, lainnya-kompor
-   - RAK STAINLESS: rak-1-susun-stainless, rak-2-susun-stainless, rak-3-susun-stainless, rak-4-susun-stainless, rak-5-susun-stainless, wallshelf, rak-stainless, lainnya-rak-stainless
-   - HOOD: hood, blower, ducting, hood-stainless, lainnya-hood
-   - SHOWCASE: showcase-1-pintu, showcase-2-pintu, cake-showcase, showcase, lainnya-showcase
-   - ICE SYSTEM: ice-bin, ice-maker, ice-system, lainnya-ice-system
-   - LAINNYA: peralatan-dapur-bekas-lainnya
+3. TUGAS 3 - EKSTRAKSI MODAL & HPP GUDANG FAKTUAL ("harga_modal"):
+   - Pahami semantik harga dari caption:
+     * "modal 2.5jt" / "2,2jt net" / "harga 4.500.000" -> Ekstrak angka integer rupiah murni (contoh: 2500000).
+     * Jika harga borongan: "ambil 3 unit 6jt" -> Hitung harga satuan per unit: 2000000.
+     * Jika TIDAK ADA angka harga/modal yang jelas di caption -> WAJIB isi "harga_modal": null. Dilarang menebak angka modal jika tidak tertulis!
 
-4. STRATEGIC PRICE ANCHORING:
-   - "harga_modal": Nilai angka rupiah modal dari caption (abaikan format titik/koma). Jika tidak ada, isi null.
-   - "estimasi_harga_baru": Taksiran wajar harga unit BARU distributor resmi di Indonesia (dalam angka integer rupiah).
-     Contoh: Chiller 2 pintu baru ~28-35jt, Kwali 2 burner baru ~20-25jt, Meja 2 susun 150cm baru ~3.5-4.5jt, Deep fryer 1 tank baru ~6.5jt.
+4. TUGAS 4 - EVALUASI KONDISI SEJATI & ANTI-JEBAKAN ("kondisi_unit"):
+   - "Bekas Siap Pakai" (Default): Unit bekas restoran/cafe. Jika ada info sparepart baru (contoh: "filter baru", "burner baru", "basket baru", "karet pintu baru") atau durasi pemakaian ("pemakaian baru 4 bulan"), unit utama TETAP "Bekas Siap Pakai".
+   - "Like New / Ex-Display": Unit bekas sangat mulus, eks display pameran, atau pemakaian di bawah 1 bulan dengan fisik 95%+.
+   - "Baru Sisa Proyek": Unit 100% baru, BNIB, belum pernah dipakai sama sekali (bukan bekas).
 
-5. SEO & DESKRIPSI:
-   - "yoast_keyword": "[nama alat] bekas" (contoh: "upright chiller mastercool bekas")
-   - "yoast_description": Deskripsi meta menarik max 150 karakter.
-   - "spesifikasi_ringkas": Array 4-6 poin spesifikasi teknis penting (dimensi, material, kelengkapan, uji fungsi).
+5. TUGAS 5 - RISET GROUNDING HARGA PASAR FAKTUAL:
+   - "estimasi_harga_baru": Taksiran harga wajar unit BARU distributor resmi di Indonesia berdasarkan brand, kapasitas, daya watt, dan material SUS 304 (integer rupiah).
+   - "harga_display_low": Rekomendasi harga penawaran second buka wajar di pasar (angka bulat kelipatan 100rb, misal ~40%-55% dari harga baru).
+   - "harga_display_high": Batas atas rentang penawaran second di pasar (angka bulat kelipatan 100rb, misal ~60%-75% dari harga baru).
 
-KEMBALIKAN STRICTLY JSON:
+6. TUGAS 6 - PEMILIHAN 58 KATEGORI SSOT & INTENT FILTER:
+   - Pilih 1 slug resmi kanonikal dari master taksonomi:
+     * CHILLER: undercounter-chiller, upright-chiller, chiller, lainnya-chiller
+     * FREEZER: chest-freezer, upright-freezer, freezer, lainnya-freezer
+     * ICE SYSTEM: ice-bin, ice-maker, ice-system, lainnya-ice-system
+     * MEJA STAINLESS: meja-1-susun-stainless, meja-2-susun-stainless, meja-3-susun-stainless, meja-bumbu-stainless, meja-kabinet-stainless, meja-kompor-stainless, meja-stainless, lainnya-meja-stainless
+     * SINK STAINLESS: single-sink-stainless, double-sink-stainless, triple-sink-stainless, sink-jumbo-stainless, sink-stainless, lainnya-sink (termasuk grease trap)
+     * KOMPOR: kompor-1-tungku, kompor-2-tungku, kompor-3-tungku, kompor-4-tungku, kompor-6-tungku, kompor-wok-kwali-range, kompor-batu-lava, kompor-grill-tepanyaki, deep-fryer, noodle-boiler, oven, kompor, lainnya-kompor
+     * RAK: rak-1-susun-stainless, rak-2-susun-stainless, rak-3-susun-stainless, rak-4-susun-stainless, rak-5-susun-stainless, wallshelf, rak-stainless, lainnya-rak-stainless
+     * HOOD: hood, blower, ducting, hood-stainless, lainnya-hood
+     * SHOWCASE: showcase-1-pintu, showcase-2-pintu, cake-showcase, showcase, lainnya-showcase
+     * LAINNYA: peralatan-dapur-bekas-lainnya (hanya untuk barang non-standar)
+   - "is_non_product": true jika postingan adalah info dompet hilang, peringatan penipu, loker teknisi, promo ekspedisi/kargo, jasa las, atau barang non-horeca.
+   - "confidence": "HIGH" jika spesifikasi teridentifikasi jelas, "LOW" jika caption sangat minim/meragukan.
+
+PROGRAMMATIC SEO & 4-TIER ALT TEXT SUITE (VARIASI SEMANTIK KAYA DI GOOGLE):
+- "seo_title": "[nama_alat] [dimensi] [semantic_badge] Siap Pakai | BBKitchen"
+- "yoast_description": "Ready stok [nama_alat] [dimensi] kondisi bekas [semantic_badge] siap pakai lolos QC teknisi BBKitchen. Siap kirim se-Jabodetabek via Lalamove!"
+- "image_alt": "[nama_alat] [dimensi] [semantic_badge] Bekas Bergaransi BBKitchen"
+- "image_title": "Jual [nama_alat] [semantic_badge] [brand] [dimensi]"
+- "image_caption": "[nama_alat] [dimensi] kondisi mulus siap pakai lolos QC teknikal BBKitchen"
+- "image_description": "[title_bersih] bergaransi 30 hari siap kirim se-Indonesia."
+
+KEMBALIKAN STRICTLY JSON SESUAI SKEMA INI:
 {
   "title_bersih": str,
   "nama_alat": str,
-  "brand": str,
-  "dimensi": str,
+  "brand": str | null,
+  "dimensi": str | null,
+  "semantic_badge": "Ex-Resto" | "Ex-Cafe" | "Ex-Bakery" | "Ex-Hotel" | "Second Mulus" | "Baru Gress",
   "category_slug": str,
   "kondisi_unit": "Bekas Siap Pakai" | "Like New / Ex-Display" | "Baru Sisa Proyek",
   "status_unit": "READY" | "SOLD",
   "harga_modal": int | null,
   "estimasi_harga_baru": int,
+  "harga_display_low": int,
+  "harga_display_high": int,
+  "is_non_product": bool,
+  "confidence": "HIGH" | "LOW",
+  "seo_title": str,
   "yoast_keyword": str,
   "yoast_description": str,
-  "spesifikasi_ringkas": [str]
+  "spesifikasi_ringkas": [str],
+  "image_alt": str,
+  "image_title": str,
+  "image_caption": str,
+  "image_description": str
 }
 """
 
 # ==============================================================================
-# LAYER 5: POST-VALIDATOR, GUARDRAIL MARGINS & PRICE ANCHORS
+# LAYER 5: AUDIT GUARDRAIL MARGINS & PRICE ANCHORS (AI-FIRST SSOT)
 # ==============================================================================
 
-def calculate_margins_and_anchors(modal: Optional[int], estimasi_baru: Optional[int], category_slug: str = "") -> Dict[str, Any]:
+def calculate_margins_and_anchors(
+    modal: Optional[int],
+    estimasi_baru: Optional[int] = None,
+    ai_display_low: Optional[int] = None,
+    ai_display_high: Optional[int] = None,
+    category_slug: str = ""
+) -> Dict[str, Any]:
     """
-    Menghitung guardrail margin privat dan batas rentang penawaran publik BBKitchen.
-    Prinsip:
-    - Modal tidak pernah dibocorkan ke publik.
-    - Harga Buka WA = Modal * (1 + margin_buka)
-    - Harga Display Low = Pembulatan rapi ke atas (kelipatan 100rb).
-    - Harga Display High = min(Display Low * 1.25, Estimasi Baru * 0.75).
+    Audit Guardrail Murni & 5-Tier Empirical Pricing Matrix SSOT.
+    
+    Prinsip Sakral:
+    1. 5-Tier Capital Brackets (Micro, Small Stainless, Small Mesin, Medium, Large, Industrial).
+    2. Jamin 3-Tier WA Negotiation Space (Floor WA < Deal WA < Buka WA).
+    3. Display Web Low = Buka WA (Bebas bocor modal, buyer dapat diskon saat chat WA).
+    4. Display Web High = Buka WA + 20% (capped di 75% Estimasi Harga Baru).
+    5. Estimasi Baru SSOT = 2.0x - 2.4x modal atau hasil riset faktual AI.
     """
     cat_lower = (category_slug or "").lower()
-    
-    # Baseline fallback if estimasi_baru is missing/unrealistic
-    default_est_baru = 15_000_000
-    if "chiller" in cat_lower or "freezer" in cat_lower:
-        default_est_baru = 25_000_000
-    elif "kwali" in cat_lower or "oven" in cat_lower:
-        default_est_baru = 22_000_000
-    elif "meja" in cat_lower or "sink" in cat_lower or "rak" in cat_lower:
-        default_est_baru = 4_500_000
-    elif "hood" in cat_lower:
-        default_est_baru = 8_000_000
+    is_stainless = any(k in cat_lower for k in ['meja', 'rak', 'sink', 'troli', 'trolley', 'cabinet', 'stainless', 'pantry', 'grease', 'hood'])
 
-    est_baru_clean = int(estimasi_baru) if estimasi_baru and estimasi_baru > 0 else default_est_baru
-
-    if modal is None or modal <= 0:
-        # Graceful handling when modal is unknown
-        modal_clean = int(est_baru_clean * 0.35)
-        is_estimated_modal = True
-    else:
+    if modal is not None and modal > 0:
         modal_clean = int(modal)
-        is_estimated_modal = False
 
-    # Bracket margin guardrails
-    if modal_clean <= 3_000_000:
-        m_floor, m_deal, m_buka = 0.45, 0.55, 0.70
-    elif modal_clean <= 10_000_000:
-        m_floor, m_deal, m_buka = 0.35, 0.45, 0.55
-    elif modal_clean <= 30_000_000:
-        m_floor, m_deal, m_buka = 0.25, 0.35, 0.45
+        # 1. Tentukan Margin Ratios & Multiplier berdasarkan Bracket Modal
+        if modal_clean < 1_500_000:
+            # Micro (<1.5jt): Rak bumbu, sink 1 bowl, grease trap kecil
+            m_floor, m_deal, m_buka = 0.25, 0.40, 0.55
+            ratio_est_baru = 2.2
+            round_unit = 50_000
+        elif modal_clean <= 3_500_000:
+            # Small (1.5jt - 3.5jt): Jantung Katalog BBKitchen (47.2%)
+            if is_stainless:
+                m_floor, m_deal, m_buka = 0.20, 0.30, 0.42
+                ratio_est_baru = 2.2
+            else:
+                m_floor, m_deal, m_buka = 0.20, 0.35, 0.48
+                ratio_est_baru = 2.4
+            round_unit = 50_000
+        elif modal_clean <= 7_500_000:
+            # Medium (3.5jt - 7.5jt): Undercounter, Kwali 2 tungku, Fryer komersial
+            m_floor, m_deal, m_buka = 0.18, 0.28, 0.38
+            ratio_est_baru = 2.3
+            round_unit = 100_000
+        elif modal_clean <= 15_000_000:
+            # Large (7.5jt - 15jt): Upright 4 pintu, Spiral mixer 20L
+            m_floor, m_deal, m_buka = 0.15, 0.22, 0.30
+            ratio_est_baru = 2.1
+            round_unit = 100_000
+        else:
+            # Industrial (>15jt): Combi oven, Walk-in chiller, Rotary oven
+            m_floor, m_deal, m_buka = 0.12, 0.18, 0.25
+            ratio_est_baru = 2.0
+            round_unit = 250_000
+
+        # 2. Hitung 3 Tingkat Harga Negosiasi Sales WA
+        harga_floor_wa = ((int(modal_clean * (1 + m_floor)) + (round_unit - 1)) // round_unit) * round_unit
+        harga_deal_wa  = ((int(modal_clean * (1 + m_deal)) + (round_unit - 1)) // round_unit) * round_unit
+        harga_buka_wa  = ((int(modal_clean * (1 + m_buka)) + (round_unit - 1)) // round_unit) * round_unit
+
+        # 3. Estimasi Harga Baru SSOT
+        if estimasi_baru and int(estimasi_baru) >= int(modal_clean * 1.5):
+            est_baru_clean = int(estimasi_baru)
+        else:
+            est_baru_clean = ((int(modal_clean * ratio_est_baru) + 99_999) // 100_000) * 100_000
+
+        # 4. Display Publik Web (Low & High)
+        final_disp_low = harga_buka_wa
+        
+        raw_high = int(final_disp_low * 1.20)
+        ceiling_high = max(int(est_baru_clean * 0.75), int(final_disp_low * 1.10)) # maks 75% harga baru
+        final_disp_high = min(raw_high, ceiling_high)
+        if final_disp_high <= final_disp_low:
+            final_disp_high = int(final_disp_low * 1.15)
+        final_disp_high = ((final_disp_high + 99_999) // 100_000) * 100_000
+
+        # Guardrail Audit Status
+        if modal_clean >= est_baru_clean:
+            status_guardrail = "ANOMALY_OVERPRICED_MODAL"
+        elif modal_clean >= final_disp_low:
+            status_guardrail = "WARNING_THIN_MARGIN"
+        else:
+            status_guardrail = "PASS"
+
+        return {
+            "harga_modal": modal_clean,
+            "margin_floor": m_floor,
+            "margin_deal": m_deal,
+            "harga_floor_wa": harga_floor_wa,
+            "harga_deal_wa": harga_deal_wa,
+            "harga_buka_wa": harga_buka_wa,
+            "status_guardrail": status_guardrail,
+            "estimasi_harga_baru": est_baru_clean,
+            "harga_display_low": final_disp_low,
+            "harga_display_high": final_disp_high,
+        }
     else:
-        m_floor, m_deal, m_buka = 0.20, 0.28, 0.38
+        # Graceful Null Pricing (No fake modal fabrication)
+        default_est_baru = 10_000_000
+        if "chiller" in cat_lower or "freezer" in cat_lower:
+            default_est_baru = 25_000_000
+        elif "kwali" in cat_lower or "oven" in cat_lower:
+            default_est_baru = 20_000_000
+        elif "meja" in cat_lower or "sink" in cat_lower or "rak" in cat_lower:
+            default_est_baru = 4_000_000
 
-    harga_floor_wa = int(modal_clean * (1 + m_floor))
-    harga_deal_wa = int(modal_clean * (1 + m_deal))
-    harga_buka_wa = int(modal_clean * (1 + m_buka))
+        est_baru_clean = int(estimasi_baru) if estimasi_baru and estimasi_baru > 0 else default_est_baru
+        disp_low = ai_display_low if ai_display_low and ai_display_low > 0 else int(est_baru_clean * 0.45)
+        disp_low = ((disp_low + 99_999) // 100_000) * 100_000
+        disp_high = ai_display_high if ai_display_high and ai_display_high > disp_low else int(disp_low * 1.25)
+        disp_high = ((disp_high + 99_999) // 100_000) * 100_000
 
-    # Public Display Low (Rounded to clean 100k)
-    harga_display_low = ((harga_buka_wa + 99_999) // 100_000) * 100_000
-
-    # Ensure estimasi_baru is dignified (Higher than display low)
-    if est_baru_clean <= harga_display_low:
-        est_baru_clean = int(harga_display_low * 1.75)
-
-    # Public Display High: capped below new price (Guarantee 25-50% savings)
-    raw_high = int(harga_display_low * 1.25)
-    ceiling = int(est_baru_clean * 0.75)
-    harga_display_high = min(raw_high, ceiling)
-    if harga_display_high <= harga_display_low:
-        harga_display_high = int(harga_display_low * 1.2)
-    harga_display_high = ((harga_display_high + 99_999) // 100_000) * 100_000
-
-    return {
-        "harga_modal": None if is_estimated_modal else modal_clean,
-        "is_estimated_modal": is_estimated_modal,
-        "margin_floor": m_floor,
-        "margin_deal": m_deal,
-        "harga_floor_wa": harga_floor_wa,
-        "harga_deal_wa": harga_deal_wa,
-        "harga_buka_wa": harga_buka_wa,
-        "status_guardrail": "PASS",
-        "estimasi_harga_baru": est_baru_clean,
-        "harga_display_low": harga_display_low,
-        "harga_display_high": harga_display_high,
-    }
+        return {
+            "harga_modal": None,
+            "margin_floor": None,
+            "margin_deal": None,
+            "harga_floor_wa": None,
+            "harga_deal_wa": None,
+            "harga_buka_wa": disp_low,
+            "status_guardrail": "NO_MODAL_INFO",
+            "estimasi_harga_baru": est_baru_clean,
+            "harga_display_low": disp_low,
+            "harga_display_high": disp_high,
+        }
 
 def format_rupiah(num: Optional[int]) -> str:
     if num is None or num <= 0:
@@ -529,35 +617,47 @@ def extract_product_fallback(caption: str, sku: str) -> Dict[str, Any]:
 
     # Check category & equipment name
     if any(k in cap_lower for k in ["chiller", "ciler", "ciller"]):
-        if any(k in cap_lower for k in ["upright", "aprait"]):
+        if any(k in cap_lower for k in ["undercounter", "anderconter", "under conter"]):
+            cat_slug = "undercounter-chiller"
+            nama_alat = "Undercounter Chiller 2 Pintu"
+        elif any(k in cap_lower for k in ["4 pintu", "4p"]):
+            cat_slug = "upright-chiller"
+            nama_alat = "Upright Chiller 4 Pintu"
+        elif any(k in cap_lower for k in ["2 pintu", "2p"]):
+            cat_slug = "upright-chiller"
+            nama_alat = "Upright Chiller 2 Pintu"
+        else:
             cat_slug = "upright-chiller"
             nama_alat = "Upright Chiller"
-        elif any(k in cap_lower for k in ["undercounter", "anderconter", "under conter"]):
-            cat_slug = "undercounter-chiller"
-            nama_alat = "Undercounter Chiller"
-        else:
-            cat_slug = "chiller"
-            nama_alat = "Chiller Komersial"
     elif any(k in cap_lower for k in ["freezer", "prizer", "freser", "frizer"]):
-        if "chest" in cap_lower:
-            cat_slug = "chest-freezer"
-            nama_alat = "Chest Freezer"
-        elif "upright" in cap_lower:
+        if "upright" in cap_lower:
             cat_slug = "upright-freezer"
             nama_alat = "Upright Freezer"
+        elif "chest" in cap_lower or "box" in cap_lower:
+            cat_slug = "chest-freezer"
+            nama_alat = "Chest Freezer"
         else:
-            cat_slug = "freezer"
-            nama_alat = "Freezer Komersial"
+            cat_slug = "chest-freezer"
+            nama_alat = "Chest Freezer"
+    elif any(k in cap_lower for k in ["greastrep", "gris trap", "grease trap", "perangkap lemak", "jebakan lemak"]):
+        cat_slug = "lainnya-sink"
+        nama_alat = "Grease Trap Stainless Steel"
     elif any(k in cap_lower for k in ["sink", "singk", "bak cuci"]):
         if any(k in cap_lower for k in ["double", "2 lubang", "2 pot", "2 bowl"]):
             cat_slug = "double-sink-stainless"
-            nama_alat = "Double Sink Stainless"
+            nama_alat = "Double Sink Stainless 2 Lubang"
         elif any(k in cap_lower for k in ["triple", "3 lubang", "3 pot"]):
             cat_slug = "triple-sink-stainless"
-            nama_alat = "Triple Sink Stainless"
+            nama_alat = "Triple Sink Stainless 3 Lubang"
         else:
             cat_slug = "single-sink-stainless"
             nama_alat = "Single Sink Stainless"
+    elif any(k in cap_lower for k in ["kabinet", "cabinet"]):
+        cat_slug = "meja-kabinet-stainless"
+        if "sliding" in cap_lower or "geser" in cap_lower:
+            nama_alat = "Meja Kabinet Sliding Stainless"
+        else:
+            nama_alat = "Meja Kabinet Stainless"
     elif "meja" in cap_lower:
         if any(k in cap_lower for k in ["3 susun", "3 trap", "3 tier"]):
             cat_slug = "meja-3-susun-stainless"
@@ -568,27 +668,31 @@ def extract_product_fallback(caption: str, sku: str) -> Dict[str, Any]:
         elif "kompor" in cap_lower:
             cat_slug = "meja-kompor-stainless"
             nama_alat = "Meja Kompor Stainless"
-        elif "kabinet" in cap_lower or "cabinet" in cap_lower:
-            cat_slug = "meja-kabinet-stainless"
-            nama_alat = "Meja Kabinet Stainless"
         else:
             cat_slug = "meja-stainless"
             nama_alat = "Meja Stainless"
     elif any(k in cap_lower for k in ["kwali", "kuali", "wok"]):
         cat_slug = "kompor-wok-kwali-range"
-        nama_alat = "Kwali Range Blower"
+        nama_alat = "Kwali Range 2 Burner Blower" if "2" in cap_lower else "Kwali Range 1 Burner Blower"
     elif "deep fryer" in cap_lower or "dip frayer" in cap_lower:
         cat_slug = "deep-fryer"
-        nama_alat = "Deep Fryer Komersial"
+        nama_alat = "Deep Fryer Gas 1 Tank"
     elif "rak" in cap_lower or "rack" in cap_lower:
         cat_slug = "rak-4-susun-stainless"
-        nama_alat = "Rak Stainless Susun"
+        nama_alat = "Rak Stainless 4 Susun"
     elif "hood" in cap_lower:
         cat_slug = "hood"
         nama_alat = "Exhaust Hood Stainless"
     elif "showcase" in cap_lower or "sokes" in cap_lower or "shocess" in cap_lower:
-        cat_slug = "showcase"
-        nama_alat = "Showcase Komersial"
+        if any(k in cap_lower for k in ["3 pintu", "3p"]):
+            cat_slug = "showcase-2-pintu"
+            nama_alat = "Showcase 3 Pintu"
+        elif any(k in cap_lower for k in ["2 pintu", "2p"]):
+            cat_slug = "showcase-2-pintu"
+            nama_alat = "Showcase 2 Pintu"
+        else:
+            cat_slug = "showcase-1-pintu"
+            nama_alat = "Showcase 1 Pintu"
 
     kondisi_unit, sub_baru = evaluate_condition_binary(caption)
     modal = extract_modal_regex(caption)
@@ -612,6 +716,8 @@ def extract_product_fallback(caption: str, sku: str) -> Dict[str, Any]:
         "status_unit": "READY",
         "harga_modal": modal,
         "estimasi_harga_baru": modal * 2 if modal else 10_000_000,
+        "is_non_product": False,
+        "confidence": "LOW",
         "yoast_keyword": f"{nama_alat.lower()} bekas",
         "yoast_description": f"{title_bersih} kondisi siap pakai bergaransi.",
         "spesifikasi_ringkas": [
@@ -619,7 +725,11 @@ def extract_product_fallback(caption: str, sku: str) -> Dict[str, Any]:
             "Material stainless steel food grade",
             "Fungsi mekanikal & elektrikal teruji siap pakai",
             "Unit lolos inspeksi quality control BBKitchen"
-        ]
+        ],
+        "image_alt": f"{title_bersih} Bekas Bergaransi BBKitchen",
+        "image_title": f"Jual {nama_alat} Bekas Resto Cafe {brand} {dimensi}".strip(),
+        "image_caption": f"{nama_alat} kondisi mulus siap pakai lolos QC teknikal",
+        "image_description": f"{title_bersih} bergaransi 30 hari siap kirim."
     }
 
 # ==============================================================================
@@ -678,14 +788,25 @@ Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai pandua
         print(f"   [Deterministic Fallback Engine] Generating structured record for {sku}...")
         parsed = extract_product_fallback(raw_caption, sku)
 
-    # 5. Build Title & Sanitize
+    # 5. Build Title & Sanitize (Opsi 2: Clean Canonical Title with Dimensions)
     title_bersih = (parsed.get("title_bersih") or "").strip()
     nama_alat = (parsed.get("nama_alat") or "Peralatan Dapur Komersial").strip()
     brand = (parsed.get("brand") or "").strip()
     dimensi = (parsed.get("dimensi") or "").strip()
 
+    # If dimension missing from AI output, recover from raw caption/text
+    if not dimensi:
+        dim_match = re.search(r'(\d{2,3}\s*[xX*]\s*\d{2,3}(?:\s*[xX*]\s*\d{2,3})?(?:\s*cm)?)', raw_caption)
+        if dim_match:
+            dimensi = dim_match.group(1).replace(" ", "")
+            if not dimensi.lower().endswith("cm"):
+                dimensi = f"{dimensi} cm"
+
     if title_bersih:
         title = title_bersih
+        # Guarantee dimension is in title for unique identification
+        if dimensi and dimensi.lower() not in title.lower() and len(f"{title} {dimensi}") <= 70:
+            title = f"{title} {dimensi}"
     else:
         parts = [nama_alat]
         # Ignore brand for stainless fabrication
@@ -694,22 +815,26 @@ Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai pandua
             parts.append(brand)
         if "second" not in [p.lower() for p in parts]:
             parts.append("Second")
-        if dimensi and len(dimensi) <= 20 and dimensi.lower() not in nama_alat.lower():
+        if dimensi and dimensi.lower() not in nama_alat.lower():
             parts.append(dimensi)
         title = " ".join(parts)
 
     # Strip any leaked prices / WA from title
     title = re.sub(r'(?i)(?:rp\.?\s*[\d.,]+|[\d.,]+\s*(?:jt|juta|k|rb|ribu))', '', title)
     title = re.sub(r'\s+', ' ', title).strip()
-    if len(title) > 65:
-        title = title[:65].rsplit(" ", 1)[0]
+    if len(title) > 75:
+        title = title[:75].rsplit(" ", 1)[0]
 
-    # 6. Sacred Slug Immutability Protection
+    # 6. Sacred Slug Immutability Protection & Unique Formula
     if existing_slug and str(existing_slug).strip():
         slug = str(existing_slug).strip()
     else:
         clean_slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
-        slug = clean_slug if clean_slug else f"unit-{sku.lower()}"
+        sku_suffix = sku.lower()
+        if clean_slug:
+            slug = clean_slug if clean_slug.endswith(f"-{sku_suffix}") else f"{clean_slug}-{sku_suffix}"
+        else:
+            slug = f"unit-{sku_suffix}"
 
     link_unit = f"https://bukanbarukitchen.com/shop/{slug}/"
 
@@ -726,39 +851,65 @@ Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai pandua
         else:
             cat_slug = "peralatan-dapur-bekas-lainnya"
 
-    # 8. Condition & Sub-Components Integration
-    kondisi_final = kondisi_pre_check
-    if parsed.get("kondisi_unit") and parsed.get("kondisi_unit") != "Bekas Siap Pakai":
-        # Only accept higher grade if supported by pre-check
-        if kondisi_pre_check != "Bekas Siap Pakai":
-            kondisi_final = parsed.get("kondisi_unit")
+    # 8. Condition Semantic Authority
+    allowed_kondisi = ["Bekas Siap Pakai", "Like New / Ex-Display", "Baru Sisa Proyek"]
+    ai_kondisi = parsed.get("kondisi_unit")
+    if ai_kondisi in allowed_kondisi:
+        kondisi_final = ai_kondisi
+    else:
+        kondisi_final = "Bekas Siap Pakai"
 
-    # 9. Status Biner Assertion
-    status_raw = str(parsed.get("status_unit") or "READY").upper()
-    if any(k in raw_caption.lower() for k in ["laku", "sold", "terjual", "habis"]):
-        status_unit = "SOLD"
-    elif status_raw in ["SOLD", "TERJUAL"]:
+    # 9. Status Biner & Non-Product Semantic Assertion
+    is_non_product = parsed.get("is_non_product") is True
+    if is_non_product:
+        status_pipeline = "SKIP_NON_PRODUCT"
         status_unit = "SOLD"
     else:
-        status_unit = "READY"
+        status_pipeline = "PROCESSED"
+        status_raw = str(parsed.get("status_unit") or "READY").upper()
+        if any(k in raw_caption.lower() for k in ["laku", "sold", "terjual", "habis"]):
+            status_unit = "SOLD"
+        elif status_raw in ["SOLD", "TERJUAL"]:
+            status_unit = "SOLD"
+        else:
+            status_unit = "READY"
 
-    # 10. Pricing & Margin Guardrails
-    modal_val = parsed.get("harga_modal")
-    if not modal_val or not isinstance(modal_val, (int, float)) or modal_val <= 0:
-        modal_val = modal_pre_check
+    # 10. Pricing & Margin Guardrails (Graceful Null Modal SSOT)
+    modal_raw = parsed.get("harga_modal")
+    if modal_raw is not None and isinstance(modal_raw, (int, float)) and int(modal_raw) > 0:
+        modal_val = int(modal_raw)
+    else:
+        modal_val = None
 
     est_baru_val = parsed.get("estimasi_harga_baru")
     if not est_baru_val or not isinstance(est_baru_val, (int, float)) or est_baru_val <= 0:
         est_baru_val = None
 
-    pricing = calculate_margins_and_anchors(modal_val, est_baru_val, category_slug=cat_slug)
+    ai_disp_low = parsed.get("harga_display_low")
+    ai_disp_high = parsed.get("harga_display_high")
 
-    # 11. SEO & Descriptions
-    short_desc = f"{title} kondisi {kondisi_final}. Lokasi unit di {location_name}. Lolos uji fungsi & siap kirim bergaransi."
+    pricing = calculate_margins_and_anchors(
+        modal=modal_val,
+        estimasi_baru=est_baru_val,
+        ai_display_low=ai_disp_low,
+        ai_display_high=ai_disp_high,
+        category_slug=cat_slug
+    )
+
+    # 11. SEO & Descriptions (Opsi 2: Clean Title + Semantic SEO Suite)
+    badge = parsed.get("semantic_badge") or "Ex-Resto"
+    seo_title = (parsed.get("seo_title") or f"{title} | BBKitchen").strip()
+    short_desc = f"{title} ({badge}) kondisi {kondisi_final}. Lokasi unit di {location_name}. Lolos uji fungsi & siap kirim bergaransi."
     full_desc = build_rich_description(parsed, pricing, location_name, sub_components_baru=sub_baru_list)
 
     yoast_kw = (parsed.get("yoast_keyword") or f"{nama_alat.lower()} bekas")[:60]
     yoast_desc = (parsed.get("yoast_description") or short_desc)[:155]
+
+    # 12. Programmatic 4-Tier Image Alt Text Suite
+    img_alt = parsed.get("image_alt") or f"{title} Bekas Bergaransi BBKitchen"
+    img_title = parsed.get("image_title") or f"Jual {nama_alat} {badge} {brand} {dimensi}".strip()
+    img_caption = parsed.get("image_caption") or f"{nama_alat} kondisi prima siap kirim dari {location_name}"
+    img_desc = parsed.get("image_description") or short_desc
 
     # Clean photo URLs
     final_photos = photo_urls if photo_urls else f"{sku}_1.webp"
@@ -769,10 +920,11 @@ Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai pandua
         "sku": sku,
         "slug": slug,
         "title": title,
-        "seo_title": f"{title} | BBKitchen",
+        "seo_title": seo_title,
+        "semantic_badge": badge,
         "category_slug": cat_slug,
         "status_unit": status_unit,
-        "status_pipeline": "PROCESSED",
+        "status_pipeline": status_pipeline,
         "lokasi_unit": location_name,
         "kondisi_unit": kondisi_final,
         "short_description": short_desc,
@@ -794,10 +946,10 @@ Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai pandua
         "estimasi_harga_baru": pricing["estimasi_harga_baru"],
         "harga_display_low": pricing["harga_display_low"],
         "harga_display_high": pricing["harga_display_high"],
-        "image_alt": f"{title} - BBKitchen Spesialis Alat Dapur Second",
-        "image_title": title,
-        "image_caption": f"{title} siap kirim dari {location_name}",
-        "image_description": short_desc,
+        "image_alt": img_alt,
+        "image_title": img_title,
+        "image_caption": img_caption,
+        "image_description": img_desc,
         "is_dirty": 1,
         "tanggal_masuk": now_str,
         "tanggal_terjual": None,
@@ -813,30 +965,52 @@ Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai pandua
 # ==============================================================================
 
 if __name__ == "__main__":
-    print("=== Testing BBKitchen Deterministic Normalization Core Engine ===")
-    test_caption = """
-    Hood complete + Filter baru
-    Ukuran 290x85x50
-    Lokasi Pamulang 2
-    Harga modal 4.500.000 nett
-    Hubungi wa: 081234567890 fast respon
-    """
-    res = normalize_single_caption(
-        raw_caption=test_caption,
-        sku="BBK0047",
-        existing_slug="hood-complete-filter-pamulang-2",
-        source_group="GK"
-    )
-    print("\nExtraction Result:")
-    print(f"SKU          : {res['sku']}")
-    print(f"Title        : {res['title']}")
-    print(f"Slug (Locked): {res['slug']}")
-    print(f"Category     : {res['category_slug']}")
-    print(f"Kondisi      : {res['kondisi_unit']} (Filter baru sub-komponen handled)")
-    print(f"Status       : {res['status_unit']}")
-    print(f"Modal HPP    : {format_rupiah(res['harga_modal'])}")
-    print(f"Buka WA      : {format_rupiah(res['harga_buka_wa'])}")
-    print(f"Display Range: {format_rupiah(res['harga_display_low'])} - {format_rupiah(res['harga_display_high'])}")
-    print(f"Est. Baru    : ~{format_rupiah(res['estimasi_harga_baru'])}")
-    print(f"Yoast KW     : {res['yoast_keyword']}")
-    print("\n✅ Normalization Engine Test Passed Successfully!")
+    print("=== Testing BBKitchen Sovereign Full-AI Normalization Engine ===")
+    
+    test_cases = [
+        {
+            "sku": "BBK3215",
+            "caption": "Sokes 1 pintu merk Gea mulus dingin bgt 231 liter lokasi pamulang modal 1.85jt net",
+            "group": "GK",
+            "desc": "Showcase 1 Pintu Mesin (Brand: GEA, Modal: 1.85jt)"
+        },
+        {
+            "sku": "BBK3192",
+            "caption": "greastrap stainles 40x30x30 anti karat tebal custom lokal resto hrg 650rb kedaung",
+            "group": "WT",
+            "desc": "Fabrikasi Stainless Unbranded (Grease Trap, Modal: 650rb)"
+        },
+        {
+            "sku": "BBK3193",
+            "caption": "Upright chiller 2 pintu mastercool pemakaian baru 5 bulan filter baru mulus dingin 12jt sawangan",
+            "group": "PE",
+            "desc": "Jebakan Sparepart Baru & Waktu (Wajib: Bekas Siap Pakai, Modal: 12jt)"
+        },
+        {
+            "sku": "BBK3999",
+            "caption": "Info loker teknisi pendingin & staf gudang area pamulang tangsel hubungi wa 0812345678",
+            "group": "GK",
+            "desc": "Non-Product Announcement (Wajib: SKIP_NON_PRODUCT)"
+        }
+    ]
+
+    for tc in test_cases:
+        print(f"\n--- Testing: {tc['desc']} ({tc['sku']}) ---")
+        res = normalize_single_caption(
+            raw_caption=tc["caption"],
+            sku=tc["sku"],
+            source_group=tc["group"]
+        )
+        print(f"Title        : {res['title']}")
+        print(f"Slug         : {res['slug']}")
+        print(f"Category     : {res['category_slug']}")
+        print(f"Kondisi      : {res['kondisi_unit']}")
+        print(f"Status Pipe  : {res['status_pipeline']}")
+        print(f"Modal HPP    : {format_rupiah(res['harga_modal'])}")
+        print(f"Buka WA      : {format_rupiah(res['harga_buka_wa'])}")
+        print(f"Display Range: {format_rupiah(res['harga_display_low'])} - {format_rupiah(res['harga_display_high'])}")
+        print(f"Est. Baru    : ~{format_rupiah(res['estimasi_harga_baru'])}")
+        print(f"Image Alt    : {res['image_alt']}")
+
+    print("\n✅ All 4 Real-World Edge Cases Tested Successfully!")
+

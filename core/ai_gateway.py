@@ -190,18 +190,18 @@ class AIGateway:
     def generate_json(self, prompt: str, system_prompt: str = None) -> dict:
         """
         Executes prompt through the strict 4-tier provider cascade:
-        1. OpenAI (gpt-4o-mini)
-        2. Google Gemini (gemini-2.5-flash / gemini-1.5-flash)
-        3. Groq Cloud (llama-3.3-70b-versatile / openai/gpt-oss-120b)
-        4. DeepSeek AI (deepseek-chat)
+        1. DeepSeek AI (deepseek-chat) [PRIMARY TIER 1 - Ultra-Fast & Reliable]
+        2. Google Gemini (gemini-3.6-flash / gemini-flash-latest)
+        3. Groq Cloud (openai/gpt-oss-120b / qwen3.8-27b)
+        4. OpenAI (gpt-4o-mini)
         """
         providers = [
-            ("1. OpenAI (gpt-4o-mini)", lambda: self._call_openai(prompt, system_prompt, "gpt-4o-mini")),
+            ("1. DeepSeek AI (deepseek-chat)", lambda: self._call_deepseek(prompt, system_prompt, "deepseek-chat")),
             ("2. Google AI Studio (gemini-3.6-flash)", lambda: self._call_gemini(prompt, system_prompt, "gemini-3.6-flash")),
             ("2b. Google AI Studio (gemini-flash-latest)", lambda: self._call_gemini(prompt, system_prompt, "gemini-flash-latest")),
             ("3. Groq Cloud (openai/gpt-oss-120b)", lambda: self._call_groq(prompt, system_prompt, "openai/gpt-oss-120b")),
             ("3b. Groq Cloud (qwen3.8-27b)", lambda: self._call_groq(prompt, system_prompt, "qwen/qwen3.8-27b")),
-            ("4. DeepSeek AI (deepseek-chat)", lambda: self._call_deepseek(prompt, system_prompt, "deepseek-chat")),
+            ("4. OpenAI (gpt-4o-mini)", lambda: self._call_openai(prompt, system_prompt, "gpt-4o-mini")),
         ]
 
         last_error = None
