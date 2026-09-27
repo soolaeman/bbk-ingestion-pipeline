@@ -386,54 +386,79 @@ def calculate_margins_and_anchors(
     estimasi_baru: Optional[int] = None,
     ai_display_low: Optional[int] = None,
     ai_display_high: Optional[int] = None,
-    category_slug: str = ""
+    category_slug: str = "",
+    title: str = ""
 ) -> Dict[str, Any]:
     """
-    Audit Guardrail Murni & 5-Tier Empirical Pricing Matrix SSOT.
+    Audit Guardrail Murni & Segmented 5-Tier Empirical Pricing Matrix SSOT.
     
     Prinsip Sakral:
-    1. 5-Tier Capital Brackets (Micro, Small Stainless, Small Mesin, Medium, Large, Industrial).
+    1. Segmented Warranty Reserve Matrix:
+       - Kompor / Elektronik / Mesin Pendingin: Garansi 14 Hari Servis (+10% s/d +15% margin buffer).
+       - Fabrikasi Stainless Pasif (Meja, Sink, Rak, Hood): Garansi QC Serah Terima.
     2. Jamin 3-Tier WA Negotiation Space (Floor WA < Deal WA < Buka WA).
     3. Display Web Low = Buka WA (Bebas bocor modal, buyer dapat diskon saat chat WA).
     4. Display Web High = Buka WA + 20% (capped di 75% Estimasi Harga Baru).
-    5. Estimasi Baru SSOT = 2.0x - 2.4x modal atau hasil riset faktual AI.
+    5. Estimasi Baru SSOT = 2.0x - 2.5x modal atau hasil riset faktual AI.
     """
-    cat_lower = (category_slug or "").lower()
-    is_stainless = any(k in cat_lower for k in ['meja', 'rak', 'sink', 'troli', 'trolley', 'cabinet', 'stainless', 'pantry', 'grease', 'hood'])
+    cat_lower = f"{category_slug} {title}".lower()
+    machinery_keywords = [
+        'kompor', 'burner', 'stockpot', 'kwali', 'chiller', 'freezer',
+        'refrigerator', 'showcase', 'ice', 'oven', 'fryer', 'blower',
+        'exhaust', 'griddle', 'steamer', 'mixer', 'blender', 'warmer',
+        'salamander', 'kebab', 'proofer', 'dishwasher', 'mesin'
+    ]
+    is_machinery = any(k in cat_lower for k in machinery_keywords)
+    garansi = "14 Hari Servis" if is_machinery else "QC Serah Terima"
 
     if modal is not None and modal > 0:
         modal_clean = int(modal)
 
-        # 1. Tentukan Margin Ratios & Multiplier berdasarkan Bracket Modal
-        if modal_clean < 1_500_000:
-            # Micro (<1.5jt): Rak bumbu, sink 1 bowl, grease trap kecil
-            m_floor, m_deal, m_buka = 0.25, 0.40, 0.55
-            ratio_est_baru = 2.2
-            round_unit = 50_000
-        elif modal_clean <= 3_500_000:
-            # Small (1.5jt - 3.5jt): Jantung Katalog BBKitchen (47.2%)
-            if is_stainless:
+        # 1. Tentukan Margin Ratios & Multiplier berdasarkan Segment & Bracket Modal
+        if is_machinery:
+            # Segment Mesin / Kompor / Pendingin (Buffer Garansi 14 Hari Servis)
+            if modal_clean < 1_500_000:
+                m_floor, m_deal, m_buka = 0.35, 0.50, 0.70
+                ratio_est_baru = 2.4
+                round_unit = 50_000
+            elif modal_clean <= 3_500_000:
+                m_floor, m_deal, m_buka = 0.30, 0.45, 0.60
+                ratio_est_baru = 2.5
+                round_unit = 50_000
+            elif modal_clean <= 7_500_000:
+                m_floor, m_deal, m_buka = 0.25, 0.38, 0.50
+                ratio_est_baru = 2.4
+                round_unit = 100_000
+            elif modal_clean <= 15_000_000:
+                m_floor, m_deal, m_buka = 0.20, 0.30, 0.40
+                ratio_est_baru = 2.2
+                round_unit = 100_000
+            else:
+                m_floor, m_deal, m_buka = 0.15, 0.22, 0.30
+                ratio_est_baru = 2.0
+                round_unit = 250_000
+        else:
+            # Segment Fabrikasi Stainless Pasif (QC Serah Terima)
+            if modal_clean < 1_500_000:
+                m_floor, m_deal, m_buka = 0.25, 0.40, 0.55
+                ratio_est_baru = 2.2
+                round_unit = 50_000
+            elif modal_clean <= 3_500_000:
                 m_floor, m_deal, m_buka = 0.20, 0.30, 0.42
                 ratio_est_baru = 2.2
+                round_unit = 50_000
+            elif modal_clean <= 7_500_000:
+                m_floor, m_deal, m_buka = 0.18, 0.28, 0.38
+                ratio_est_baru = 2.3
+                round_unit = 100_000
+            elif modal_clean <= 15_000_000:
+                m_floor, m_deal, m_buka = 0.15, 0.22, 0.30
+                ratio_est_baru = 2.1
+                round_unit = 100_000
             else:
-                m_floor, m_deal, m_buka = 0.20, 0.35, 0.48
-                ratio_est_baru = 2.4
-            round_unit = 50_000
-        elif modal_clean <= 7_500_000:
-            # Medium (3.5jt - 7.5jt): Undercounter, Kwali 2 tungku, Fryer komersial
-            m_floor, m_deal, m_buka = 0.18, 0.28, 0.38
-            ratio_est_baru = 2.3
-            round_unit = 100_000
-        elif modal_clean <= 15_000_000:
-            # Large (7.5jt - 15jt): Upright 4 pintu, Spiral mixer 20L
-            m_floor, m_deal, m_buka = 0.15, 0.22, 0.30
-            ratio_est_baru = 2.1
-            round_unit = 100_000
-        else:
-            # Industrial (>15jt): Combi oven, Walk-in chiller, Rotary oven
-            m_floor, m_deal, m_buka = 0.12, 0.18, 0.25
-            ratio_est_baru = 2.0
-            round_unit = 250_000
+                m_floor, m_deal, m_buka = 0.12, 0.18, 0.25
+                ratio_est_baru = 2.0
+                round_unit = 250_000
 
         # 2. Hitung 3 Tingkat Harga Negosiasi Sales WA
         harga_floor_wa = ((int(modal_clean * (1 + m_floor)) + (round_unit - 1)) // round_unit) * round_unit
@@ -475,6 +500,7 @@ def calculate_margins_and_anchors(
             "estimasi_harga_baru": est_baru_clean,
             "harga_display_low": final_disp_low,
             "harga_display_high": final_disp_high,
+            "garansi": garansi
         }
     else:
         # Graceful Null Pricing (No fake modal fabrication)
@@ -503,6 +529,7 @@ def calculate_margins_and_anchors(
             "estimasi_harga_baru": est_baru_clean,
             "harga_display_low": disp_low,
             "harga_display_high": disp_high,
+            "garansi": garansi
         }
 
 def format_rupiah(num: Optional[int]) -> str:
@@ -511,13 +538,11 @@ def format_rupiah(num: Optional[int]) -> str:
     return f"Rp {num:,}".replace(",", ".")
 
 def build_rich_description(parsed: Dict[str, Any], pricing: Dict[str, Any], location_name: str, sub_components_baru: List[str] = None) -> str:
-    """Generates sanitized, high-conversion HTML description."""
+    """Generates sanitized, high-conversion HTML description (pure clean specs without duplicate box)."""
     nama = parsed.get("nama_alat", "Peralatan Dapur Komersial")
     brand = parsed.get("brand", "")
     specs = parsed.get("spesifikasi_ringkas", [])
-    est_baru = pricing["estimasi_harga_baru"]
-    disp_low = pricing["harga_display_low"]
-    disp_high = pricing["harga_display_high"]
+    garansi = pricing.get("garansi", "QC Serah Terima")
 
     spec_items = []
     if sub_components_baru:
@@ -539,9 +564,7 @@ def build_rich_description(parsed: Dict[str, Any], pricing: Dict[str, Any], loca
     spec_html = "\n    ".join(spec_items)
     brand_label = f"({brand})" if brand else "(Commercial Grade)"
     kondisi_label = parsed.get("kondisi_unit", "Bekas Siap Pakai")
-
-    hemat_min_pct = round((1 - (disp_high / est_baru)) * 100) if est_baru > 0 else 30
-    hemat_max_pct = round((1 - (disp_low / est_baru)) * 100) if est_baru > 0 else 50
+    garansi_label = "Garansi Servis 14 Hari BBKitchen" if "14" in garansi else "QC Serah Terima Food Grade"
 
     html = f"""<div class="bbk-product-description">
   <h3>Spesifikasi & Keunggulan Unit</h3>
@@ -550,17 +573,8 @@ def build_rich_description(parsed: Dict[str, Any], pricing: Dict[str, Any], loca
     {spec_html}
     <li><strong>Lokasi Unit:</strong> {location_name}</li>
     <li><strong>Kondisi:</strong> {kondisi_label}</li>
+    <li><strong>Jaminan & Garansi:</strong> {garansi_label}</li>
   </ul>
-
-  <div class="panduan-anggaran" style="margin-top: 24px; padding: 16px 20px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
-    <h4 style="margin-top: 0; color: #0f172a; font-weight: 800;">Panduan Anggaran & Estimasi Nilai Pasar</h4>
-    <ul style="margin-bottom: 8px;">
-      <li><strong>Estimasi Harga Unit Baru (Distributor):</strong> ~{format_rupiah(est_baru)}</li>
-      <li><strong>Rentang Penawaran Unit Second BBKitchen:</strong> {format_rupiah(disp_low)} – {format_rupiah(disp_high)}</li>
-      <li><strong>Potensi Efisiensi Investasi:</strong> Hemat {hemat_min_pct}% s/d {hemat_max_pct}% dari harga baru</li>
-    </ul>
-    <p style="font-size: 12px; color: #64748b; margin-bottom: 0;"><em>*Catatan: Penawaran final bergantung pada grade kemulusan fisik, riwayat operasional, kelengkapan aksesoris, dan paket garansi servis. Hubungi konsultan kami untuk cek unit & penawaran terbaik.</em></p>
-  </div>
 </div>"""
     return html
 
@@ -891,7 +905,8 @@ Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai pandua
         estimasi_baru=est_baru_val,
         ai_display_low=ai_disp_low,
         ai_display_high=ai_disp_high,
-        category_slug=cat_slug
+        category_slug=cat_slug,
+        title=title
     )
 
     # 11. SEO & Descriptions (Opsi 2: Clean Title + Semantic SEO Suite)
@@ -921,6 +936,7 @@ Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai pandua
         "seo_title": seo_title,
         "semantic_badge": badge,
         "category_slug": cat_slug,
+        "garansi": pricing.get("garansi", "QC Serah Terima"),
         "status_unit": status_unit,
         "status_pipeline": status_pipeline,
         "lokasi_unit": location_name,
