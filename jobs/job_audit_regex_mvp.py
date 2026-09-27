@@ -379,7 +379,7 @@ def parse_regex_mvp(caption: str, sku: str, existing_slug: str = None, source_gr
         "brand": brand,
         "dimensi": dimensi,
         "category_slug": cat_slug,
-        "kondisi_unit": "Baru" if is_baru_unit else "Bekas Siap Pakai",
+        "kondisi_unit": "Baru" if is_baru_unit else "Bekas",
         "kondisi_tag": kondisi_label,
         "sub_komponen_baru": sub_baru,
         "status_unit": "SOLD" if any(k in cap_lower for k in ["sold", "laku", "terjual", "habis"]) else "READY",

@@ -131,7 +131,7 @@ ATURAN BISNIS MUTLAK:
    - "yoast_keyword": "[nama alat] bekas" (contoh: "upright chiller mastercool bekas")
    - "yoast_description": Deskripsi meta menarik max 150 karakter.
    - "spesifikasi_ringkas": Array berisi 4-6 poin spesifikasi teknis penting (dimensi, watt/daya, voltase, kapasitas, kelengkapan).
-   - "kondisi_unit": "Bekas Siap Pakai" atau "Like New / Ex-Display" atau "Baru Sisa Proyek"
+   - "kondisi_unit": "Bekas" atau "Baru"
    - "status_unit": "READY" (Kecuali ada kata LAKU/SOLD/TERJUAL -> "SOLD")
 
 KEMBALIKAN STRICTLY JSON SESUAI STRUKTUR INI:
@@ -249,7 +249,7 @@ def build_full_description(parsed: dict, pricing: dict, location_name: str) -> s
   <ul>
     {spec_items}
     <li><strong>Lokasi Unit:</strong> {location_name}</li>
-    <li><strong>Kondisi:</strong> {parsed.get('kondisi_unit', 'Bekas Siap Pakai')}</li>
+    <li><strong>Kondisi:</strong> {parsed.get('kondisi_unit', 'Bekas')}</li>
   </ul>
 
   <div class="panduan-anggaran" style="margin-top: 24px; padding: 16px 20px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
@@ -353,7 +353,7 @@ def extract_product_fallback(caption: str, sku: str) -> dict:
         "brand": brand,
         "dimensi": dimensi,
         "category_slug": cat_slug,
-        "kondisi_unit": "Bekas Siap Pakai",
+        "kondisi_unit": "Bekas",
         "status_unit": "READY",
         "harga_modal": modal if modal > 0 else None,
         "estimasi_harga_baru": modal * 2 if modal > 0 else 10_000_000,

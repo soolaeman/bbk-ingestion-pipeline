@@ -319,9 +319,8 @@ Tugas Anda: Menganalisis caption mentah Telegram dari gudang mitra secara semant
      * Jika TIDAK ADA angka harga/modal yang jelas di caption -> WAJIB isi "harga_modal": null. Dilarang menebak angka modal jika tidak tertulis!
 
 4. TUGAS 4 - EVALUASI KONDISI SEJATI & ANTI-JEBAKAN ("kondisi_unit"):
-   - "Bekas Siap Pakai" (Default): Unit bekas restoran/cafe. Jika ada info sparepart baru (contoh: "filter baru", "burner baru", "basket baru", "karet pintu baru") atau durasi pemakaian ("pemakaian baru 4 bulan"), unit utama TETAP "Bekas Siap Pakai".
-   - "Like New / Ex-Display": Unit bekas sangat mulus, eks display pameran, atau pemakaian di bawah 1 bulan dengan fisik 95%+.
-   - "Baru Sisa Proyek": Unit 100% baru, BNIB, belum pernah dipakai sama sekali (bukan bekas).
+   - "Bekas" (Default): Unit bekas restoran/cafe. Jika ada info sparepart baru (contoh: "filter baru", "burner baru", "basket baru", "karet pintu baru") atau durasi pemakaian ("pemakaian baru 4 bulan"), unit utama TETAP "Bekas".
+   - "Baru": Unit 100% baru fisik, BNIB, sisa proyek/stok distributor yang belum pernah dipakai sama sekali.
 
 5. TUGAS 5 - RISET GROUNDING HARGA PASAR FAKTUAL:
    - "estimasi_harga_baru": Taksiran harga wajar unit BARU distributor resmi di Indonesia berdasarkan brand, kapasitas, daya watt, dan material SUS 304 (integer rupiah).
@@ -851,13 +850,12 @@ Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai pandua
         else:
             cat_slug = "peralatan-dapur-bekas-lainnya"
 
-    # 8. Condition Semantic Authority
-    allowed_kondisi = ["Bekas Siap Pakai", "Like New / Ex-Display", "Baru Sisa Proyek"]
-    ai_kondisi = parsed.get("kondisi_unit")
-    if ai_kondisi in allowed_kondisi:
-        kondisi_final = ai_kondisi
+    # 8. Condition Semantic Authority (Pure Binary: 'Baru' vs 'Bekas')
+    ai_kondisi = str(parsed.get("kondisi_unit") or "").strip().upper()
+    if "BARU" in ai_kondisi or "GRESS" in ai_kondisi or "BNIB" in ai_kondisi:
+        kondisi_final = "Baru"
     else:
-        kondisi_final = "Bekas Siap Pakai"
+        kondisi_final = "Bekas"
 
     # 9. Status Biner & Non-Product Semantic Assertion
     is_non_product = parsed.get("is_non_product") is True
