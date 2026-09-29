@@ -49,6 +49,14 @@ Examples:
     parser_sync.add_argument("--all", action="store_true", help="Sync all products")
     parser_sync.add_argument("--min-sku", type=str, default=None, help="Sync products from minimum SKU")
 
+    # Command: heal
+    parser_heal = subparsers.add_parser("heal", help="Heal and re-enrich legacy catalog with Holver.id/DeepSeek AI")
+    parser_heal.add_argument("--sku", type=str, default=None, help="Target specific SKU(s), comma-separated")
+    parser_heal.add_argument("--anomalies-only", action="store_true", help="Target only detected anomaly records")
+    parser_heal.add_argument("--limit", type=int, default=None, help="Limit number of items to heal")
+    parser_heal.add_argument("--dry-run", action="store_true", help="Dry run without writing to DB")
+    parser_heal.add_argument("--resume", action="store_true", help="Resume from last checkpoint")
+
     # Command: upload-r2
     parser_r2 = subparsers.add_parser("upload-r2", help="Upload WebP photos to Cloudflare R2 bucket")
     parser_r2.add_argument("--no-purge", action="store_true", help="Keep ephemeral buffer without purging")
@@ -89,6 +97,22 @@ Examples:
             sync_to_turso(min_sku=args.min_sku)
         else:
             sync_to_turso(only_dirty=True)
+
+    elif args.command == "heal":
+        print("=== [BULK HEALER] Healing Legacy Catalog with Holver.id/DeepSeek AI ===")
+        import subprocess
+        cmd = [sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "core", "enrich_holver_bulk.py")]
+        if args.sku:
+            cmd.extend(["--sku", args.sku])
+        if args.anomalies_only:
+            cmd.append("--anomalies-only")
+        if args.limit:
+            cmd.extend(["--limit", str(args.limit)])
+        if args.dry_run:
+            cmd.append("--dry-run")
+        if args.resume:
+            cmd.append("--resume")
+        subprocess.run(cmd)
 
     elif args.command == "upload-r2":
         print("=== [STEP 4/4] Uploading Master WebP Photos to Cloudflare R2 ===")

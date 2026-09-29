@@ -186,7 +186,11 @@ def parse_telegram_text(raw_text):
         return " ".join("".join(parts).split())
     return ""
 
-def group_raw_messages(src_code, time_window=15):
+def group_raw_messages(src_code):
+    """
+    Mengelompokkan pesan Telegram berbasis native msg.grouped_id (SSOT Rule #49).
+    Mencegah pencampuran foto antar postingan berbeda yang dikirim dalam waktu berdekatan.
+    """
     folder = EXPORT_ROOT / src_code
     path = folder / "result.json"
     if not path.exists():
@@ -197,22 +201,17 @@ def group_raw_messages(src_code, time_window=15):
 
     msgs = sorted([m for m in data.get("messages", []) if m.get("type") == "message" and m.get("photo")], key=lambda x: x.get("id", 0))
     grouped = {}
-    current_group = []
-    last_ts = None
-    group_index = 0
 
     for m in msgs:
-        ts = int(m.get("date_unixtime", 0))
-        if last_ts is None or abs(ts - last_ts) <= time_window:
-            current_group.append(m)
+        gid = m.get("grouped_id")
+        if gid:
+            key = f"album_{gid}"
         else:
-            grouped[f"time_album_{group_index}"] = current_group
-            group_index += 1
-            current_group = [m]
-        last_ts = ts
+            key = f"msg_{m.get('id')}"
 
-    if current_group:
-        grouped[f"time_album_{group_index}"] = current_group
+        if key not in grouped:
+            grouped[key] = []
+        grouped[key].append(m)
 
     chat_id = SOURCE_MAP.get(src_code, 0)
     clean_chat = str(chat_id).replace("-100", "").replace("-", "")

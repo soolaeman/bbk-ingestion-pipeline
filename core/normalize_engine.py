@@ -71,8 +71,8 @@ OFFICIAL_CATEGORY_SLUGS = set(CAT_SSOT.get("by_slug", {}).keys())
 
 # Fallback category mapping for common LLM deviations
 CATEGORY_SYNONYM_MAP = {
-    "undercounter-freezer": "freezer",
-    "undercounter_freezer": "freezer",
+    "undercounter-freezer": "lainnya-freezer",
+    "undercounter_freezer": "lainnya-freezer",
     "undercounter_chiller": "undercounter-chiller",
     "upright_chiller": "upright-chiller",
     "upright_freezer": "upright-freezer",
@@ -80,16 +80,46 @@ CATEGORY_SYNONYM_MAP = {
     "single_sink": "single-sink-stainless",
     "double_sink": "double-sink-stainless",
     "triple_sink": "triple-sink-stainless",
+    "sink_jumbo": "sink-jumbo-stainless",
     "meja_1_susun": "meja-1-susun-stainless",
     "meja_2_susun": "meja-2-susun-stainless",
     "meja_3_susun": "meja-3-susun-stainless",
+    "meja_kabinet": "meja-kabinet-stainless",
+    "meja_bumbu": "meja-bumbu-stainless",
+    "meja_kompor": "meja-kompor-stainless",
+    "rak_1_susun": "rak-1-susun-stainless",
+    "rak_2_susun": "rak-2-susun-stainless",
+    "rak_3_susun": "rak-3-susun-stainless",
     "rak_4_susun": "rak-4-susun-stainless",
+    "rak_5_susun": "rak-5-susun-stainless",
+    "rak_susun": "rak-4-susun-stainless",
     "kwali_range": "kompor-wok-kwali-range",
     "wok_range": "kompor-wok-kwali-range",
     "exhaust_hood": "hood",
-    "grease_trap": "lainnya-sink",
-    "greasetrap": "lainnya-sink",
+    "exhaust-hood": "hood",
+    "grease_trap": "grease-trap-stainless",
+    "greasetrap": "grease-trap-stainless",
     "gutter": "lainnya-sink",
+    "troli_bakery": "troli-bakery-stainless",
+    "trolley_bakery": "troli-bakery-stainless",
+    "troli-bakery": "troli-bakery-stainless",
+    "troli_service": "troli-service-stainless",
+    "trolley_service": "troli-service-stainless",
+    "troli_makanan": "troli-service-stainless",
+    "troli": "troli-service-stainless",
+    "trolley": "troli-service-stainless",
+    "mixer": "mixer-bakery",
+    "planetary_mixer": "mixer-bakery",
+    "spiral_mixer": "mixer-bakery",
+    "meat_slicer": "meat-processing-mesin",
+    "bone_saw": "meat-processing-mesin",
+    "meat_grinder": "meat-processing-mesin",
+    "giling_daging": "meat-processing-mesin",
+    "cup_sealer": "lainnya-food-processing",
+    "vacuum_sealer": "lainnya-food-processing",
+    "dough_divider": "lainnya-food-processing",
+    "dough_sheeter": "lainnya-food-processing",
+    "proofer": "lainnya-food-processing",
 }
 
 # ==============================================================================
@@ -160,7 +190,10 @@ def sanitize_raw_caption(caption: str) -> str:
     text = re.sub(r'https?://t\.me/\S+', '', text, flags=re.IGNORECASE)
     text = re.sub(r'@\w+', '', text)
     
-    # 3. Normalize whitespaces & emojis
+    # 3. Strip warehouse stock counts (e.g. Ready 3 unit, sisa 1 unit, ambil 2 unit)
+    text = re.sub(r'(?i)\b(?:ready\s+\d+\s*unit|sisa\s+\d+\s*unit|stok\s+\d+\s*unit|\d+\s*unit\s*(?:sold|ready)|ambil\s+\d+\s*unit)\b', '', text)
+
+    # 4. Normalize whitespaces & emojis
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
@@ -262,6 +295,12 @@ SLANG_DICTIONARY = {
     "kukusan": "Dimsum Steamer",
     "tepanyaki": "Teppanyaki",
     "tepangrild": "Teppanyaki Grill",
+    "ice bean": "Ice Bin",
+    "ice been": "Ice Bin",
+    "preparetion": "Preparasi",
+    "upershelf": "+ Uppershelf",
+    "uper shelf": "+ Uppershelf",
+    "uppershelf": "+ Uppershelf",
 }
 
 KNOWN_COMMERCIAL_BRANDS = [
@@ -303,9 +342,9 @@ Tugas Anda: Menganalisis caption mentah Telegram dari gudang mitra secara semant
      * Jargon Teknis BUKAN Brand (Brand: null): Low Pressure, High Pressure, Heavy Duty, Table Top, Custom 201/304, Stainless, Blower, 1 Tungku, Sliding Door, Kaki Roda.
      * Fabrikasi Stainless (Meja, Sink, Rak, Hood, Wallshelf, Kabinet, Grease Trap) 99% custom bengkel -> Brand: null.
 
-2. TUGAS 2 - BADGE SEMANTIK KONTEKSTUAL ("semantic_badge"):
-   - Pilih 1 badge persona asal unit untuk ditampilkan sebagai stiker elegan di foto katalog:
-     * "Ex-Resto" (Peralatan dapur resto, kompor kwali, sink, meja potong)
+2. TUGAS 2 - KONTEKS SEMANTIK & PENGAYAAN SINONIM SEO ("semantic_badge"):
+   - Identifikasi arketipe asal/konteks unit murni untuk memperkaya variasi sinonim (LSI Keywords) di deskripsi, alt text, dan Schema JSON-LD Google (BUKAN stiker visual di UI):
+     * "Ex-Resto" (Peralatan dapur restoran, kompor kwali, sink potong, meja stainless)
      * "Ex-Cafe" (Chiller display, undercounter, blender, ice bin, cake showcase)
      * "Ex-Bakery" (Troli loyang roti, deck oven, proofer, planetary mixer)
      * "Ex-Hotel" (Combi oven, banquet cart, heavy duty dishwasher)
@@ -319,33 +358,42 @@ Tugas Anda: Menganalisis caption mentah Telegram dari gudang mitra secara semant
      * Jika TIDAK ADA angka harga/modal yang jelas di caption -> WAJIB isi "harga_modal": null. Dilarang menebak angka modal jika tidak tertulis!
 
 4. TUGAS 4 - EVALUASI KONDISI SEJATI & ANTI-JEBAKAN ("kondisi_unit"):
-   - "Bekas" (Default): Unit bekas restoran/cafe. Jika ada info sparepart baru (contoh: "filter baru", "burner baru", "basket baru", "karet pintu baru") atau durasi pemakaian ("pemakaian baru 4 bulan"), unit utama TETAP "Bekas".
-   - "Baru": Unit 100% baru fisik, BNIB, sisa proyek/stok distributor yang belum pernah dipakai sama sekali.
+   - MURNI BINER HANYA 2 PILIHAN: "Bekas" ATAU "Baru".
+   - "Bekas" (Default): Seluruh unit operasional second resto/cafe/bakery. JIKA ada info sparepart baru (contoh: "filter baru", "burner baru", "kran baru", "karet pintu baru") atau durasi pemakaian ("pemakaian baru 4 bulan", "like new"), unit utama TETAP WAJIB "Bekas".
+   - "Baru": Hanya jika unit fisik 100% baru, BNIB, sisa proyek/stok distributor yang belum pernah dipakai sama sekali.
 
 5. TUGAS 5 - RISET GROUNDING HARGA PASAR FAKTUAL:
    - "estimasi_harga_baru": Taksiran harga wajar unit BARU distributor resmi di Indonesia berdasarkan brand, kapasitas, daya watt, dan material SUS 304 (integer rupiah).
    - "harga_display_low": Rekomendasi harga penawaran second buka wajar di pasar (angka bulat kelipatan 100rb, misal ~40%-55% dari harga baru).
    - "harga_display_high": Batas atas rentang penawaran second di pasar (angka bulat kelipatan 100rb, misal ~60%-75% dari harga baru).
 
-6. TUGAS 6 - PEMILIHAN 58 KATEGORI SSOT & INTENT FILTER:
-   - Pilih 1 slug resmi kanonikal dari master taksonomi:
-     * CHILLER: undercounter-chiller, upright-chiller, chiller, lainnya-chiller
-     * FREEZER: chest-freezer, upright-freezer, freezer, lainnya-freezer
-     * ICE SYSTEM: ice-bin, ice-maker, ice-system, lainnya-ice-system
-     * MEJA STAINLESS: meja-1-susun-stainless, meja-2-susun-stainless, meja-3-susun-stainless, meja-bumbu-stainless, meja-kabinet-stainless, meja-kompor-stainless, meja-stainless, lainnya-meja-stainless
-     * SINK STAINLESS: single-sink-stainless, double-sink-stainless, triple-sink-stainless, sink-jumbo-stainless, sink-stainless, lainnya-sink (termasuk grease trap)
-     * KOMPOR: kompor-1-tungku, kompor-2-tungku, kompor-3-tungku, kompor-4-tungku, kompor-6-tungku, kompor-wok-kwali-range, kompor-batu-lava, kompor-grill-tepanyaki, deep-fryer, noodle-boiler, oven, kompor, lainnya-kompor
-     * RAK: rak-1-susun-stainless, rak-2-susun-stainless, rak-3-susun-stainless, rak-4-susun-stainless, rak-5-susun-stainless, wallshelf, rak-stainless, lainnya-rak-stainless
-     * HOOD: hood, blower, ducting, hood-stainless, lainnya-hood
-     * SHOWCASE: showcase-1-pintu, showcase-2-pintu, cake-showcase, showcase, lainnya-showcase
-     * LAINNYA: peralatan-dapur-bekas-lainnya (hanya untuk barang non-standar)
+6. TUGAS 6 - PEMILIHAN 66 KATEGORI SSOT KANONIKAL (URUTAN PER-STAINLESS-AN DULU):
+   - Pilih 1 slug resmi kanonikal dari 11 Kategori Induk:
+     [BLOK 1: PERSTAINLESSAN / FABRIKASI PASIF - 65% STOK]
+     * MEJA STAINLESS: meja-1-susun-stainless, meja-2-susun-stainless, meja-3-susun-stainless, meja-kabinet-stainless, meja-bumbu-stainless, meja-kompor-stainless, lainnya-meja-stainless
+     * SINK STAINLESS: single-sink-stainless, double-sink-stainless, triple-sink-stainless, sink-jumbo-stainless, grease-trap-stainless, lainnya-sink
+     * RAK & TROLI: rak-1-susun-stainless, rak-2-susun-stainless, rak-3-susun-stainless, rak-4-susun-stainless, rak-5-susun-stainless, wallshelf, troli-bakery-stainless, troli-service-stainless, lainnya-rak-stainless
+     * HOOD & EXHAUST: hood, blower, ducting, lainnya-hood
+     * ICE SYSTEM: ice-bin, ice-maker, lainnya-ice-system
+
+     [BLOK 2: COOKING & THERMAL]
+     * KOMPOR: kompor-wok-kwali-range, kompor-1-tungku, kompor-2-tungku, kompor-3-tungku, kompor-4-tungku, kompor-6-tungku, deep-fryer, kompor-grill-tepanyaki, kompor-batu-lava, noodle-boiler, oven, lainnya-kompor
+
+     [BLOK 3: REFRIGERATION & DISPLAY]
+     * CHILLER: undercounter-chiller, upright-chiller, lainnya-chiller
+     * FREEZER: chest-freezer, upright-freezer, lainnya-freezer
+     * SHOWCASE: showcase-1-pintu, showcase-2-pintu, showcase-3-pintu, cake-showcase, lainnya-showcase
+
+     [BLOK 4 & 5: FOOD PROCESSING & LAINNYA]
+     * FOOD PROCESSING: mixer-bakery, meat-processing-mesin, lainnya-food-processing
+     * LAINNYA: peralatan-dapur-bekas-lainnya (hanya untuk barang aksesoris/umum: juice dispenser, water boiler, food pan GN, timbangan)
    - "is_non_product": true jika postingan adalah info dompet hilang, peringatan penipu, loker teknisi, promo ekspedisi/kargo, jasa las, atau barang non-horeca.
    - "confidence": "HIGH" jika spesifikasi teridentifikasi jelas, "LOW" jika caption sangat minim/meragukan.
 
 PROGRAMMATIC SEO & 4-TIER ALT TEXT SUITE (VARIASI SEMANTIK KAYA DI GOOGLE):
 - "seo_title": "[nama_alat] [dimensi] [semantic_badge] Siap Pakai | BBKitchen"
-- "yoast_description": "Ready stok [nama_alat] [dimensi] kondisi bekas [semantic_badge] siap pakai lolos QC teknisi BBKitchen. Siap kirim se-Jabodetabek via Lalamove!"
-- "image_alt": "[nama_alat] [dimensi] [semantic_badge] Bekas Bergaransi BBKitchen"
+- "yoast_description": "Ready stok [nama_alat] [dimensi] kondisi [kondisi_unit] [semantic_badge] siap pakai lolos QC teknisi BBKitchen. Siap kirim se-Jabodetabek via Lalamove!"
+- "image_alt": "[nama_alat] [dimensi] [semantic_badge] [kondisi_unit] Bergaransi BBKitchen"
 - "image_title": "Jual [nama_alat] [semantic_badge] [brand] [dimensi]"
 - "image_caption": "[nama_alat] [dimensi] kondisi mulus siap pakai lolos QC teknikal BBKitchen"
 - "image_description": "[title_bersih] bergaransi 30 hari siap kirim se-Indonesia."
@@ -358,7 +406,7 @@ KEMBALIKAN STRICTLY JSON SESUAI SKEMA INI:
   "dimensi": str | null,
   "semantic_badge": "Ex-Resto" | "Ex-Cafe" | "Ex-Bakery" | "Ex-Hotel" | "Second Mulus" | "Baru Gress",
   "category_slug": str,
-  "kondisi_unit": "Bekas Siap Pakai" | "Like New / Ex-Display" | "Baru Sisa Proyek",
+  "kondisi_unit": "Bekas" | "Baru",
   "status_unit": "READY" | "SOLD",
   "harga_modal": int | null,
   "estimasi_harga_baru": int,
@@ -698,7 +746,7 @@ def extract_product_fallback(caption: str, sku: str) -> Dict[str, Any]:
         nama_alat = "Exhaust Hood Stainless"
     elif "showcase" in cap_lower or "sokes" in cap_lower or "shocess" in cap_lower:
         if any(k in cap_lower for k in ["3 pintu", "3p"]):
-            cat_slug = "showcase-2-pintu"
+            cat_slug = "showcase-3-pintu"
             nama_alat = "Showcase 3 Pintu"
         elif any(k in cap_lower for k in ["2 pintu", "2p"]):
             cat_slug = "showcase-2-pintu"
@@ -776,14 +824,42 @@ def normalize_single_caption(
     modal_pre_check = extract_modal_regex(raw_caption)
     kondisi_pre_check, sub_baru_list = evaluate_condition_binary(raw_caption)
 
-    # 3. LLM Call via AIGateway (Cascade: OpenAI ➔ Gemini ➔ Groq ➔ DeepSeek)
+    # 3. LLM Call via AIGateway (Cascade: Holver/DeepSeek -> Gemini -> Groq -> OpenAI)
+    slugs_list_str = ", ".join(sorted(list(OFFICIAL_CATEGORY_SLUGS)))
     user_prompt = f"""KODE UNIT: {sku}
 LOKASI GUDANG: {location_name} (Hub: {hub_code})
 
 CAPTION MENTAH GUDANG:
 \"\"\"{sanitized_caption}\"\"\"
 
-Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai panduan sistem."""
+PILIH SALAH SATU category_slug HANYA DARI DAFTAR 66 KATEGORI RESMI BERIKUT:
+{slugs_list_str}
+
+Kembalikan strictly JSON dengan struktur:
+{{
+  "title_bersih": "[Nama Standar Alat] [Brand jika ada] Second/Baru [Dimensi PxLxT / Kapasitas]",
+  "nama_alat": "...",
+  "brand": "..." (atau null jika fabrikasi stainless / tanpa brand),
+  "dimensi": "...",
+  "semantic_badge": "Ex-Resto" | "Ex-Cafe" | "Ex-Bakery" | "Ex-Hotel" | "Second Mulus" | "Baru Gress",
+  "category_slug": "<wajib salah satu dari 66 daftar resmi di atas>",
+  "kondisi_unit": "Bekas" | "Baru",
+  "status_unit": "READY" | "SOLD",
+  "harga_modal": int | null,
+  "estimasi_harga_baru": int,
+  "harga_display_low": int,
+  "harga_display_high": int,
+  "is_non_product": bool,
+  "confidence": "HIGH" | "LOW",
+  "seo_title": "...",
+  "yoast_keyword": "...",
+  "yoast_description": "...",
+  "spesifikasi_ringkas": ["..."],
+  "image_alt": "...",
+  "image_title": "...",
+  "image_caption": "...",
+  "image_description": "..."
+}}"""
 
     parsed = None
     for attempt in range(1, 4):
@@ -817,8 +893,10 @@ Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai pandua
 
     if title_bersih:
         title = title_bersih
-        # Guarantee dimension is in title for unique identification
-        if dimensi and dimensi.lower() not in title.lower() and len(f"{title} {dimensi}") <= 70:
+        # Guarantee dimension is in title for unique identification without duplicating
+        dim_core = re.sub(r'[^0-9x]', '', dimensi.lower()) if dimensi else ""
+        title_core = re.sub(r'[^0-9x]', '', title.lower())
+        if dim_core and dim_core not in title_core and len(f"{title} {dimensi}") <= 70:
             title = f"{title} {dimensi}"
     else:
         parts = [nama_alat]
@@ -832,8 +910,32 @@ Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai pandua
             parts.append(dimensi)
         title = " ".join(parts)
 
-    # Strip any leaked prices / WA from title
+    # Replace typos & slang in title
+    title = re.sub(r'(?i)\bice\s+bean\b', 'Ice Bin', title)
+    title = re.sub(r'(?i)\bpreparetion\b', '', title)
+    title = re.sub(r'(?i)\bmeja\s+prepare(?:tion)?\b', 'Meja', title)
+    title = re.sub(r'(?i)\b(?:upershelf|uper\s+shelf|uppershelf)\b', '+ Uppershelf', title)
+    title = re.sub(r'\+\s*\+', '+', title)
+    if ('kabinet' in raw_caption.lower() or 'cabinet' in raw_caption.lower()) and 'meja' in raw_caption.lower():
+        title = re.sub(r'(?i)\bmeja\s+kerja\b', 'Meja Kabinet', title)
+        title = re.sub(r'(?i)\bmeja\s+stainless\b', 'Meja Kabinet Stainless', title)
+    
+    # Strip bowl dimensions from title (bowl specs must stay in description/bullets)
+    title = re.sub(r'(?i)\(?\s*(?:ukuran\s+)?bowl[:\s]*[\d.xX*]+\s*(?:cm)?\s*\)?', '', title)
+
+    # Strip subjective adjectives, warehouse stock counts, and noise from title
+    title = re.sub(r'(?i)\b(?:mulus|gress|normal|kondisi\s+prima|cek\s+video|ready\s+\d+\s*unit|sisa\s+\d+\s*unit|stok\s+\d+\s*unit|\d+\s*unit\s*(?:sold|ready)|lengkap\s+dengan\s+saklar\s+dan\s+filter\s+baru|fullset\s+kran\s+greasetrap)\b', '', title)
+    
+    # Strip country / origin hallucinations from stainless fabrication
+    title = re.sub(r'(?i)\b(?:japan|jepang|korea|china|taiwan|lokal|custom|solid\s+double\s+plat|include\s+meja)\b', '', title)
+
+    # Single sink sayap kanan cleaner
+    if 'sayap kanan' in raw_caption.lower() and 'single sink' in title.lower() and 'sayap' not in title.lower():
+        title = title.replace('Single Sink Stainless', 'Single Sink Sayap Kanan 2 Susun')
+
+    # Strip any leaked prices / WA / operational noise from title
     title = re.sub(r'(?i)(?:rp\.?\s*[\d.,]+|[\d.,]+\s*(?:jt|juta|k|rb|ribu))', '', title)
+    title = re.sub(r'(?i)\b(?:sold(?:\s+out)?|terjual|laku|gudang\s+[a-z0-9_]+|lokasi\s+[a-z0-9_]+|lok\s+[a-z0-9_]+|hub\s*:\s*[a-z0-9_]+)\b', '', title)
     title = re.sub(r'\s+', ' ', title).strip()
     if len(title) > 75:
         title = title[:75].rsplit(" ", 1)[0]
@@ -851,10 +953,40 @@ Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai pandua
 
     link_unit = f"https://bukanbarukitchen.com/shop/{slug}/"
 
-    # 7. Category Assertion
+    # 7. Category Assertion with SSOT Rules
+    cap_full_lower = f"{raw_caption} {title}".lower()
     cat_slug = str(parsed.get("category_slug") or "").strip().lower()
-    if cat_slug in CATEGORY_SYNONYM_MAP:
+    
+    # Deterministic Category Overrides based on Sacred SSOT Rules
+    if 'sink' in cap_full_lower or 'singk' in cap_full_lower or 'bak cuci' in cap_full_lower:
+        # 1. Check Jumbo: Utamakan kata 'jumbo' atau ukuran bowl >= 100cm
+        is_jumbo = 'jumbo' in cap_full_lower
+        if not is_jumbo:
+            bowl_match = re.search(r'bowl[:\s]*(\d{2,3})', cap_full_lower)
+            if bowl_match and int(bowl_match.group(1)) >= 100:
+                is_jumbo = True
+        
+        if is_jumbo:
+            cat_slug = 'sink-jumbo-stainless'
+        elif any(k in cap_full_lower for k in ['triple', '3 lubang', '3 pot', '3 bowl', '3 lobang']):
+            cat_slug = 'triple-sink-stainless'
+        elif any(k in cap_full_lower for k in ['double', '2 lubang', '2 pot', '2 bowl', '2 lobang']):
+            cat_slug = 'double-sink-stainless'
+        elif any(k in cap_full_lower for k in ['single', '1 lubang', '1 pot', '1 bowl', '1 lobang']):
+            cat_slug = 'single-sink-stainless'
+        elif 'grease' in cap_full_lower or 'lemak' in cap_full_lower:
+            cat_slug = 'grease-trap-stainless'
+        elif cat_slug in OFFICIAL_CATEGORY_SLUGS and 'sink' in cat_slug:
+            pass # Keep AI resolution if valid sink subcategory
+        else:
+            cat_slug = 'single-sink-stainless'
+    elif ('kabinet' in cap_full_lower or 'cabinet' in cap_full_lower) and 'meja' in cap_full_lower:
+        cat_slug = 'meja-kabinet-stainless'
+    elif 'ice bin' in cap_full_lower or 'ice bean' in cap_full_lower:
+        cat_slug = 'ice-bin'
+    elif cat_slug in CATEGORY_SYNONYM_MAP:
         cat_slug = CATEGORY_SYNONYM_MAP[cat_slug]
+        
     if cat_slug not in OFFICIAL_CATEGORY_SLUGS:
         # Fuzzy match
         for official in OFFICIAL_CATEGORY_SLUGS:
@@ -865,11 +997,15 @@ Ekstrak spesifikasi teknis, taksonomi kategori, dan estimasi harga sesuai pandua
             cat_slug = "peralatan-dapur-bekas-lainnya"
 
     # 8. Condition Semantic Authority (Pure Binary: 'Baru' vs 'Bekas')
-    ai_kondisi = str(parsed.get("kondisi_unit") or "").strip().upper()
-    if "BARU" in ai_kondisi or "GRESS" in ai_kondisi or "BNIB" in ai_kondisi:
-        kondisi_final = "Baru"
-    else:
+    # Layer 2 Deterministic Override: Sub-komponen baru (filter baru, kran baru) selalu Bekas
+    if sub_baru_list and kondisi_pre_check == "Bekas Siap Pakai":
         kondisi_final = "Bekas"
+    else:
+        ai_kondisi = str(parsed.get("kondisi_unit") or "").strip().upper()
+        if "BARU" in ai_kondisi or "GRESS" in ai_kondisi or "BNIB" in ai_kondisi:
+            kondisi_final = "Baru"
+        else:
+            kondisi_final = "Bekas"
 
     # 9. Status Biner & Non-Product Semantic Assertion
     is_non_product = parsed.get("is_non_product") is True

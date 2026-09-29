@@ -64,10 +64,43 @@ def parse_json_safely(raw_text: str) -> dict:
 
 class AIGateway:
     def __init__(self):
+        self.holver_key = os.getenv("HOLVER_API_KEY", "")
+        self.holver_base_url = os.getenv("HOLVER_BASE_URL", "https://api.holver.id/v1")
+        self.deepseek_key = os.getenv("DEEPSEEK_API_KEY", "")
         self.openai_key = os.getenv("OPENAI_API_KEY", "")
         self.gemini_key = os.getenv("GEMINI_API_KEY", "")
         self.groq_key = os.getenv("GROQ_API_KEY", "")
-        self.deepseek_key = os.getenv("DEEPSEEK_API_KEY", "")
+
+    def _call_holver(self, prompt: str, system_prompt: str = None, model: str = "DeepSeek-4.1-Flash") -> dict:
+        if not self.holver_key:
+            raise ValueError("HOLVER_API_KEY not configured")
+        
+        url = f"{self.holver_base_url.rstrip('/')}/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.holver_key}",
+            "Content-Type": "application/json"
+        }
+        guaranteed_prompt = prompt if "json" in prompt.lower() else f"{prompt}\n\nRespond strictly in valid JSON format."
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": guaranteed_prompt})
+
+        payload = {
+            "model": model,
+            "messages": messages,
+            "response_format": {"type": "json_object"},
+            "temperature": 0.1,
+            "max_tokens": 1500
+        }
+
+        res = requests.post(url, headers=headers, json=payload, timeout=30)
+        if res.status_code != 200:
+            raise RuntimeError(f"Holver error {res.status_code}: {res.text[:200]}")
+        
+        data = res.json()
+        raw_content = data["choices"][0]["message"]["content"]
+        return parse_json_safely(raw_content)
 
     def _call_openai(self, prompt: str, system_prompt: str = None, model: str = "gpt-4o-mini") -> dict:
         if not self.openai_key:
@@ -189,20 +222,26 @@ class AIGateway:
 
     def generate_json(self, prompt: str, system_prompt: str = None) -> dict:
         """
-        Executes prompt through the strict 4-tier provider cascade:
-        1. DeepSeek AI (deepseek-chat) [PRIMARY TIER 1 - Ultra-Fast & Reliable]
-        2. Google Gemini (gemini-3.6-flash / gemini-flash-latest)
-        3. Groq Cloud (openai/gpt-oss-120b / qwen3.8-27b)
-        4. OpenAI (gpt-4o-mini)
+        Executes prompt through the strict multi-tier provider cascade:
+        0. Holver.id (deepseek-4.1-flash) [100% Dedicated Text Workhorse]
+        1. DeepSeek AI (deepseek-chat) [Primary Sovereign Text Fallback]
+        2. Groq Cloud (llama-3.3-70b-versatile)
+        3. OpenAI (gpt-4o-mini)
+        4. Google AI Studio (gemini-2.5-flash)
         """
-        providers = [
+        providers = []
+        if self.holver_key:
+            providers.extend([
+                ("0a. Holver.id (deepseek-4.1-flash)", lambda: self._call_holver(prompt, system_prompt, "deepseek-4.1-flash")),
+                ("0b. Holver.id (deepseek-v3)", lambda: self._call_holver(prompt, system_prompt, "deepseek-v3")),
+            ])
+
+        providers.extend([
             ("1. DeepSeek AI (deepseek-chat)", lambda: self._call_deepseek(prompt, system_prompt, "deepseek-chat")),
-            ("2. Google AI Studio (gemini-3.6-flash)", lambda: self._call_gemini(prompt, system_prompt, "gemini-3.6-flash")),
-            ("2b. Google AI Studio (gemini-flash-latest)", lambda: self._call_gemini(prompt, system_prompt, "gemini-flash-latest")),
-            ("3. Groq Cloud (openai/gpt-oss-120b)", lambda: self._call_groq(prompt, system_prompt, "openai/gpt-oss-120b")),
-            ("3b. Groq Cloud (qwen3.8-27b)", lambda: self._call_groq(prompt, system_prompt, "qwen/qwen3.8-27b")),
-            ("4. OpenAI (gpt-4o-mini)", lambda: self._call_openai(prompt, system_prompt, "gpt-4o-mini")),
-        ]
+            ("2. Groq Cloud (llama-3.3-70b-versatile)", lambda: self._call_groq(prompt, system_prompt, "llama-3.3-70b-versatile")),
+            ("3. OpenAI (gpt-4o-mini)", lambda: self._call_openai(prompt, system_prompt, "gpt-4o-mini")),
+            ("4. Google AI Studio (gemini-2.5-flash)", lambda: self._call_gemini(prompt, system_prompt, "gemini-2.5-flash")),
+        ])
 
         last_error = None
         for name, fn in providers:
@@ -215,7 +254,7 @@ class AIGateway:
                 last_error = e
                 time.sleep(0.3)
 
-        raise RuntimeError(f"All 4 AI Providers failed! Last error: {last_error}")
+        raise RuntimeError(f"All AI Providers failed! Last error: {last_error}")
 
 # Quick test if run directly
 if __name__ == "__main__":

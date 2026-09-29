@@ -111,17 +111,18 @@ ATURAN BISNIS MUTLAK:
      * "stimer", "kukusan" -> Dimsum Steamer
    - BRAND FILTER: Jangan gunakan kata "Stainless", "Heavy Duty", "Import", "Custom", "Ex Cafe", "Second" sebagai nama merk. Jika tidak bermerk resmi, sebutkan saja jenis bahannya (misal "Meja Stainless 2 Susun Second").
 
-2. CATEGORY SLUG (PILIH 1 SLUG RESMI WOOCOMMERCE YANG PALING TEPAT):
-   - CHILLER: "undercounter-chiller", "upright-chiller", "chiller", "lainnya-chiller"
-   - FREEZER: "chest-freezer", "upright-freezer", "freezer", "lainnya-freezer"
-   - MEJA STAINLESS: "meja-1-susun-stainless", "meja-2-susun-stainless", "meja-3-susun-stainless", "meja-bumbu-stainless", "meja-kabinet-stainless", "meja-kompor-stainless", "meja-stainless", "lainnya-meja-stainless"
-   - SINK STAINLESS: "single-sink-stainless", "double-sink-stainless", "triple-sink-stainless", "sink-jumbo-stainless", "sink-stainless", "lainnya-sink"
-   - KOMPOR & COOKING: "kompor-1-tungku", "kompor-2-tungku", "kompor-3-tungku", "kompor-4-tungku", "kompor-6-tungku", "kompor-wok-kwali-range", "kompor-batu-lava", "kompor-grill-tepanyaki", "deep-fryer", "noodle-boiler", "oven", "kompor", "lainnya-kompor"
-   - RAK STAINLESS: "rak-1-susun-stainless", "rak-2-susun-stainless", "rak-3-susun-stainless", "rak-4-susun-stainless", "rak-5-susun-stainless", "wallshelf", "rak-stainless", "lainnya-rak-stainless"
-   - HOOD & VENTILASI: "hood", "blower", "ducting", "hood-stainless", "lainnya-hood"
-   - SHOWCASE: "showcase-1-pintu", "showcase-2-pintu", "cake-showcase", "showcase", "lainnya-showcase"
-   - ICE SYSTEM: "ice-bin", "ice-maker", "ice-system", "lainnya-ice-system"
-   - LAINNYA: "peralatan-dapur-bekas-lainnya"
+2. CATEGORY SLUG (PILIH 1 SLUG RESMI SSOT - URUTAN PER-STAINLESS-AN DULU):
+   - MEJA STAINLESS: "meja-1-susun-stainless", "meja-2-susun-stainless", "meja-3-susun-stainless", "meja-kabinet-stainless", "meja-bumbu-stainless", "meja-kompor-stainless", "lainnya-meja-stainless"
+   - SINK STAINLESS: "single-sink-stainless", "double-sink-stainless", "triple-sink-stainless", "sink-jumbo-stainless", "grease-trap-stainless", "lainnya-sink"
+   - RAK & TROLI: "rak-1-susun-stainless", "rak-2-susun-stainless", "rak-3-susun-stainless", "rak-4-susun-stainless", "rak-5-susun-stainless", "wallshelf", "troli-bakery-stainless", "troli-service-stainless", "lainnya-rak-stainless"
+   - HOOD & EXHAUST: "hood", "blower", "ducting", "lainnya-hood"
+   - ICE SYSTEM: "ice-bin", "ice-maker", "lainnya-ice-system"
+   - KOMPOR & COOKING: "kompor-wok-kwali-range", "kompor-1-tungku", "kompor-2-tungku", "kompor-3-tungku", "kompor-4-tungku", "kompor-6-tungku", "deep-fryer", "kompor-grill-tepanyaki", "kompor-batu-lava", "noodle-boiler", "oven", "lainnya-kompor"
+   - CHILLER: "undercounter-chiller", "upright-chiller", "lainnya-chiller"
+   - FREEZER: "chest-freezer", "upright-freezer", "lainnya-freezer"
+   - SHOWCASE: "showcase-1-pintu", "showcase-2-pintu", "showcase-3-pintu", "cake-showcase", "lainnya-showcase"
+   - FOOD PROCESSING & MESIN: "mixer-bakery", "meat-processing-mesin", "lainnya-food-processing"
+   - LAINNYA: "peralatan-dapur-bekas-lainnya" 
 
 3. STRATEGIC PRICE ANCHORING:
    - "harga_modal": Angka bulat rupiah modal borongan yang tertulis di caption. Abaikan format titik/koma (misal "12.500.000" -> 12500000, "7,5jt" -> 7500000). Jika tidak disebutkan sama sekali di caption, isi null.
