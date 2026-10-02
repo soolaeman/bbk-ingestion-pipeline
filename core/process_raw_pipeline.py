@@ -228,8 +228,13 @@ def calculate_margins_and_anchors(modal: int, estimasi_baru: int):
         "harga_display_high": harga_display_high,
     }
 
-def format_rupiah(num: int) -> str:
-    return f"Rp {num:,}".replace(",", ".")
+def format_rupiah(num) -> str:
+    if num is None:
+        return "-"
+    try:
+        return f"Rp {int(num):,}".replace(",", ".")
+    except Exception:
+        return str(num)
 
 def build_full_description(parsed: dict, pricing: dict, location_name: str) -> str:
     nama = parsed.get("nama_alat", "Peralatan Dapur Komersial")
@@ -425,7 +430,8 @@ def run_pipeline(dry_run=False, limit=None):
             print(f"   -> Slug: {record['link_unit']}")
 
             if not dry_run:
-                cols = list(record.keys())
+                valid_cols = set(col_info[1] for col_info in cur.execute("PRAGMA table_info(products)").fetchall())
+                cols = [c for c in record.keys() if c in valid_cols]
                 placeholders = ", ".join(["?"] * len(cols))
                 col_names = ", ".join(cols)
                 update_clause = ", ".join([f"{c}=excluded.{c}" for c in cols if c != "sku"])
