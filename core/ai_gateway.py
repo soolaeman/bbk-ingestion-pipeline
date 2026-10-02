@@ -1,12 +1,12 @@
+# -*- coding: utf-8 -*-
 """
-BBKitchen Multi-Provider AI Failover Gateway
-Unified 4-Tier Provider Cascade:
-1. OpenAI (gpt-4o-mini / gpt-4o)
-2. Google AI Studio (Gemini 2.5 Flash / Flash Latest)
-3. Groq Cloud (Llama 3.3 70B / Qwen 2.5 32B)
-4. DeepSeek AI (deepseek-chat)
+👑 BBKitchen Pure Gemini Multi-Tier AI Gateway (ai_gateway.py)
+Unified Sovereign Multimodal Engine:
+1. Primary: Google AI Studio Direct (Gemini Flash - Free Tier 1,500 RPD)
+2. Fallback: Holver.id Gemini Gateway (gemini-3.8-flash / gemini-3.7-flash Vision)
+3. Fail-Fast: Clean AIGatewayExhaustedError if both offline
 
-Zero external SDK dependencies (pure requests + json), robust failover and strict JSON schema return.
+Strictly pure Gemini family across both providers for 100% prompt & vision consistency.
 """
 
 import os
@@ -14,6 +14,7 @@ import re
 import json
 import time
 import requests
+from typing import Dict, Any, Optional, List
 
 def load_env(env_path=None):
     if env_path is not None and os.path.exists(env_path):
@@ -39,6 +40,10 @@ def load_env(env_path=None):
 
 load_env()
 
+class AIGatewayExhaustedError(RuntimeError):
+    """Raised when all Gemini providers (Google Direct & Holver) are unavailable or quota-exhausted."""
+    pass
+
 def clean_json_text(raw_text: str) -> str:
     """Strips Markdown fences like ```json ... ``` from response."""
     text = raw_text.strip()
@@ -56,7 +61,6 @@ def parse_json_safely(raw_text: str) -> dict:
     try:
         return json.loads(cleaned)
     except Exception:
-        # Fallback: regex search for outer {...}
         match = re.search(r"(\{.*\})", cleaned, re.DOTALL)
         if match:
             return json.loads(match.group(1))
@@ -64,14 +68,49 @@ def parse_json_safely(raw_text: str) -> dict:
 
 class AIGateway:
     def __init__(self):
+        self.gemini_key = os.getenv("GEMINI_API_KEY", "")
         self.holver_key = os.getenv("HOLVER_API_KEY", "")
         self.holver_base_url = os.getenv("HOLVER_BASE_URL", "https://api.holver.id/v1")
-        self.deepseek_key = os.getenv("DEEPSEEK_API_KEY", "")
-        self.openai_key = os.getenv("OPENAI_API_KEY", "")
-        self.gemini_key = os.getenv("GEMINI_API_KEY", "")
-        self.groq_key = os.getenv("GROQ_API_KEY", "")
 
-    def _call_holver(self, prompt: str, system_prompt: str = None, model: str = "DeepSeek-4.1-Flash") -> dict:
+    def _call_google_gemini(self, prompt: str, image_base64_list: Optional[List[str]] = None, system_prompt: Optional[str] = None, model: str = "gemini-2.5-flash") -> dict:
+        if not self.gemini_key:
+            raise ValueError("GEMINI_API_KEY not configured")
+        
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={self.gemini_key}"
+        
+        parts: List[Dict[str, Any]] = [{"text": prompt}]
+        if image_base64_list:
+            for b64 in image_base64_list:
+                if b64:
+                    parts.append({
+                        "inline_data": {
+                            "mime_type": "image/webp",
+                            "data": b64
+                        }
+                    })
+
+        payload: Dict[str, Any] = {
+            "contents": [{"parts": parts}],
+            "generationConfig": {
+                "responseMimeType": "application/json",
+                "temperature": 0.1,
+                "maxOutputTokens": 2048
+            }
+        }
+        if system_prompt:
+            payload["systemInstruction"] = {
+                "parts": [{"text": system_prompt}]
+            }
+
+        res = requests.post(url, json=payload, timeout=4)
+        if res.status_code != 200:
+            raise RuntimeError(f"Google Gemini Direct error {res.status_code}: {res.text[:200]}")
+        
+        data = res.json()
+        raw_content = data["candidates"][0]["content"]["parts"][0]["text"]
+        return parse_json_safely(raw_content)
+
+    def _call_holver_gemini(self, prompt: str, image_base64_list: Optional[List[str]] = None, system_prompt: Optional[str] = None, model: str = "gemini-3.8-flash") -> dict:
         if not self.holver_key:
             raise ValueError("HOLVER_API_KEY not configured")
         
@@ -80,168 +119,83 @@ class AIGateway:
             "Authorization": f"Bearer {self.holver_key}",
             "Content-Type": "application/json"
         }
-        guaranteed_prompt = prompt if "json" in prompt.lower() else f"{prompt}\n\nRespond strictly in valid JSON format."
+        
+        user_content: Any = []
+        user_content.append({"type": "text", "text": prompt})
+        
+        if image_base64_list:
+            for b64 in image_base64_list:
+                if b64:
+                    user_content.append({
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/webp;base64,{b64}"}
+                    })
+
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": guaranteed_prompt})
+        messages.append({"role": "user", "content": user_content})
 
         payload = {
             "model": model,
             "messages": messages,
             "response_format": {"type": "json_object"},
             "temperature": 0.1,
-            "max_tokens": 1500
-        }
-
-        res = requests.post(url, headers=headers, json=payload, timeout=30)
-        if res.status_code != 200:
-            raise RuntimeError(f"Holver error {res.status_code}: {res.text[:200]}")
-        
-        data = res.json()
-        raw_content = data["choices"][0]["message"]["content"]
-        return parse_json_safely(raw_content)
-
-    def _call_openai(self, prompt: str, system_prompt: str = None, model: str = "gpt-4o-mini") -> dict:
-        if not self.openai_key:
-            raise ValueError("OPENAI_API_KEY not configured")
-        
-        url = "https://api.openai.com/v1/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {self.openai_key}",
-            "Content-Type": "application/json"
-        }
-        guaranteed_prompt = prompt if "json" in prompt.lower() else f"{prompt}\n\nRespond strictly in valid JSON format."
-        messages = []
-        if system_prompt:
-            messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": guaranteed_prompt})
-
-        payload = {
-            "model": model,
-            "messages": messages,
-            "response_format": {"type": "json_object"},
-            "temperature": 0.1,
+            "max_tokens": 2048
         }
 
         res = requests.post(url, headers=headers, json=payload, timeout=25)
         if res.status_code != 200:
-            raise RuntimeError(f"OpenAI error {res.status_code}: {res.text[:200]}")
+            raise RuntimeError(f"Holver Gemini Gateway error {res.status_code}: {res.text[:200]}")
         
         data = res.json()
         raw_content = data["choices"][0]["message"]["content"]
         return parse_json_safely(raw_content)
 
-    def _call_gemini(self, prompt: str, system_prompt: str = None, model: str = "gemini-2.5-flash") -> dict:
-        if not self.gemini_key:
-            raise ValueError("GEMINI_API_KEY not configured")
+    def _call_holver_text_workhorse(self, prompt: str, system_prompt: Optional[str] = None, model: str = "deepseek-4.1-flash") -> dict:
+        if not self.holver_key:
+            raise ValueError("HOLVER_API_KEY not configured")
         
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={self.gemini_key}"
-        
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "responseMimeType": "application/json",
-                "temperature": 0.1,
-            }
-        }
-        if system_prompt:
-            payload["systemInstruction"] = {
-                "parts": [{"text": system_prompt}]
-            }
-
-        res = requests.post(url, json=payload, timeout=25)
-        if res.status_code != 200:
-            raise RuntimeError(f"Gemini error {res.status_code}: {res.text[:200]}")
-        
-        data = res.json()
-        raw_content = data["candidates"][0]["content"]["parts"][0]["text"]
-        return parse_json_safely(raw_content)
-
-    def _call_groq(self, prompt: str, system_prompt: str = None, model: str = "llama-3.3-70b-versatile") -> dict:
-        if not self.groq_key:
-            raise ValueError("GROQ_API_KEY not configured")
-        
-        url = "https://api.groq.com/openai/v1/chat/completions"
+        url = f"{self.holver_base_url.rstrip('/')}/chat/completions"
         headers = {
-            "Authorization": f"Bearer {self.groq_key}",
+            "Authorization": f"Bearer {self.holver_key}",
             "Content-Type": "application/json"
         }
-        guaranteed_prompt = prompt if "json" in prompt.lower() else f"{prompt}\n\nRespond strictly in valid JSON format."
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": guaranteed_prompt})
+        messages.append({"role": "user", "content": prompt})
 
         payload = {
             "model": model,
             "messages": messages,
             "response_format": {"type": "json_object"},
             "temperature": 0.1,
-            "max_tokens": 1500
+            "max_tokens": 2048
         }
 
-        res = requests.post(url, headers=headers, json=payload, timeout=20)
+        res = requests.post(url, headers=headers, json=payload, timeout=25)
         if res.status_code != 200:
-            raise RuntimeError(f"Groq error {res.status_code}: {res.text[:200]}")
+            raise RuntimeError(f"Holver Text Workhorse error {res.status_code}: {res.text[:200]}")
         
         data = res.json()
         raw_content = data["choices"][0]["message"]["content"]
         return parse_json_safely(raw_content)
 
-    def _call_deepseek(self, prompt: str, system_prompt: str = None, model: str = "deepseek-chat") -> dict:
-        if not self.deepseek_key:
-            raise ValueError("DEEPSEEK_API_KEY not configured")
-        
-        url = "https://api.deepseek.com/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {self.deepseek_key}",
-            "Content-Type": "application/json"
-        }
-        guaranteed_prompt = prompt if "json" in prompt.lower() else f"{prompt}\n\nRespond strictly in valid JSON format."
-        messages = []
-        if system_prompt:
-            messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": guaranteed_prompt})
-
-        payload = {
-            "model": model,
-            "messages": messages,
-            "response_format": {"type": "json_object"},
-            "temperature": 0.1,
-            "max_tokens": 1500
-        }
-
-        res = requests.post(url, headers=headers, json=payload, timeout=30)
-        if res.status_code != 200:
-            raise RuntimeError(f"DeepSeek error {res.status_code}: {res.text[:200]}")
-        
-        data = res.json()
-        raw_content = data["choices"][0]["message"]["content"]
-        return parse_json_safely(raw_content)
-
-    def generate_json(self, prompt: str, system_prompt: str = None) -> dict:
+    def generate_vision_json(self, prompt: str, image_base64_list: Optional[List[str]] = None, system_prompt: Optional[str] = None) -> dict:
         """
-        Executes prompt through the strict multi-tier provider cascade:
-        0. Holver.id (deepseek-4.1-flash) [100% Dedicated Text Workhorse]
-        1. DeepSeek AI (deepseek-chat) [Primary Sovereign Text Fallback]
-        2. Groq Cloud (llama-3.3-70b-versatile)
-        3. OpenAI (gpt-4o-mini)
-        4. Google AI Studio (gemini-2.5-flash)
+        Executes prompt & optional photos strictly through Sovereign Cascade:
+        1. Google AI Studio Direct (gemini-3.8-flash / gemini-2.5-flash-lite) [Primary Free Tier]
+        2. Holver.id Gemini Gateway (gemini-3.8-flash / gemini-3.7-flash) [Sovereign Vision Proxy]
+        3. Holver.id Sovereign Workhorse (deepseek-4.1-flash) [Text Fallback if Gemini quota depleted]
         """
-        providers = []
-        if self.holver_key:
-            providers.extend([
-                ("0a. Holver.id (deepseek-4.1-flash)", lambda: self._call_holver(prompt, system_prompt, "deepseek-4.1-flash")),
-                ("0b. Holver.id (deepseek-v3)", lambda: self._call_holver(prompt, system_prompt, "deepseek-v3")),
-            ])
-
-        providers.extend([
-            ("1. DeepSeek AI (deepseek-chat)", lambda: self._call_deepseek(prompt, system_prompt, "deepseek-chat")),
-            ("2. Groq Cloud (llama-3.3-70b-versatile)", lambda: self._call_groq(prompt, system_prompt, "llama-3.3-70b-versatile")),
-            ("3. OpenAI (gpt-4o-mini)", lambda: self._call_openai(prompt, system_prompt, "gpt-4o-mini")),
-            ("4. Google AI Studio (gemini-2.5-flash)", lambda: self._call_gemini(prompt, system_prompt, "gemini-2.5-flash")),
-        ])
+        providers = [
+            ("1a. Google AI Studio (gemini-3.8-flash Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-3.8-flash")),
+            ("1b. Google AI Studio (gemini-2.5-flash-lite Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-2.5-flash-lite")),
+            ("2a. Holver.id Gemini Gateway (gemini-3.8-flash)", lambda: self._call_holver_gemini(prompt, image_base64_list, system_prompt, "gemini-3.8-flash")),
+            ("2b. Holver.id Gemini Gateway (gemini-3.7-flash)", lambda: self._call_holver_gemini(prompt, image_base64_list, system_prompt, "gemini-3.7-flash")),
+            ("3. Holver.id Workhorse (deepseek-4.1-flash)", lambda: self._call_holver_text_workhorse(prompt, system_prompt, "deepseek-4.1-flash")),
+        ]
 
         last_error = None
         for name, fn in providers:
@@ -250,18 +204,21 @@ class AIGateway:
                 if result and isinstance(result, dict):
                     return result
             except Exception as e:
-                # Silently catch and log provider failover
                 last_error = e
                 time.sleep(0.3)
 
-        raise RuntimeError(f"All AI Providers failed! Last error: {last_error}")
+        raise AIGatewayExhaustedError(f"All AI Providers failed or exhausted! Last error: {last_error}")
 
-# Quick test if run directly
+    def generate_json(self, prompt: str, system_prompt: Optional[str] = None) -> dict:
+        """Text-only wrapper delegating to Pure Gemini Cascade."""
+        return self.generate_vision_json(prompt, image_base64_list=None, system_prompt=system_prompt)
+
+# Self-test
 if __name__ == "__main__":
-    gateway = AIGateway()
-    print("Testing AIGateway 4-Tier Cascade...")
-    res = gateway.generate_json(
-        prompt="Sebutkan nama barang: 'Dijual Chiller 3 Pintu Sandev 180cm, harga 12.500.000 nego, kondisi mulus'. Ekstrak nama, merk, dan dimensi.",
-        system_prompt="Anda adalah AI Normalisasi BBKitchen. Ekstrak data dan kembalikan strictly JSON dengan format: {\"nama\": str, \"merk\": str, \"dimensi\": str}"
+    gw = AIGateway()
+    print("Testing Pure Gemini Gateway...")
+    res = gw.generate_json(
+        prompt="Sebutkan nama barang: 'Dijual Chiller 3 Pintu Sandev 180cm, harga 12.500.000 nego'. Return strictly JSON: {\"nama\": str, \"dimensi\": str}",
+        system_prompt="Anda adalah AI Normalisasi BBKitchen. Return strictly JSON."
     )
     print("Gateway Result:", json.dumps(res, indent=2))

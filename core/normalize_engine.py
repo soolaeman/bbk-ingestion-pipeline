@@ -19,6 +19,8 @@ import re
 import sys
 import json
 import time
+import base64
+import requests
 import unicodedata
 from typing import Dict, Any, Tuple, Optional, List
 
@@ -34,7 +36,7 @@ for p in [CURRENT_DIR, PARENT_DIR]:
     if p not in sys.path:
         sys.path.append(p)
 
-from ai_gateway import AIGateway, load_env
+from ai_gateway import AIGateway, AIGatewayExhaustedError, load_env
 
 load_env()
 
@@ -316,58 +318,42 @@ FABRICATION_KEYWORDS = ["meja", "sink", "rak", "hood", "wallshelf", "kabinet", "
 # LAYER 4: GOLDEN LLM SYSTEM PROMPT & INSTRUCTION
 # ==============================================================================
 
-GOLDEN_SYSTEM_PROMPT = """Anda adalah Principal Catalog Architect & Senior Equipment Expert untuk BBKitchen (Penyedia Peralatan Dapur Komersial & Resto Second Terbesar di Indonesia).
+GOLDEN_SYSTEM_PROMPT = """Anda adalah Senior Executive Chef & Forensic Multimodal Equipment Specialist untuk BBKitchen (Pusat Peralatan Dapur Komersial Restoran Terbesar di Indonesia).
 
-Tugas Anda: Menganalisis caption mentah Telegram dari gudang mitra secara semantik (100% AI-Driven Semantic Extraction), mengekstrak fakta akurat, membersihkan noise/typo, dan menghasilkan data katalog standar industri Horeca kelas atas.
+Tugas Anda: Menganalisis caption mentah Telegram dari gudang mitra DAN memeriksa FOTO FISIK ALAT DAPUR (jika disertakan) secara objektif untuk menghasilkan data katalog standar industri Horeca kelas atas, metadata presisi, serta deskripsi operasional 4-pilar berkelas chef profesional.
 
 5 ATURAN BISNIS EMAS (5 GOLDEN RULES):
 
-1. TUGAS 1 - JUDUL PRODUK KANONIKAL BERSIH & BERDIMENSI ("title_bersih"):
-   - FORMULA RESMI: [Nama Standar Alat] [Brand jika ada] Second [Dimensi PxLxT / Kapasitas]
-   - ATURAN KANONIKAL:
-     * Selalu gunakan format rapi, konsisten, dan simetris untuk tampilan katalog web/mobile.
-     * WAJIB cantumkan dimensi fisik (contoh: 110x70x85 cm) atau kapasitas (contoh: 231L, 2 Pintu, 21 Tray, 2 Burner).
-     * Jika unit Bekas, gunakan kata "Second". Jika unit Baru, gunakan kata "Baru".
-   - Contoh Ideal "title_bersih":
+1. TUGAS 1 - KALIBRASI VISUAL & JUDUL PRODUK KANONIKAL ("title_bersih"):
+   - FORMULA RESMI: [Nama Standar Alat] [Brand jika ada] Second/Baru [Dimensi PxLxT / Kapasitas]
+   - Periksa FOTO FISIK (jika ada):
+     * Hitung jumlah pintu chiller/freezer, tungku kompor, susun meja/rak, laci kabinet, dan posisi sayap sink.
+     * DETEKSI STIKER PROTEKSI PABRIK (Baru vs Bekas): Jika permukaan stainless terbungkus stiker/film plastik proteksi pabrik (warna biru, putih, bening) atau 100% gress pabrik tanpa jejak noda pemakaian -> set "kondisi_unit": "Baru" dan beri akhiran 'Baru' di judul. Jika bekas/second -> set "kondisi_unit": "Bekas" dan beri akhiran 'Second'.
+   - Contoh Ideal:
      * "Meja Stainless 2 Susun Second 110x70x85 cm"
-     * "Troli Bakery Stainless 21 Tray Second 45x63x170 cm"
      * "Double Sink Stainless 2 Lubang Second 120x60x84 cm"
-     * "Showcase 1 Pintu GEA Second 231L"
      * "Upright Chiller 2 Pintu Mastercool Second"
-     * "Kompor Grill Teppanyaki Stainless Second 100x70x85 cm"
-     * "Ice Bin Stainless Steel Second 180x70x85 cm"
+     * "Hood Stainless + Filter Baru 120x115x50 cm"
    - Maksimal 65 karakter, Title Case.
-   - ATURAN BRAND vs JARGON TEKNIS:
-     * Brand Resmi: GEA, Mastercool, Nayati, Getra, Sander, Krischef, Berjaya, Fomac, Crown, Rational, Escoffier, Hoshizaki, Liebherr, Unox, Convotherm, Kolb, Roller Grill, Sirman, Sinmag, Primax, Guangdong, Mutu, Zanussi, Electrolux, Rinnai, Modena, RSA.
-     * Jargon Teknis BUKAN Brand (Brand: null): Low Pressure, High Pressure, Heavy Duty, Table Top, Custom 201/304, Stainless, Blower, 1 Tungku, Sliding Door, Kaki Roda.
-     * Fabrikasi Stainless (Meja, Sink, Rak, Hood, Wallshelf, Kabinet, Grease Trap) 99% custom bengkel -> Brand: null.
+   - Fabrikasi Stainless (Meja, Sink, Rak, Hood, Wallshelf, Kabinet) 99% custom bengkel -> Brand: null.
 
-2. TUGAS 2 - KONTEKS SEMANTIK & PENGAYAAN SINONIM SEO ("semantic_badge"):
-   - Identifikasi arketipe asal/konteks unit murni untuk memperkaya variasi sinonim (LSI Keywords) di deskripsi, alt text, dan Schema JSON-LD Google (BUKAN stiker visual di UI):
-     * "Ex-Resto" (Peralatan dapur restoran, kompor kwali, sink potong, meja stainless)
-     * "Ex-Cafe" (Chiller display, undercounter, blender, ice bin, cake showcase)
-     * "Ex-Bakery" (Troli loyang roti, deck oven, proofer, planetary mixer)
-     * "Ex-Hotel" (Combi oven, banquet cart, heavy duty dishwasher)
-     * "Second Mulus" (Peralatan umum dengan kondisi fisik sangat terawat)
-     * "Baru Gress" (Unit baru sisa proyek/stok distributor)
+2. TUGAS 2 - CHEF COPYWRITING 4-PILAR OPERASIONAL:
+   - "ringkasan_chef": 2-3 kalimat padat berbobot use-case operasional dapur komersial.
+   - "rekomendasi_station": Stasiun alur kerja dapur mana yang paling optimal (Hot Line, Prep Station, Dishwashing, Bakery/Pastry, atau Beverage Bar).
+   - "keunggulan_material_higiene": Durabilitas plat stainless, ketahanan panas/karat, dan kemudahan sanitasi food contact standar HACCP.
+   - "catatan_uji_fisik": Deskripsi faktual penampakan fisik alat, kelurusan bodi, kelengkapan rak/burner/pintu, stiker proteksi pabrik (jika ada), dan jejak pemakaian wajar.
+   - "estimasi_kondisi_persen": Integer taksiran kemulusan fisik (misal: 80 - 100).
+   - "is_desync": boolean (true jika foto fisik berbeda total dari teks caption awal).
 
 3. TUGAS 3 - EKSTRAKSI MODAL & HPP GUDANG FAKTUAL ("harga_modal"):
-   - Pahami semantik harga dari caption:
-     * "modal 2.5jt" / "2,2jt net" / "harga 4.500.000" -> Ekstrak angka integer rupiah murni (contoh: 2500000).
-     * Jika harga borongan: "ambil 3 unit 6jt" -> Hitung harga satuan per unit: 2000000.
-     * Jika TIDAK ADA angka harga/modal yang jelas di caption -> WAJIB isi "harga_modal": null. Dilarang menebak angka modal jika tidak tertulis!
+   - Pahami semantik harga: "modal 2.5jt" -> 2500000. Jika tidak tertulis angka modal di caption -> "harga_modal": null. Dilarang menebak angka modal jika tidak ada!
 
-4. TUGAS 4 - EVALUASI KONDISI SEJATI & ANTI-JEBAKAN ("kondisi_unit"):
-   - MURNI BINER HANYA 2 PILIHAN: "Bekas" ATAU "Baru".
-   - "Bekas" (Default): Seluruh unit operasional second resto/cafe/bakery. JIKA ada info sparepart baru (contoh: "filter baru", "burner baru", "kran baru", "karet pintu baru") atau durasi pemakaian ("pemakaian baru 4 bulan", "like new"), unit utama TETAP WAJIB "Bekas".
-   - "Baru": Hanya jika unit fisik 100% baru, BNIB, sisa proyek/stok distributor yang belum pernah dipakai sama sekali.
+4. TUGAS 4 - GROUNDING HARGA PASAR FAKTUAL:
+   - "estimasi_harga_baru": Taksiran harga wajar unit BARU distributor resmi di Indonesia (integer rupiah).
+   - "harga_display_low": Rekomendasi harga penawaran second buka wajar di pasar (kelipatan 100rb, ~40%-55% dari harga baru).
+   - "harga_display_high": Batas atas rentang penawaran second di pasar (kelipatan 100rb, ~60%-75% dari harga baru).
 
-5. TUGAS 5 - RISET GROUNDING HARGA PASAR FAKTUAL:
-   - "estimasi_harga_baru": Taksiran harga wajar unit BARU distributor resmi di Indonesia berdasarkan brand, kapasitas, daya watt, dan material SUS 304 (integer rupiah).
-   - "harga_display_low": Rekomendasi harga penawaran second buka wajar di pasar (angka bulat kelipatan 100rb, misal ~40%-55% dari harga baru).
-   - "harga_display_high": Batas atas rentang penawaran second di pasar (angka bulat kelipatan 100rb, misal ~60%-75% dari harga baru).
-
-6. TUGAS 6 - PEMILIHAN 66 KATEGORI SSOT KANONIKAL (URUTAN PER-STAINLESS-AN DULU):
+5. TUGAS 5 - PEMILIHAN 66 KATEGORI SSOT KANONIKAL:
    - Pilih 1 slug resmi kanonikal dari 11 Kategori Induk:
      [BLOK 1: PERSTAINLESSAN / FABRIKASI PASIF - 65% STOK]
      * MEJA STAINLESS: meja-1-susun-stainless, meja-2-susun-stainless, meja-3-susun-stainless, meja-kabinet-stainless, meja-bumbu-stainless, meja-kompor-stainless, lainnya-meja-stainless
@@ -386,17 +372,9 @@ Tugas Anda: Menganalisis caption mentah Telegram dari gudang mitra secara semant
 
      [BLOK 4 & 5: FOOD PROCESSING & LAINNYA]
      * FOOD PROCESSING: mixer-bakery, meat-processing-mesin, lainnya-food-processing
-     * LAINNYA: peralatan-dapur-bekas-lainnya (hanya untuk barang aksesoris/umum: juice dispenser, water boiler, food pan GN, timbangan)
-   - "is_non_product": true jika postingan adalah info dompet hilang, peringatan penipu, loker teknisi, promo ekspedisi/kargo, jasa las, atau barang non-horeca.
-   - "confidence": "HIGH" jika spesifikasi teridentifikasi jelas, "LOW" jika caption sangat minim/meragukan.
+     * LAINNYA: peralatan-dapur-bekas-lainnya
 
-PROGRAMMATIC SEO & 4-TIER ALT TEXT SUITE (VARIASI SEMANTIK KAYA DI GOOGLE):
-- "seo_title": "[nama_alat] [dimensi] [semantic_badge] Siap Pakai | BBKitchen"
-- "yoast_description": "Ready stok [nama_alat] [dimensi] kondisi [kondisi_unit] [semantic_badge] siap pakai lolos QC teknisi BBKitchen. Siap kirim se-Jabodetabek via Lalamove!"
-- "image_alt": "[nama_alat] [dimensi] [semantic_badge] [kondisi_unit] Bergaransi BBKitchen"
-- "image_title": "Jual [nama_alat] [semantic_badge] [brand] [dimensi]"
-- "image_caption": "[nama_alat] [dimensi] kondisi mulus siap pakai lolos QC teknikal BBKitchen"
-- "image_description": "[title_bersih] bergaransi 30 hari siap kirim se-Indonesia."
+   - "is_non_product": true jika postingan adalah info dompet hilang, peringatan penipu, loker teknisi, promo ekspedisi/kargo, jasa las, atau barang non-horeca.
 
 KEMBALIKAN STRICTLY JSON SESUAI SKEMA INI:
 {
@@ -413,6 +391,12 @@ KEMBALIKAN STRICTLY JSON SESUAI SKEMA INI:
   "harga_display_low": int,
   "harga_display_high": int,
   "is_non_product": bool,
+  "is_desync": bool,
+  "estimasi_kondisi_persen": int,
+  "ringkasan_chef": str,
+  "rekomendasi_station": str,
+  "keunggulan_material_higiene": str,
+  "catatan_uji_fisik": str,
   "confidence": "HIGH" | "LOW",
   "seo_title": str,
   "yoast_keyword": str,
@@ -586,11 +570,21 @@ def format_rupiah(num: Optional[int]) -> str:
     return f"Rp {num:,}".replace(",", ".")
 
 def build_rich_description(parsed: Dict[str, Any], pricing: Dict[str, Any], location_name: str, sub_components_baru: List[str] = None) -> str:
-    """Generates sanitized, high-conversion HTML description (pure clean specs without duplicate box)."""
+    """Generates sanitized, high-conversion 4-Pillar Chef HTML description."""
     nama = parsed.get("nama_alat", "Peralatan Dapur Komersial")
     brand = parsed.get("brand", "")
     specs = parsed.get("spesifikasi_ringkas", [])
     garansi = pricing.get("garansi", "QC Serah Terima")
+    station = parsed.get("rekomendasi_station") or "Area Preparasi dan Pengolahan Dapur Komersial"
+    material = parsed.get("keunggulan_material_higiene") or "Material stainless steel food grade komersial yang higienis, tahan karat, dan mudah disanitasi."
+    catatan_fisik = parsed.get("catatan_uji_fisik") or "Fisik unit terawat, struktur kokoh tanpa deformasi, siap langsung dioperasikan."
+    kondisi_pct = parsed.get("estimasi_kondisi_persen") or 85
+    kondisi_label = parsed.get("kondisi_unit", "Bekas")
+    garansi_label = "Garansi Servis 14 Hari BBKitchen" if "14" in str(garansi) else "QC Serah Terima Food Grade"
+
+    disp_low_str = format_rupiah(pricing.get("harga_display_low"))
+    disp_high_str = format_rupiah(pricing.get("harga_display_high"))
+    est_baru_str = format_rupiah(pricing.get("estimasi_harga_baru"))
 
     spec_items = []
     if sub_components_baru:
@@ -609,20 +603,39 @@ def build_rich_description(parsed: Dict[str, Any], pricing: Dict[str, Any], loca
             "<li>Fungsi operasional teruji siap pakai dan lolos inspeksi teknikal.</li>"
         ]
 
-    spec_html = "\n    ".join(spec_items)
-    brand_label = f"({brand})" if brand else "(Commercial Grade)"
-    kondisi_label = parsed.get("kondisi_unit", "Bekas Siap Pakai")
-    garansi_label = "Garansi Servis 14 Hari BBKitchen" if "14" in garansi else "QC Serah Terima Food Grade"
+    spec_html = "\n      ".join(spec_items)
 
     html = f"""<div class="bbk-product-description">
-  <h3>Spesifikasi & Keunggulan Unit</h3>
-  <p>Unit <strong>{nama}</strong> {brand_label} dalam kondisi prima dan siap langsung dioperasikan untuk kebutuhan dapur restoran, cafe, bakery, atau katering Anda. Seluruh unit di BBKitchen telah melalui proses kurasi ketat dan uji fungsi mekanikal serta elektrikal sebelum ditawarkan.</p>
-  <ul>
-    {spec_html}
-    <li><strong>Lokasi Unit:</strong> {location_name}</li>
-    <li><strong>Kondisi:</strong> {kondisi_label}</li>
-    <li><strong>Jaminan & Garansi:</strong> {garansi_label}</li>
-  </ul>
+  <div class="chef-recommendation" style="margin-bottom: 20px;">
+    <h4 style="color: #0f172a; font-weight: 700; margin-bottom: 8px;">👨‍🍳 Rekomendasi Stasiun Dapur & Alur Operasional</h4>
+    <p style="color: #334155; line-height: 1.6; margin: 0;">{station}</p>
+  </div>
+
+  <div class="material-durability" style="margin-bottom: 20px;">
+    <h4 style="color: #0f172a; font-weight: 700; margin-bottom: 8px;">🛡️ Standar Material & Durabilitas Higienis</h4>
+    <p style="color: #334155; line-height: 1.6; margin: 0;">{material}</p>
+  </div>
+
+  <div class="qc-inspection" style="margin-bottom: 20px;">
+    <h4 style="color: #0f172a; font-weight: 700; margin-bottom: 8px;">⚙️ Catatan Uji Fungsi & Fisik Teknisi BBKitchen</h4>
+    <ul style="color: #334155; line-height: 1.6; padding-left: 20px; margin: 0;">
+      <li><strong>Estimasi Fisik:</strong> Sekitar {kondisi_pct}% ({catatan_fisik})</li>
+      <li><strong>Lokasi Unit:</strong> {location_name}</li>
+      <li><strong>Kondisi:</strong> {kondisi_label}</li>
+      <li><strong>Jaminan & Garansi:</strong> {garansi_label}</li>
+      {spec_html}
+    </ul>
+  </div>
+
+  <div class="panduan-anggaran" style="padding: 16px 20px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+    <h4 style="margin-top: 0; color: #0f172a; font-weight: 800;">Panduan Anggaran & Estimasi Nilai Pasar</h4>
+    <ul style="margin-bottom: 8px; color: #334155; line-height: 1.6; padding-left: 20px;">
+      <li><strong>Estimasi Harga Unit Baru (Distributor):</strong> ~{est_baru_str}</li>
+      <li><strong>Rentang Penawaran Unit Second BBKitchen:</strong> {disp_low_str} - {disp_high_str}</li>
+      <li><strong>Efisiensi Investasi:</strong> Hemat signifikan dibanding beli baru dengan fungsi operasional setara</li>
+    </ul>
+    <p style="font-size: 12px; color: #64748b; margin-bottom: 0;"><em>*Catatan: Penawaran final bergantung pada grade kemulusan fisik, kelengkapan aksesoris, dan paket garansi servis. Hubungi konsultan kami untuk cek unit & video tes.</em></p>
+  </div>
 </div>"""
     return html
 
@@ -808,7 +821,7 @@ def normalize_single_caption(
     gateway: Optional[AIGateway] = None
 ) -> Dict[str, Any]:
     """
-    Eksekusi normalisasi lengkap untuk 1 item data mentah.
+    Eksekusi normalisasi multimodal lengkap (Teks Caption + Foto Fisik Base64) untuk 1 item data mentah.
     Menghasilkan dictionary siap simpan ke tabel products (SQLite & Turso Edge).
     """
     if gateway is None:
@@ -824,7 +837,33 @@ def normalize_single_caption(
     modal_pre_check = extract_modal_regex(raw_caption)
     kondisi_pre_check, sub_baru_list = evaluate_condition_binary(raw_caption)
 
-    # 3. LLM Call via AIGateway (Cascade: Holver/DeepSeek -> Gemini -> Groq -> OpenAI)
+    # 3. Load Physical Photo (Local buffer or CDN) as Base64 for Gemini Vision
+    img_b64 = None
+    candidate_paths = [
+        os.path.join(CURRENT_DIR, "..", ".temp_webp", f"{sku}_1.webp"),
+        os.path.join(CURRENT_DIR, "exports", f"{sku}_1.webp"),
+    ]
+    for cp in candidate_paths:
+        if os.path.exists(cp) and os.path.getsize(cp) > 500:
+            try:
+                with open(cp, "rb") as f:
+                    img_b64 = base64.b64encode(f.read()).decode("utf-8")
+                break
+            except Exception:
+                pass
+    
+    if not img_b64 and photo_urls:
+        p_first = photo_urls.split(",")[0].strip()
+        cdn_url = p_first if p_first.startswith("http") else f"https://bukanbarukitchen.com/api/cdn/{p_first}"
+        if cdn_url.startswith("http"):
+            try:
+                r_img = requests.get(cdn_url, timeout=4)
+                if r_img.status_code == 200 and len(r_img.content) > 500:
+                    img_b64 = base64.b64encode(r_img.content).decode("utf-8")
+            except Exception:
+                pass
+
+    # 4. LLM Call via Pure Gemini Gateway (Google AI Studio Primary -> Holver Fallback)
     slugs_list_str = ", ".join(sorted(list(OFFICIAL_CATEGORY_SLUGS)))
     user_prompt = f"""KODE UNIT: {sku}
 LOKASI GUDANG: {location_name} (Hub: {hub_code})
@@ -835,49 +874,30 @@ CAPTION MENTAH GUDANG:
 PILIH SALAH SATU category_slug HANYA DARI DAFTAR 66 KATEGORI RESMI BERIKUT:
 {slugs_list_str}
 
-Kembalikan strictly JSON dengan struktur:
-{{
-  "title_bersih": "[Nama Standar Alat] [Brand jika ada] Second/Baru [Dimensi PxLxT / Kapasitas]",
-  "nama_alat": "...",
-  "brand": "..." (atau null jika fabrikasi stainless / tanpa brand),
-  "dimensi": "...",
-  "semantic_badge": "Ex-Resto" | "Ex-Cafe" | "Ex-Bakery" | "Ex-Hotel" | "Second Mulus" | "Baru Gress",
-  "category_slug": "<wajib salah satu dari 66 daftar resmi di atas>",
-  "kondisi_unit": "Bekas" | "Baru",
-  "status_unit": "READY" | "SOLD",
-  "harga_modal": int | null,
-  "estimasi_harga_baru": int,
-  "harga_display_low": int,
-  "harga_display_high": int,
-  "is_non_product": bool,
-  "confidence": "HIGH" | "LOW",
-  "seo_title": "...",
-  "yoast_keyword": "...",
-  "yoast_description": "...",
-  "spesifikasi_ringkas": ["..."],
-  "image_alt": "...",
-  "image_title": "...",
-  "image_caption": "...",
-  "image_description": "..."
-}}"""
+Kembalikan strictly JSON dengan struktur yang diminta."""
 
     parsed = None
     for attempt in range(1, 4):
         try:
-            parsed = gateway.generate_json(user_prompt, system_prompt=GOLDEN_SYSTEM_PROMPT)
+            if img_b64:
+                parsed = gateway.generate_vision_json(user_prompt, image_base64_list=[img_b64], system_prompt=GOLDEN_SYSTEM_PROMPT)
+            else:
+                parsed = gateway.generate_json(user_prompt, system_prompt=GOLDEN_SYSTEM_PROMPT)
             if parsed and isinstance(parsed, dict) and (parsed.get("title_bersih") or parsed.get("nama_alat")):
                 break
+        except AIGatewayExhaustedError:
+            raise
         except Exception as err:
             print(f"   [AI Gateway Attempt {attempt}/3 Warning on {sku}] {err}")
             if attempt < 3:
                 time.sleep(attempt * 2)
 
-    # 4. Fallback if AI offline or returned invalid schema
+    # 5. Fallback if AI offline or returned invalid schema
     if not parsed or not isinstance(parsed, dict):
         print(f"   [Deterministic Fallback Engine] Generating structured record for {sku}...")
         parsed = extract_product_fallback(raw_caption, sku)
 
-    # 5. Build Title & Sanitize (Opsi 2: Clean Canonical Title with Dimensions)
+    # 6. Build Title & Sanitize (Opsi 2: Clean Canonical Title with Dimensions)
     title_bersih = (parsed.get("title_bersih") or "").strip()
     nama_alat = (parsed.get("nama_alat") or "Peralatan Dapur Komersial").strip()
     brand = (parsed.get("brand") or "").strip()
@@ -940,7 +960,7 @@ Kembalikan strictly JSON dengan struktur:
     if len(title) > 75:
         title = title[:75].rsplit(" ", 1)[0]
 
-    # 6. Sacred Slug Immutability Protection & Unique Formula
+    # 7. Sacred Slug Immutability Protection & Unique Formula
     if existing_slug and str(existing_slug).strip():
         slug = str(existing_slug).strip()
     else:
@@ -953,13 +973,12 @@ Kembalikan strictly JSON dengan struktur:
 
     link_unit = f"https://bukanbarukitchen.com/shop/{slug}/"
 
-    # 7. Category Assertion with SSOT Rules
+    # 8. Category Assertion with SSOT Rules
     cap_full_lower = f"{raw_caption} {title}".lower()
     cat_slug = str(parsed.get("category_slug") or "").strip().lower()
     
     # Deterministic Category Overrides based on Sacred SSOT Rules
     if 'sink' in cap_full_lower or 'singk' in cap_full_lower or 'bak cuci' in cap_full_lower:
-        # 1. Check Jumbo: Utamakan kata 'jumbo' atau ukuran bowl >= 100cm
         is_jumbo = 'jumbo' in cap_full_lower
         if not is_jumbo:
             bowl_match = re.search(r'bowl[:\s]*(\d{2,3})', cap_full_lower)
@@ -977,7 +996,7 @@ Kembalikan strictly JSON dengan struktur:
         elif 'grease' in cap_full_lower or 'lemak' in cap_full_lower:
             cat_slug = 'grease-trap-stainless'
         elif cat_slug in OFFICIAL_CATEGORY_SLUGS and 'sink' in cat_slug:
-            pass # Keep AI resolution if valid sink subcategory
+            pass
         else:
             cat_slug = 'single-sink-stainless'
     elif ('kabinet' in cap_full_lower or 'cabinet' in cap_full_lower) and 'meja' in cap_full_lower:
@@ -988,7 +1007,6 @@ Kembalikan strictly JSON dengan struktur:
         cat_slug = CATEGORY_SYNONYM_MAP[cat_slug]
         
     if cat_slug not in OFFICIAL_CATEGORY_SLUGS:
-        # Fuzzy match
         for official in OFFICIAL_CATEGORY_SLUGS:
             if official in cat_slug or cat_slug in official:
                 cat_slug = official
@@ -996,8 +1014,7 @@ Kembalikan strictly JSON dengan struktur:
         else:
             cat_slug = "peralatan-dapur-bekas-lainnya"
 
-    # 8. Condition Semantic Authority (Pure Binary: 'Baru' vs 'Bekas')
-    # Layer 2 Deterministic Override: Sub-komponen baru (filter baru, kran baru) selalu Bekas
+    # 9. Condition Semantic Authority (Pure Binary: 'Baru' vs 'Bekas')
     if sub_baru_list and kondisi_pre_check == "Bekas Siap Pakai":
         kondisi_final = "Bekas"
     else:
@@ -1007,7 +1024,7 @@ Kembalikan strictly JSON dengan struktur:
         else:
             kondisi_final = "Bekas"
 
-    # 9. Status Biner & Non-Product Semantic Assertion
+    # 10. Status Biner & Non-Product Semantic Assertion
     is_non_product = parsed.get("is_non_product") is True
     if is_non_product:
         status_pipeline = "SKIP_NON_PRODUCT"
@@ -1022,7 +1039,7 @@ Kembalikan strictly JSON dengan struktur:
         else:
             status_unit = "READY"
 
-    # 10. Pricing & Margin Guardrails (Graceful Null Modal SSOT)
+    # 11. Pricing & Margin Guardrails (Graceful Null Modal SSOT)
     modal_raw = parsed.get("harga_modal")
     if modal_raw is not None and isinstance(modal_raw, (int, float)) and int(modal_raw) > 0:
         modal_val = int(modal_raw)
@@ -1045,7 +1062,7 @@ Kembalikan strictly JSON dengan struktur:
         title=title
     )
 
-    # 11. SEO & Descriptions (Opsi 2: Clean Title + Semantic SEO Suite)
+    # 12. SEO & Descriptions with 4-Pillar Chef Copywriting
     badge = parsed.get("semantic_badge") or "Ex-Resto"
     seo_title = (parsed.get("seo_title") or f"{title} | BBKitchen").strip()
     short_desc = f"{title} ({badge}) kondisi {kondisi_final}. Lokasi unit di {location_name}. Lolos uji fungsi & siap kirim bergaransi."
@@ -1054,15 +1071,24 @@ Kembalikan strictly JSON dengan struktur:
     yoast_kw = (parsed.get("yoast_keyword") or f"{nama_alat.lower()} bekas")[:60]
     yoast_desc = (parsed.get("yoast_description") or short_desc)[:155]
 
-    # 12. Programmatic 4-Tier Image Alt Text Suite
+    # 13. Programmatic 4-Tier Image Alt Text Suite
     img_alt = parsed.get("image_alt") or f"{title} Bekas Bergaransi BBKitchen"
     img_title = parsed.get("image_title") or f"Jual {nama_alat} {badge} {brand} {dimensi}".strip()
     img_caption = parsed.get("image_caption") or f"{nama_alat} kondisi prima siap kirim dari {location_name}"
     img_desc = parsed.get("image_description") or short_desc
 
-    # Clean photo URLs
-    final_photos = photo_urls if photo_urls else f"{sku}_1.webp"
+    # 14. Vision Calibration Metadata
+    if img_b64:
+        is_desync = parsed.get("is_desync") is True
+        ai_vision_status = "DESYNC_HEALED" if is_desync else "VERIFIED_MATCH"
+    else:
+        ai_vision_status = "TEXT_ONLY"
 
+    vision_fitur = parsed.get("rekomendasi_station") or ""
+    vision_kondisi_pct = parsed.get("estimasi_kondisi_persen") or 85
+    vision_catatan = parsed.get("catatan_uji_fisik") or ""
+
+    final_photos = photo_urls if photo_urls else f"{sku}_1.webp"
     now_str = time.strftime("%Y-%m-%d %H:%M:%S")
 
     return {
@@ -1100,6 +1126,10 @@ Kembalikan strictly JSON dengan struktur:
         "image_title": img_title,
         "image_caption": img_caption,
         "image_description": img_desc,
+        "ai_vision_status": ai_vision_status,
+        "vision_fitur_utama": vision_fitur,
+        "vision_kondisi_persen": vision_kondisi_pct,
+        "vision_catatan": vision_catatan,
         "is_dirty": 1,
         "tanggal_masuk": now_str,
         "tanggal_terjual": None,

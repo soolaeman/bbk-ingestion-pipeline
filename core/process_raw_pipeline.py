@@ -15,7 +15,7 @@ from datetime import datetime
 
 # Add local path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from ai_gateway import AIGateway, load_env
+from ai_gateway import AIGateway, AIGatewayExhaustedError, load_env
 from normalize_engine import normalize_single_caption
 
 load_env()
@@ -449,6 +449,11 @@ def run_pipeline(dry_run=False, limit=None):
             # Polite pause to stay well within provider rate limits (15 RPM)
             time.sleep(1.2)
 
+        except AIGatewayExhaustedError as e:
+            print(f"\n   [CRITICAL STOP] AI Gateway Exhausted: {e}")
+            print(f"   [FAIL-FAST] Ingestion paused safely at {sku}. Unit {sku} and subsequent pending units remain in raw_pipeline for next scheduled run.")
+            fail_count += 1
+            break
         except Exception as e:
             print(f"   [ERROR] Failed processing {sku}: {e}")
             fail_count += 1
