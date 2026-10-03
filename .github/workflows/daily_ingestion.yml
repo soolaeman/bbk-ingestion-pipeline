@@ -97,8 +97,8 @@ jobs:
 
       - name: Commit and Push Updated Sovereign Database
         run: |
-          git config user.name "BBKitchen Sovereign Bot"
-          git config user.email "bot@bukanbarukitchen.com"
+          git config --global user.name "BBKitchen Sovereign Bot"
+          git config --global user.email "bot@bukanbarukitchen.com"
           git add bbk.db
           [ -f last_success.txt ] && git add last_success.txt || true
           if git diff --staged --quiet; then
@@ -115,8 +115,8 @@ jobs:
         run: |
           if [ -n "$PAT_TOKEN" ]; then
             echo "🚀 Pushing updated bbk.db directly to Storefront & Control Tower..."
-            git config user.name "BBKitchen Sovereign Bot"
-            git config user.email "bot@bukanbarukitchen.com"
+            git config --global user.name "BBKitchen Sovereign Bot"
+            git config --global user.email "bot@bukanbarukitchen.com"
 
             # 1. Push to Storefront (triggers instant Vercel auto-deploy)
             git clone "https://x-access-token:${PAT_TOKEN}@github.com/soolaeman/Front-End-BBKitchen.git" temp_storefront
