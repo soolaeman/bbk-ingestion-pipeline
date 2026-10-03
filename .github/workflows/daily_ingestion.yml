@@ -99,13 +99,57 @@ jobs:
         run: |
           git config user.name "BBKitchen Sovereign Bot"
           git config user.email "bot@bukanbarukitchen.com"
-          git add bbk.db last_success.txt
+          git add bbk.db
+          [ -f last_success.txt ] && git add last_success.txt || true
           if git diff --staged --quiet; then
             echo "No database changes to commit."
           else
             git commit -m "feat(catalog): auto-ingest daily catalog updates [skip ci]"
             git push origin main
             echo "Updated bbk.db successfully committed and pushed to origin main."
+          fi
+
+      - name: Auto-Sync Master DB to Storefront & Control Tower (Option A)
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GH_PAT }}
+        run: |
+          if [ -n "$PAT_TOKEN" ]; then
+            echo "🚀 Pushing updated bbk.db directly to Storefront & Control Tower..."
+            git config user.name "BBKitchen Sovereign Bot"
+            git config user.email "bot@bukanbarukitchen.com"
+
+            # 1. Push to Storefront (triggers instant Vercel auto-deploy)
+            git clone "https://x-access-token:${PAT_TOKEN}@github.com/soolaeman/Front-End-BBKitchen.git" temp_storefront
+            cp bbk.db temp_storefront/data/bbk.db
+            cd temp_storefront
+            git add data/bbk.db
+            if ! git diff --staged --quiet; then
+              git commit -m "feat(catalog): auto-update master database from cloud ingestion [skip ci]"
+              git push origin main
+              echo "✅ Storefront updated! Vercel redeployment triggered."
+            else
+              echo "ℹ️ Storefront is already up-to-date."
+            fi
+            cd ..
+            rm -rf temp_storefront
+
+            # 2. Push to Control Tower
+            git clone "https://x-access-token:${PAT_TOKEN}@github.com/soolaeman/BBKitchenBTC.git" temp_tower
+            cp bbk.db temp_tower/data/bbk.db
+            cd temp_tower
+            git add data/bbk.db
+            if ! git diff --staged --quiet; then
+              git commit -m "feat(catalog): auto-update master database from cloud ingestion [skip ci]"
+              git push origin main
+              echo "✅ Control Tower updated!"
+            else
+              echo "ℹ️ Control Tower is already up-to-date."
+            fi
+            cd ..
+            rm -rf temp_tower
+          else
+            echo "⚠️ [NOTICE] PAT_TOKEN / GH_PAT secret is not yet configured in GitHub Secrets."
+            echo "Master database is committed to BBK-Automation. Configure PAT_TOKEN to enable 100% hands-free multi-repo deployment."
           fi
 
       - name: Pipeline Execution Summary
