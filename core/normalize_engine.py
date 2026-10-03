@@ -853,11 +853,14 @@ def normalize_single_caption(
                 pass
     
     if not img_b64 and photo_urls:
-        p_first = photo_urls.split(",")[0].strip()
-        cdn_url = p_first if p_first.startswith("http") else f"https://bukanbarukitchen.com/api/cdn/{p_first}"
+        p_first = photo_urls.replace("|", ",").split(",")[0].strip()
+        r2_base = os.getenv("NEXT_PUBLIC_R2_PHOTO_BASE_URL", "https://bukanbarukitchen.com/api/cdn").rstrip("/")
+        if "r2.dev" in r2_base:
+            r2_base = "https://bukanbarukitchen.com/api/cdn"
+        cdn_url = p_first if p_first.startswith("http") else f"{r2_base}/{p_first}"
         if cdn_url.startswith("http"):
             try:
-                r_img = requests.get(cdn_url, timeout=4)
+                r_img = requests.get(cdn_url, timeout=6)
                 if r_img.status_code == 200 and len(r_img.content) > 500:
                     img_b64 = base64.b64encode(r_img.content).decode("utf-8")
             except Exception:
@@ -898,10 +901,38 @@ Kembalikan strictly JSON dengan struktur yang diminta."""
         parsed = extract_product_fallback(raw_caption, sku)
 
     # 6. Build Title & Sanitize (Opsi 2: Clean Canonical Title with Dimensions)
-    title_bersih = (parsed.get("title_bersih") or "").strip()
-    nama_alat = (parsed.get("nama_alat") or "Peralatan Dapur Komersial").strip()
-    brand = (parsed.get("brand") or "").strip()
-    dimensi = (parsed.get("dimensi") or "").strip()
+    title_bersih = str(parsed.get("title_bersih") or "").strip()
+    if title_bersih.lower() in ["none", "null"]:
+        title_bersih = ""
+
+    nama_alat = str(parsed.get("nama_alat") or "Peralatan Dapur Komersial").strip()
+    if nama_alat.lower() in ["none", "null"]:
+        nama_alat = "Peralatan Dapur Komersial"
+
+    brand = str(parsed.get("brand") or "").strip()
+    if brand.lower() in ["none", "null"]:
+        brand = ""
+
+    raw_dim = parsed.get("dimensi")
+    if isinstance(raw_dim, dict):
+        p = raw_dim.get("panjang") or raw_dim.get("p") or raw_dim.get("length") or ""
+        l = raw_dim.get("lebar") or raw_dim.get("l") or raw_dim.get("width") or ""
+        t = raw_dim.get("tinggi") or raw_dim.get("t") or raw_dim.get("height") or ""
+        parts_dim = [str(x).strip() for x in [p, l, t] if str(x).strip()]
+        if parts_dim:
+            dimensi = "x".join(parts_dim)
+            if not dimensi.lower().endswith("cm"):
+                dimensi = f"{dimensi} cm"
+        else:
+            dimensi = ""
+    elif isinstance(raw_dim, list):
+        dimensi = "x".join(str(x).strip() for x in raw_dim if str(x).strip())
+        if dimensi and not dimensi.lower().endswith("cm"):
+            dimensi = f"{dimensi} cm"
+    else:
+        dimensi = str(raw_dim or "").strip()
+        if dimensi.lower() in ["none", "null", "undefined"]:
+            dimensi = ""
 
     # If dimension missing from AI output, recover from raw caption/text
     if not dimensi:

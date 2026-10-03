@@ -11,6 +11,11 @@ import sys
 import os
 import argparse
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "core"))
 
@@ -43,11 +48,7 @@ Examples:
     parser_norm.add_argument("--dry-run", action="store_true", help="Dry run without writing to SQLite")
 
     # Command: sync
-    parser_sync = subparsers.add_parser("sync", help="Sync SQLite products & master tables to Turso Edge")
-    parser_sync.add_argument("--dirty", action="store_true", help="Sync only dirty (updated/new) records")
-    parser_sync.add_argument("--master", action="store_true", help="Sync master categories & warehouses")
-    parser_sync.add_argument("--all", action="store_true", help="Sync all products")
-    parser_sync.add_argument("--min-sku", type=str, default=None, help="Sync products from minimum SKU")
+    parser_sync = subparsers.add_parser("sync", help="Replicate master SQLite bbk.db across sovereign repositories (bbk-storefront, bbk-control-tower, Jarvis-OS)")
 
     # Command: heal
     parser_heal = subparsers.add_parser("heal", help="Heal and re-enrich legacy catalog with Holver.id/DeepSeek AI")
@@ -85,18 +86,9 @@ Examples:
         run_pipeline(dry_run=args.dry_run, limit=args.limit)
 
     elif args.command == "sync":
-        print("=== [STEP 3/4] Syncing to Turso Cloud Edge ===")
-        from sync_turso import sync_to_turso, sync_master_tables
-        if args.master or (not args.dirty and not args.all and not args.min_sku):
-            sync_master_tables()
-        if args.dirty:
-            sync_to_turso(only_dirty=True)
-        elif args.all:
-            sync_to_turso()
-        elif args.min_sku:
-            sync_to_turso(min_sku=args.min_sku)
-        else:
-            sync_to_turso(only_dirty=True)
+        print("=== [STEP 3/4] Replicating Master SQLite to Repositories ===")
+        from sync_repos import sync_master_db
+        sync_master_db()
 
     elif args.command == "heal":
         print("=== [BULK HEALER] Healing Legacy Catalog with Holver.id/DeepSeek AI ===")
@@ -138,10 +130,9 @@ Examples:
         run_pipeline(dry_run=False)
 
         # 3. Sync
-        print("\n--- 3. Syncing to Turso Cloud Edge ---")
-        from sync_turso import sync_to_turso, sync_master_tables
-        sync_master_tables()
-        sync_to_turso(only_dirty=True)
+        print("\n--- 3. Replicating Master SQLite to Repositories ---")
+        from sync_repos import sync_master_db
+        sync_master_db()
 
         # 4. Upload to Cloudflare R2 & Auto-Purge
         print("\n--- 4. Syncing Master WebP Photos to Cloudflare R2 ---")

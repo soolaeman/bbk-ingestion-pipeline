@@ -132,56 +132,7 @@ def ensure_db_schema(db_path):
                     """, (code, w.get("name", code), w.get("hub_id", code), w.get("location", ""), w.get("telegram_id", "")))
 
     conn.commit()
-
-    # If products table is empty (fresh cloud runner), bootstrap existing links & max SKU from Turso
-    cur.execute("SELECT COUNT(*) FROM products")
-    prod_count = cur.fetchone()[0]
-    if prod_count == 0:
-        bootstrap_from_turso(conn)
-
     conn.close()
-
-def bootstrap_from_turso(conn):
-    """Pulls existing telegram links and max SKU from Turso Cloud Edge to seed the local runner."""
-    turso_url = os.getenv("TURSO_DATABASE_URL", "libsql://bbk-soolaeman.aws-ap-northeast-1.turso.io")
-    turso_token = os.getenv("TURSO_AUTH_TOKEN", "")
-    if not turso_token:
-        return
-
-    http_url = turso_url.replace("libsql://", "https://").rstrip("/") + "/v2/pipeline"
-    headers = {
-        "Authorization": f"Bearer {turso_token}",
-        "Content-Type": "application/json"
-    }
-
-    try:
-        payload = {
-            "requests": [
-                {
-                    "type": "execute",
-                    "stmt": {
-                        "sql": "SELECT sku, link_telegram, featured_image FROM products WHERE link_telegram IS NOT NULL AND link_telegram != ''"
-                    }
-                }
-            ]
-        }
-        res = requests.post(http_url, json=payload, headers=headers, timeout=15)
-        if res.status_code == 200:
-            data = res.json()
-            rows = data.get("results", [{}])[0].get("response", {}).get("result", {}).get("rows", [])
-            cur = conn.cursor()
-            inserted = 0
-            for r in rows:
-                sku = r[0].get("value")
-                link_tg = r[1].get("value")
-                feat_img = r[2].get("value") if len(r) > 2 else ""
-                if sku and link_tg:
-                    cur.execute("INSERT OR IGNORE INTO products (sku, link_telegram, featured_image) VALUES (?, ?, ?)", (sku, link_tg, feat_img))
-                    inserted += 1
-            conn.commit()
-            print(f"📥 [CLOUD BOOTSTRAP] Sukses memuat {inserted} link Telegram dari Turso Cloud Edge.")
-    except Exception as e:
-        print(f"⚠️ [CLOUD BOOTSTRAP WARNING] Gagal menarik link dari Turso: {e}")
 
 if __name__ == "__main__":
     db_test = ROOT_DIR / "bbk.db"

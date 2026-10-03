@@ -113,15 +113,7 @@ def get_existing_links():
         except Exception as e:
             print(f"  [Notice] Local DB link check: {e}")
 
-    # 2. Ambil dari Turso Cloud SSOT (Proteksi mutlak untuk GitHub Actions runner)
-    try:
-        from sync_turso import fetch_turso_state
-        _, turso_links = fetch_turso_state()
-        valid_links.update(turso_links)
-    except Exception as e:
-        print(f"  [Notice] Turso cloud state fetch: {e}")
-
-    print(f"🛡️ Total link Telegram terdaftar di SSOT (Local + Turso): {len(valid_links)} link.")
+    print(f"🛡️ Total link Telegram terdaftar di SSOT SQLite: {len(valid_links)} link.")
     return valid_links
 
 async def fetch_group(src_code, chat_id, start_date, end_date, existing_links):
@@ -255,16 +247,7 @@ def ingest_exports_to_raw_pipeline():
         """).fetchall() if r[0]
     )
 
-    # 2. Ambil state dari Turso Cloud SSOT (Proteksi mutlak untuk cloud runner)
-    cloud_max_sku = 0
-    try:
-        from sync_turso import fetch_turso_state
-        cloud_max_sku, turso_links = fetch_turso_state()
-        existing_links.update(turso_links)
-    except Exception as e:
-        print(f"  [Notice] Turso cloud state check: {e}")
-
-    print(f"📊 Total link Telegram yang sudah terdaftar di SSOT: {len(existing_links)} link.")
+    print(f"📊 Total link Telegram yang sudah terdaftar di SSOT SQLite: {len(existing_links)} link.")
 
     # 3. Hitung next SKU
     cur.execute("SELECT MAX(CAST(SUBSTR(sku, 4) AS INTEGER)) FROM products WHERE sku LIKE 'BBK%'")

@@ -102,7 +102,7 @@ class AIGateway:
                 "parts": [{"text": system_prompt}]
             }
 
-        res = requests.post(url, json=payload, timeout=4)
+        res = requests.post(url, json=payload, timeout=20)
         if res.status_code != 200:
             raise RuntimeError(f"Google Gemini Direct error {res.status_code}: {res.text[:200]}")
         
@@ -190,8 +190,9 @@ class AIGateway:
         3. Holver.id Sovereign Workhorse (deepseek-4.1-flash) [Text Fallback if Gemini quota depleted]
         """
         providers = [
-            ("1a. Google AI Studio (gemini-3.8-flash Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-3.8-flash")),
-            ("1b. Google AI Studio (gemini-2.5-flash-lite Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-2.5-flash-lite")),
+            ("1a. Google AI Studio (gemini-3.5-flash-lite Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-3.5-flash-lite")),
+            ("1b. Google AI Studio (gemini-3-flash-preview Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-3-flash-preview")),
+            ("1c. Google AI Studio (gemini-3.5-flash Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-3.5-flash")),
             ("2a. Holver.id Gemini Gateway (gemini-3.8-flash)", lambda: self._call_holver_gemini(prompt, image_base64_list, system_prompt, "gemini-3.8-flash")),
             ("2b. Holver.id Gemini Gateway (gemini-3.7-flash)", lambda: self._call_holver_gemini(prompt, image_base64_list, system_prompt, "gemini-3.7-flash")),
             ("3. Holver.id Workhorse (deepseek-4.1-flash)", lambda: self._call_holver_text_workhorse(prompt, system_prompt, "deepseek-4.1-flash")),

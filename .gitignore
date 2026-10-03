@@ -29,6 +29,7 @@ scratch/
 *.tmp
 *.dump
 *.db
+!bbk.db
 *.sqlite
 *.sqlite3
 r2_uploaded_cache.txt

@@ -91,8 +91,8 @@ def main():
     pipeline_script = BASE_DIR / "bbk_pipeline.py"
     run_step("STEP 2/4 — AI NORMALIZATION, SSOT & WEBP WATERMARK", f"{PYTHON_EXE} {pipeline_script} normalize")
 
-    # STEP 3: SYNC TO TURSO CLOUD EDGE
-    run_step("STEP 3/4 — SYNC CATALOG & MASTERS TO TURSO CLOUD EDGE", f"{PYTHON_EXE} {pipeline_script} sync --dirty --master")
+    # STEP 3: REPLICATE MASTER SQLITE TO REPOSITORIES
+    run_step("STEP 3/4 — REPLICATE MASTER SQLITE TO SOVEREIGN REPOSITORIES", f"{PYTHON_EXE} {pipeline_script} sync")
 
     # STEP 4: AUTO-UPLOAD MASTER WEBP TO CLOUDFLARE R2
     sync_r2_script = CORE_DIR / "sync_photos_to_r2.py"
