@@ -41,6 +41,8 @@ Examples:
     parser_fetch = subparsers.add_parser("fetch", help="Fetch raw messages from Telegram partner channels")
     parser_fetch.add_argument("--days", type=int, default=1, help="Number of lookback days for Telegram fetch")
     parser_fetch.add_argument("--limit", type=int, default=50, help="Maximum messages to fetch per channel")
+    parser_fetch.add_argument("--start", type=str, default=None, help="Start date YYYY-MM-DD")
+    parser_fetch.add_argument("--end", type=str, default=None, help="End date YYYY-MM-DD")
 
     # Command: normalize
     parser_norm = subparsers.add_parser("normalize", help="Process raw items with AI & SSOT taxonomy")
@@ -65,6 +67,8 @@ Examples:
     # Command: run-all
     parser_all = subparsers.add_parser("run-all", help="Execute complete automated pipeline (fetch -> normalize -> sync -> upload-r2)")
     parser_all.add_argument("--days", type=int, default=1, help="Number of lookback days for Telegram fetch (default: 1)")
+    parser_all.add_argument("--start", type=str, default=None, help="Start date YYYY-MM-DD")
+    parser_all.add_argument("--end", type=str, default=None, help="End date YYYY-MM-DD")
 
     args = parser.parse_args()
 
@@ -76,7 +80,10 @@ Examples:
         print("=== [STEP 1/4] Fetching from Telegram Channels ===")
         try:
             from telethon_fetch import main as telethon_main
-            telethon_main(days=args.days)
+            f_args = []
+            if args.start and args.end:
+                f_args = ["--start", args.start, "--end", args.end]
+            telethon_main(days=args.days, args_list=f_args if f_args else None)
         except Exception as e:
             print(f"[ERROR] Fetch execution failed: {e}")
 
@@ -117,10 +124,14 @@ Examples:
         print("==================================================")
         
         # 1. Fetch
-        print(f"\n--- 1. Fetching Telegram Messages (Lookback: {args.days} hari) ---")
+        range_str = f"{args.start} s/d {args.end}" if (args.start and args.end) else f"Lookback: {args.days} hari"
+        print(f"\n--- 1. Fetching Telegram Messages ({range_str}) ---")
         try:
             from telethon_fetch import main as telethon_main
-            telethon_main(days=args.days)
+            f_args = []
+            if args.start and args.end:
+                f_args = ["--start", args.start, "--end", args.end]
+            telethon_main(days=args.days, args_list=f_args if f_args else None)
         except Exception as e:
             print(f"[WARN] Fetch step skipped or encountered warning: {e}")
 

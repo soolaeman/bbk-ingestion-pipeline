@@ -441,7 +441,7 @@ def calculate_margins_and_anchors(
         'salamander', 'kebab', 'proofer', 'dishwasher', 'mesin'
     ]
     is_machinery = any(k in cat_lower for k in machinery_keywords)
-    garansi = "14 Hari Servis" if is_machinery else "QC Serah Terima"
+    garansi = "14 Hari Servis BBKitchen & Lolos Uji Fungsi" if is_machinery else "QC Serah Terima & Cek Fisik di Lokasi"
 
     if modal is not None and modal > 0:
         modal_clean = int(modal)
@@ -837,34 +837,43 @@ def normalize_single_caption(
     modal_pre_check = extract_modal_regex(raw_caption)
     kondisi_pre_check, sub_baru_list = evaluate_condition_binary(raw_caption)
 
-    # 3. Load Physical Photo (Local buffer or CDN) as Base64 for Gemini Vision
-    img_b64 = None
-    candidate_paths = [
-        os.path.join(CURRENT_DIR, "..", ".temp_webp", f"{sku}_1.webp"),
-        os.path.join(CURRENT_DIR, "exports", f"{sku}_1.webp"),
-    ]
-    for cp in candidate_paths:
-        if os.path.exists(cp) and os.path.getsize(cp) > 500:
-            try:
-                with open(cp, "rb") as f:
-                    img_b64 = base64.b64encode(f.read()).decode("utf-8")
-                break
-            except Exception:
-                pass
-    
-    if not img_b64 and photo_urls:
-        p_first = photo_urls.replace("|", ",").split(",")[0].strip()
-        r2_base = os.getenv("NEXT_PUBLIC_R2_PHOTO_BASE_URL", "https://bukanbarukitchen.com/api/cdn").rstrip("/")
-        if "r2.dev" in r2_base:
-            r2_base = "https://bukanbarukitchen.com/api/cdn"
-        cdn_url = p_first if p_first.startswith("http") else f"{r2_base}/{p_first}"
-        if cdn_url.startswith("http"):
-            try:
-                r_img = requests.get(cdn_url, timeout=6)
-                if r_img.status_code == 200 and len(r_img.content) > 500:
-                    img_b64 = base64.b64encode(r_img.content).decode("utf-8")
-            except Exception:
-                pass
+    # 3. Load Physical Photos (Local ephemeral buffer or CDN) as Base64 for Gemini Vision
+    img_b64_list = []
+    photo_candidates = []
+    if photo_urls:
+        photo_candidates = [p.strip() for p in photo_urls.replace("|", ",").split(",") if p.strip()]
+    if not photo_candidates:
+        photo_candidates = [f"{sku}_1.webp", f"{sku}_2.webp", f"{sku}_3.webp"]
+
+    for p_name in photo_candidates[:3]:
+        found_b64 = None
+        local_paths = [
+            os.path.join(CURRENT_DIR, "..", ".temp_webp", p_name),
+            os.path.join(CURRENT_DIR, ".temp_webp", p_name),
+            os.path.join(CURRENT_DIR, "exports", p_name),
+        ]
+        for lp in local_paths:
+            if os.path.exists(lp) and os.path.getsize(lp) > 500:
+                try:
+                    with open(lp, "rb") as f:
+                        found_b64 = base64.b64encode(f.read()).decode("utf-8")
+                    break
+                except Exception:
+                    pass
+        if not found_b64:
+            r2_base = os.getenv("NEXT_PUBLIC_R2_PHOTO_BASE_URL", "https://bukanbarukitchen.com/api/cdn").rstrip("/")
+            if "r2.dev" in r2_base:
+                r2_base = "https://bukanbarukitchen.com/api/cdn"
+            cdn_url = p_name if p_name.startswith("http") else f"{r2_base}/{p_name}"
+            if cdn_url.startswith("http"):
+                try:
+                    r_img = requests.get(cdn_url, timeout=5)
+                    if r_img.status_code == 200 and len(r_img.content) > 500:
+                        found_b64 = base64.b64encode(r_img.content).decode("utf-8")
+                except Exception:
+                    pass
+        if found_b64:
+            img_b64_list.append(found_b64)
 
     # 4. LLM Call via Pure Gemini Gateway (Google AI Studio Primary -> Holver Fallback)
     slugs_list_str = ", ".join(sorted(list(OFFICIAL_CATEGORY_SLUGS)))
@@ -882,8 +891,8 @@ Kembalikan strictly JSON dengan struktur yang diminta."""
     parsed = None
     for attempt in range(1, 4):
         try:
-            if img_b64:
-                parsed = gateway.generate_vision_json(user_prompt, image_base64_list=[img_b64], system_prompt=GOLDEN_SYSTEM_PROMPT)
+            if img_b64_list:
+                parsed = gateway.generate_vision_json(user_prompt, image_base64_list=img_b64_list, system_prompt=GOLDEN_SYSTEM_PROMPT)
             else:
                 parsed = gateway.generate_json(user_prompt, system_prompt=GOLDEN_SYSTEM_PROMPT)
             if parsed and isinstance(parsed, dict) and (parsed.get("title_bersih") or parsed.get("nama_alat")):
@@ -1109,9 +1118,9 @@ Kembalikan strictly JSON dengan struktur yang diminta."""
     img_desc = parsed.get("image_description") or short_desc
 
     # 14. Vision Calibration Metadata
-    if img_b64:
+    if img_b64_list:
         is_desync = parsed.get("is_desync") is True
-        ai_vision_status = "DESYNC_HEALED" if is_desync else "VERIFIED_MATCH"
+        ai_vision_status = "DESYNC_HEALED" if is_desync else "SOVEREIGN_HEALED"
     else:
         ai_vision_status = "TEXT_ONLY"
 
@@ -1161,6 +1170,7 @@ Kembalikan strictly JSON dengan struktur yang diminta."""
         "vision_fitur_utama": vision_fitur,
         "vision_kondisi_persen": vision_kondisi_pct,
         "vision_catatan": vision_catatan,
+        "sovereign_healed": 1 if img_b64_list else 0,
         "is_dirty": 1,
         "tanggal_masuk": now_str,
         "tanggal_terjual": None,

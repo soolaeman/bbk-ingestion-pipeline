@@ -258,7 +258,7 @@ def ingest_exports_to_raw_pipeline():
     row_raw = cur.fetchone()
     max_raw = row_raw[0] if row_raw and row_raw[0] is not None else 0
 
-    next_idx = max(max_prod, max_raw, cloud_max_sku, 3097) + 1
+    next_idx = max(max_prod, max_raw, 3188) + 1
     print(f"🔢 SKU selanjutnya dimulai dari: BBK{next_idx:04d}")
 
     # 3. Pure Cloud Ephemeral WebP Buffer (.temp_webp)
