@@ -20,14 +20,27 @@ if hasattr(sys.stderr, "reconfigure"):
 def get_master_db():
     current_dir = Path(__file__).resolve().parent
     candidates = [
-        current_dir.parent.parent / "Jarvis-OS" / "domains" / "business" / "bbkitchen" / "data" / "bbk.db",
         current_dir.parent / "bbk.db",
         current_dir.parent / "data" / "bbk.db",
+        current_dir.parent.parent / "Jarvis-OS" / "domains" / "business" / "bbkitchen" / "data" / "bbk.db",
     ]
+    best_cand = None
+    best_sku = -1
     for cand in candidates:
         if cand.exists() and cand.stat().st_size > 100_000:
-            return cand
-    return None
+            try:
+                conn = sqlite3.connect(cand)
+                cur = conn.cursor()
+                cur.execute("SELECT MAX(CAST(SUBSTR(sku, 4) AS INTEGER)) FROM products WHERE sku LIKE 'BBK%'")
+                row = cur.fetchone()
+                val = row[0] if row and row[0] is not None else 0
+                conn.close()
+                if val > best_sku:
+                    best_sku = val
+                    best_cand = cand
+            except Exception:
+                pass
+    return best_cand
 
 def sync_master_db(source_db=None):
     if not source_db:
