@@ -18,9 +18,19 @@ on:
           - sync
           - upload-r2
       days:
-        description: 'Lookback days for Telegram fetch (default: 1, or enter 7, 14 for backlog)'
+        description: 'Lookback days for Telegram fetch (default: 1, or enter 2, 7, 14)'
         required: false
         default: '1'
+        type: string
+      start_date:
+        description: 'Start date YYYY-MM-DD (e.g. 2026-10-02)'
+        required: false
+        default: ''
+        type: string
+      end_date:
+        description: 'End date YYYY-MM-DD (e.g. 2026-10-03)'
+        required: false
+        default: ''
         type: string
 
 jobs:
@@ -74,8 +84,16 @@ jobs:
         run: |
           COMMAND="${{ github.event.inputs.command || 'run-all' }}"
           DAYS="${{ github.event.inputs.days || '1' }}"
-          echo "Executing BBKitchen Pipeline: python bbk_pipeline.py $COMMAND --days $DAYS"
-          python bbk_pipeline.py "$COMMAND" --days "$DAYS"
+          START_DATE="${{ github.event.inputs.start_date }}"
+          END_DATE="${{ github.event.inputs.end_date }}"
+          
+          if [ -n "$START_DATE" ] && [ -n "$END_DATE" ]; then
+            echo "Executing BBKitchen Pipeline with Date Range: $START_DATE to $END_DATE"
+            python bbk_pipeline.py "$COMMAND" --start "$START_DATE" --end "$END_DATE"
+          else
+            echo "Executing BBKitchen Pipeline with Lookback: $DAYS days"
+            python bbk_pipeline.py "$COMMAND" --days "$DAYS"
+          fi
 
       - name: Commit and Push Updated Sovereign Database
         run: |

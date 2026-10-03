@@ -72,7 +72,7 @@ class AIGateway:
         self.holver_key = os.getenv("HOLVER_API_KEY", "")
         self.holver_base_url = os.getenv("HOLVER_BASE_URL", "https://api.holver.id/v1")
 
-    def _call_google_gemini(self, prompt: str, image_base64_list: Optional[List[str]] = None, system_prompt: Optional[str] = None, model: str = "gemini-2.5-flash") -> dict:
+    def _call_google_gemini(self, prompt: str, image_base64_list: Optional[List[str]] = None, system_prompt: Optional[str] = None, model: str = "gemini-3.5-flash-lite") -> dict:
         if not self.gemini_key:
             raise ValueError("GEMINI_API_KEY not configured")
         
@@ -191,8 +191,9 @@ class AIGateway:
         """
         providers = [
             ("1a. Google AI Studio (gemini-3.5-flash-lite Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-3.5-flash-lite")),
-            ("1b. Google AI Studio (gemini-3-flash-preview Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-3-flash-preview")),
-            ("1c. Google AI Studio (gemini-3.5-flash Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-3.5-flash")),
+            ("1b. Google AI Studio (gemini-3.5-flash Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-3.5-flash")),
+            ("1c. Google AI Studio (gemini-3.7-flash Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-3.7-flash")),
+            ("1d. Google AI Studio (gemini-flash-latest Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-flash-latest")),
             ("2a. Holver.id Gemini Gateway (gemini-3.8-flash)", lambda: self._call_holver_gemini(prompt, image_base64_list, system_prompt, "gemini-3.8-flash")),
             ("2b. Holver.id Gemini Gateway (gemini-3.7-flash)", lambda: self._call_holver_gemini(prompt, image_base64_list, system_prompt, "gemini-3.7-flash")),
             ("3. Holver.id Workhorse (deepseek-4.1-flash)", lambda: self._call_holver_text_workhorse(prompt, system_prompt, "deepseek-4.1-flash")),
