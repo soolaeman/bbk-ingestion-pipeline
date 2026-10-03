@@ -152,42 +152,12 @@ class AIGateway:
         raw_content = data["choices"][0]["message"]["content"]
         return parse_json_safely(raw_content)
 
-    def _call_holver_text_workhorse(self, prompt: str, system_prompt: Optional[str] = None, model: str = "deepseek-4.1-flash") -> dict:
-        if not self.holver_key:
-            raise ValueError("HOLVER_API_KEY not configured")
-        
-        url = f"{self.holver_base_url.rstrip('/')}/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {self.holver_key}",
-            "Content-Type": "application/json"
-        }
-        messages = []
-        if system_prompt:
-            messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": prompt})
-
-        payload = {
-            "model": model,
-            "messages": messages,
-            "response_format": {"type": "json_object"},
-            "temperature": 0.1,
-            "max_tokens": 2048
-        }
-
-        res = requests.post(url, headers=headers, json=payload, timeout=25)
-        if res.status_code != 200:
-            raise RuntimeError(f"Holver Text Workhorse error {res.status_code}: {res.text[:200]}")
-        
-        data = res.json()
-        raw_content = data["choices"][0]["message"]["content"]
-        return parse_json_safely(raw_content)
-
     def generate_vision_json(self, prompt: str, image_base64_list: Optional[List[str]] = None, system_prompt: Optional[str] = None) -> dict:
         """
-        Executes prompt & optional photos strictly through Sovereign Cascade:
-        1. Google AI Studio Direct (gemini-3.8-flash / gemini-2.5-flash-lite) [Primary Free Tier]
+        Executes prompt & optional photos strictly through Sovereign Pure Gemini Cascade:
+        1. Google AI Studio Direct (gemini-3.5-flash-lite / gemini-3.5-flash / gemini-3.7-flash / gemini-flash-latest) [Primary Free Tier]
         2. Holver.id Gemini Gateway (gemini-3.8-flash / gemini-3.7-flash) [Sovereign Vision Proxy]
-        3. Holver.id Sovereign Workhorse (deepseek-4.1-flash) [Text Fallback if Gemini quota depleted]
+        Zero DeepSeek, Zero Non-Gemini models.
         """
         providers = [
             ("1a. Google AI Studio (gemini-3.5-flash-lite Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-3.5-flash-lite")),
@@ -196,7 +166,6 @@ class AIGateway:
             ("1d. Google AI Studio (gemini-flash-latest Direct)", lambda: self._call_google_gemini(prompt, image_base64_list, system_prompt, "gemini-flash-latest")),
             ("2a. Holver.id Gemini Gateway (gemini-3.8-flash)", lambda: self._call_holver_gemini(prompt, image_base64_list, system_prompt, "gemini-3.8-flash")),
             ("2b. Holver.id Gemini Gateway (gemini-3.7-flash)", lambda: self._call_holver_gemini(prompt, image_base64_list, system_prompt, "gemini-3.7-flash")),
-            ("3. Holver.id Workhorse (deepseek-4.1-flash)", lambda: self._call_holver_text_workhorse(prompt, system_prompt, "deepseek-4.1-flash")),
         ]
 
         last_error = None

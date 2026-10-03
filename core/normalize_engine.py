@@ -8,7 +8,7 @@ Features:
    - Layer 1: Regex Pre-Parser (Sanitasi Modal, Kontak, WhatsApp, Noise)
    - Layer 2: Deterministic Binary Condition Evaluator (False Positive sub-komponen baru vs unit bekas)
    - Layer 3: Kamus Slang Fonetik Gudang Horeca Lokal
-   - Layer 4: LLM Structured JSON Extraction via AIGateway (OpenAI ➔ Gemini ➔ Groq ➔ DeepSeek)
+   - Layer 4: LLM Structured JSON Extraction via AIGateway (Pure Gemini Cascade)
    - Layer 5: Post-Validator & SSOT Taxonomy Assertion (58 Kategori SSOT & Guardrail Margins)
 2. Sacred Slug Protection: Kunci mati permalink Google Search Console untuk produk lama (Zero 404).
 3. Zero External Dependencies: Pure Python standard library + requests + AIGateway.
@@ -843,9 +843,9 @@ def normalize_single_caption(
     if photo_urls:
         photo_candidates = [p.strip() for p in photo_urls.replace("|", ",").split(",") if p.strip()]
     if not photo_candidates:
-        photo_candidates = [f"{sku}_1.webp", f"{sku}_2.webp", f"{sku}_3.webp"]
+        photo_candidates = [f"{sku}_{i}.webp" for i in range(1, 6)]
 
-    for p_name in photo_candidates[:3]:
+    for p_name in photo_candidates[:5]:
         found_b64 = None
         local_paths = [
             os.path.join(CURRENT_DIR, "..", ".temp_webp", p_name),

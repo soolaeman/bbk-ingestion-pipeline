@@ -7,7 +7,7 @@ Features:
 1. Sacred Slug Immutability (SSOT Rule #25): Kunci mati permalink Google Search Console (Zero 404).
 2. 5-Layer Semantic Healing: Title kanonikal berdimensi, taksonomi 58 kategori SSOT, anti-jebakan biner,
    rich HTML description bersih tanpa box duplikat, dan 4-tier image alt text suite.
-3. Pluggable AI Gateway: Holver.id (Tier 1) -> DeepSeek (Tier 2) -> Gemini -> Groq -> OpenAI.
+3. Pure Gemini Gateway: Google AI Studio Direct -> Holver.id Gemini Gateway (Zero DeepSeek).
 4. Checkpointing & Resumability: Track state in checkpoint file with batch commits.
 5. Dual DB Auto-Sync: Updates both Jarvis-OS master bbk.db and bbk-storefront/data/bbk.db.
 """
@@ -216,7 +216,7 @@ def update_product_in_db(conn: sqlite3.Connection, record: Dict[str, Any]):
             image_title = ?,
             image_caption = ?,
             image_description = ?,
-            normalization_source = 'HOLVER_DEEPSEEK',
+            normalization_source = 'PURE_GEMINI',
             ai_enrichment_status = 'COMPLETED',
             ai_enrich_status = 'COMPLETED',
             is_dirty = 1,

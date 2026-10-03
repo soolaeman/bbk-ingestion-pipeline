@@ -53,7 +53,7 @@ Examples:
     parser_sync = subparsers.add_parser("sync", help="Replicate master SQLite bbk.db across sovereign repositories (bbk-storefront, bbk-control-tower, Jarvis-OS)")
 
     # Command: heal
-    parser_heal = subparsers.add_parser("heal", help="Heal and re-enrich legacy catalog with Holver.id/DeepSeek AI")
+    parser_heal = subparsers.add_parser("heal", help="Heal and re-enrich legacy catalog with Pure Gemini Multimodal AI")
     parser_heal.add_argument("--sku", type=str, default=None, help="Target specific SKU(s), comma-separated")
     parser_heal.add_argument("--anomalies-only", action="store_true", help="Target only detected anomaly records")
     parser_heal.add_argument("--limit", type=int, default=None, help="Limit number of items to heal")
@@ -98,7 +98,7 @@ Examples:
         sync_master_db()
 
     elif args.command == "heal":
-        print("=== [BULK HEALER] Healing Legacy Catalog with Holver.id/DeepSeek AI ===")
+        print("=== [BULK HEALER] Healing Legacy Catalog with Pure Gemini Multimodal AI ===")
         import subprocess
         cmd = [sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "core", "enrich_holver_bulk.py")]
         if args.sku:
