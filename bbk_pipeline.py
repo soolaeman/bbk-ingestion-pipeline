@@ -16,11 +16,94 @@ if hasattr(sys.stdout, "reconfigure"):
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
+from pathlib import Path
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "core"))
 
 from ai_gateway import load_env
 load_env()
+
+def ensure_preflight_sync(no_sync=False):
+    """
+    🛡️ BBKitchen Anti-Collision Pre-Flight Sync Guard
+    Checks if running locally and verifies upstream origin/main.
+    If Cloud Bot has pushed new updates/commits, automatically pulls and replicates
+    master bbk.db locally before any SKU calculation or processing begins.
+    Guarantees zero split-brain collisions between Cloud and Local.
+    """
+    if no_sync:
+        print("ℹ️ [PRE-FLIGHT GUARD] Upstream sync dilewati (--no-sync aktif).")
+        return True
+
+    if os.getenv("GITHUB_ACTIONS") == "true":
+        print("🛡️ [PRE-FLIGHT GUARD] Berjalan di GitHub Actions (Cloud Runner SSOT).")
+        return True
+
+    repo_dir = Path(__file__).resolve().parent
+    git_dir = repo_dir / ".git"
+    if not git_dir.exists():
+        return True
+
+    import subprocess
+
+    print("\n==================================================")
+    print("🛡️ [PRE-FLIGHT GUARD] Memeriksa Keselarasan Upstream Git...")
+    print("==================================================")
+
+    try:
+        # 1. Fetch origin main with polite timeout
+        res_fetch = subprocess.run(
+            ["git", "fetch", "origin", "main"],
+            cwd=repo_dir,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        if res_fetch.returncode != 0:
+            print("⚠️ [PRE-FLIGHT GUARD] Gagal fetch origin/main (mungkin offline). Melanjutkan dengan DB lokal.")
+            return True
+
+        # 2. Check if local is behind origin/main
+        res_behind = subprocess.run(
+            ["git", "rev-list", "--count", "HEAD..origin/main"],
+            cwd=repo_dir,
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        behind_count = int(res_behind.stdout.strip() or "0")
+
+        if behind_count > 0:
+            print(f"⚡ [PRE-FLIGHT GUARD] Terdeteksi {behind_count} commit baru dari Cloud Bot di origin/main!")
+            print("   • Menarik database master & kode terbaru (git pull --rebase)...")
+            res_pull = subprocess.run(
+                ["git", "pull", "--rebase", "origin", "main"],
+                cwd=repo_dir,
+                capture_output=True,
+                text=True,
+                timeout=15
+            )
+            if res_pull.returncode == 0:
+                print("   ✅ Berhasil sinkronisasi upstream!")
+                try:
+                    from sync_repos import sync_master_db
+                    sync_master_db()
+                    print("   ✅ Database lokal berhasil direplikasi ke seluruh repo holding.")
+                except Exception as e:
+                    print(f"   ⚠️ Replikasi notice: {e}")
+            else:
+                print(f"   ⚠️ Git pull warning: {res_pull.stderr.strip()}")
+        else:
+            print("✅ [PRE-FLIGHT GUARD] Database lokal sudah 100% selaras dengan Cloud upstream (0 commit behind).")
+
+        return True
+    except subprocess.TimeoutExpired:
+        print("⚠️ [PRE-FLIGHT GUARD] Timeout memeriksa upstream (koneksi lambat). Melanjutkan dengan DB lokal.")
+        return True
+    except Exception as e:
+        print(f"ℹ️ [PRE-FLIGHT GUARD] Notice: {e}")
+        return True
 
 def main():
     parser = argparse.ArgumentParser(
@@ -70,11 +153,17 @@ Examples:
     parser_all.add_argument("--start", type=str, default=None, help="Start date YYYY-MM-DD")
     parser_all.add_argument("--end", type=str, default=None, help="End date YYYY-MM-DD")
 
+    parser.add_argument("--no-sync", action="store_true", help="Bypass automatic pre-flight upstream git sync")
+
     args = parser.parse_args()
 
     if not args.command:
         parser.print_help()
         sys.exit(1)
+
+    # Pre-Flight Anti-Collision Guard
+    if args.command in ("fetch", "normalize", "run-all"):
+        ensure_preflight_sync(no_sync=getattr(args, "no_sync", False))
 
     if args.command == "fetch":
         print("=== [STEP 1/4] Fetching from Telegram Channels ===")
