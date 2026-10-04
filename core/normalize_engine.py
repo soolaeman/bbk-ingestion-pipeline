@@ -822,7 +822,7 @@ def normalize_single_caption(
 ) -> Dict[str, Any]:
     """
     Eksekusi normalisasi multimodal lengkap (Teks Caption + Foto Fisik Base64) untuk 1 item data mentah.
-    Menghasilkan dictionary siap simpan ke tabel products (SQLite & Turso Edge).
+    Menghasilkan dictionary siap simpan ke tabel products (SQLite SSOT).
     """
     if gateway is None:
         gateway = AIGateway()

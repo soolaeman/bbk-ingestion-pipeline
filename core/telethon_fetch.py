@@ -91,7 +91,7 @@ def load_r2_uploaded_cache():
 
 def get_existing_links():
     """
-    Mengambil Telegram link yang sudah terdaftar di Local DB dan Turso Edge DB.
+    Mengambil Telegram link yang sudah terdaftar di Sovereign SQLite SSOT.
     """
     valid_links = set()
     r2_cache = load_r2_uploaded_cache()

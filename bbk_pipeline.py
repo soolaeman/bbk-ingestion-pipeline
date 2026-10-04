@@ -3,7 +3,7 @@ BBKitchen Sovereign Ingestion Pipeline CLI
 Unified operational entrypoint for:
 - fetch: Pull raw messages & photos from partner Telegram channels
 - normalize: AI & regex normalization, categories & warehouses SSOT mapping
-- sync: Sync clean catalog & master tables to Turso Edge DB
+- sync: Replicate master SQLite bbk.db across sovereign repositories
 - run-all: Complete end-to-end automated daily pipeline run
 """
 
@@ -112,8 +112,7 @@ def main():
         epilog="""
 Examples:
   python bbk_pipeline.py normalize --limit 10   # Test normalize 10 pending items
-  python bbk_pipeline.py sync --dirty           # Sync modified items to Turso Edge
-  python bbk_pipeline.py sync --master          # Sync categories & warehouses SSOT
+  python bbk_pipeline.py sync                   # Replicate master bbk.db across repos
   python bbk_pipeline.py run-all                # Execute fetch -> normalize -> sync
         """
     )

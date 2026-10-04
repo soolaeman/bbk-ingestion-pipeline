@@ -2,7 +2,7 @@
 """
 👑 BBKitchen Database Schema & Seed Initializer
 Ensures all required tables exist in SQLite (both local and cloud runner),
-populates master SSOT tables from JSON configs, and bootstraps anti-duplicate index from Turso.
+populates master SSOT tables from JSON configs, and bootstraps anti-duplicate index.
 """
 
 import os

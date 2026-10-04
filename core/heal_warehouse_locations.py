@@ -1,7 +1,7 @@
 """
 BBKitchen Warehouse & Location SSOT Data Healer
 Scans all products and raw_pipeline records, detects any mismatched asal_gudang or lokasi_unit
-by cross-referencing Telegram link IDs with warehouses_ssot.json, and fixes them in SQLite and Turso.
+by cross-referencing Telegram link IDs with warehouses_ssot.json, and fixes them in SQLite SSOT.
 """
 
 import os
@@ -16,7 +16,6 @@ if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
 from ai_gateway import load_env
-from sync_turso import get_turso_endpoint, get_headers
 
 load_env()
 
@@ -113,12 +112,15 @@ def heal_all():
 
     conn.close()
 
-    # 3. Sync all fixed products to Turso Edge DB
+    # 3. Replicate healed master db across holding repos
     if fixed_products:
-        print("\n☁️ Syncing healed records to Turso Cloud Edge...")
-        from sync_turso import sync_to_turso
-        sync_to_turso(only_dirty=True)
-        print("🎉 Turso Edge DB successfully synced and healed!")
+        print("\n🔄 Replicating healed SQLite master db across repositories...")
+        try:
+            from sync_repos import replicate_master_db
+            replicate_master_db()
+            print("🎉 Repositories successfully synchronized with healed SQLite master db!")
+        except Exception as e:
+            print(f"⚠️ Repo replication skipped: {e}")
     else:
         print("\n✨ All records were already clean and matched!")
 

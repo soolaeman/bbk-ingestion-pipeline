@@ -18,8 +18,8 @@
        ▼
 [ SQLite: tabel `products` ]      <-- KATALOG BERSIH (is_dirty = 1)
        │
-       ▼ (3. Sync)
-[ Turso Cloud Edge DB ]          <-- DISTRIBUSI GLOBAL (<50ms)
+       ▼ (3. Sync & Replicate)
+[ Sovereign SQLite SSOT (bbk.db) ]   <-- EMBEDDED SSOT (<1ms)
        │
        ├──► [ Storefront Web (bukanbarukitchen.com) ]
        └──► [ Control Tower ERP (Internal Bisnis) ]
@@ -38,8 +38,8 @@ python bbk_pipeline.py fetch [--limit 50]
 # 2. Kurasi AI & petakan ke 58 kategori SSOT & 6 hub fisik
 python bbk_pipeline.py normalize [--limit 10] [--dry-run]
 
-# 3. Sinkronkan produk bersih & tabel master ke Turso Cloud Edge
-python bbk_pipeline.py sync [--dirty] [--master] [--all]
+# 3. Replikasi database master SQLite ke seluruh repositori holding
+python bbk_pipeline.py sync
 
 # 4. EKSEKUSI LENGKAP END-TO-END (Dipakai untuk jadwal otomatis harian / cloud)
 python bbk_pipeline.py run-all
@@ -75,9 +75,9 @@ Seluruh kerumitan kode internal disimpan rapi di dalam folder [`core/`](core/), 
 * **Fungsi:** Penyedia kecerdasan buatan tanpa jeda.
 * **Tugas:** Menghubungi Google AI Studio (**Gemini 3.6 Flash**) sebagai model utama, dan otomatis failover ke Groq Cloud (**Qwen / Llama**) jika terjadi limit atau gangguan jaringan, dengan jaminan output JSON terstruktur.
 
-### 5. `core/sync_turso.py` *(Kurir Cloud Edge)*
-* **Fungsi:** Jembatan sinkronisasi data lokal ke internet.
-* **Tugas:** Mengirim batch data (25 produk/request via HTTP pipeline) ke Turso Edge DB di Tokyo/Singapura, dan mereset status `is_dirty = 0` setelah data berhasil diterima. Juga menyinkronkan tabel master kategori & gudang.
+### 5. `core/sync_repos.py` *(Replikasi Sovereign SQLite Holding)*
+* **Fungsi:** Replikasi cepat database master `bbk.db` ke seluruh repositori holding.
+* **Tugas:** Menjamin integritas database SQLite, memverifikasi katalog SKU tertinggi, dan menyalin master `bbk.db` ke Storefront Web, Control Tower ERP, dan Jarvis-OS secara atomik.
 
 ### 6. `core/sync_photos_to_r2.py` *(Pengunggah Aset Cloud)*
 * **Fungsi:** Pengunggah foto multi-threading.
@@ -96,7 +96,7 @@ bbk-ingestion-pipeline/
 ├── 📁 archive/                <-- Arsip script & file era Google Sheet/Appscript lama
 ├── 📁 docs/                   <-- Dokumentasi teknis & progress
 ├── 🐍 bbk_pipeline.py         <-- Remote control utama CLI
-├── .env                       <-- API Keys (Gemini, Groq, Turso, Cloudflare)
+├── .env                       <-- API Keys (Gemini, Groq, Cloudflare)
 ├── README.md                  <-- Dokumentasi ini
 └── requirements.txt           <-- Dependensi Python (Telethon, Pillow, Requests, dll)
 ```
