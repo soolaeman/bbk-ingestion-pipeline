@@ -16,10 +16,10 @@
 [ AI Gateway + SSOT Engine ]     <-- 58 Kategori WooCommerce & 6 Hub Fisik
        │
        ▼
-[ SQLite: tabel `products` ]      <-- KATALOG BERSIH (is_dirty = 1)
+[ SQLite: tabel `products` ]      <-- KATALOG BERSIH (bbk.db)
        │
-       ▼ (3. Sync & Replicate)
-[ Sovereign SQLite SSOT (bbk.db) ]   <-- EMBEDDED SSOT (<1ms)
+       ▼ (3. Sync)
+[ Git SSOT Replication ]          <-- DISTRIBUSI LOKAL & CLOUD
        │
        ├──► [ Storefront Web (bukanbarukitchen.com) ]
        └──► [ Control Tower ERP (Internal Bisnis) ]
@@ -38,7 +38,7 @@ python bbk_pipeline.py fetch [--limit 50]
 # 2. Kurasi AI & petakan ke 58 kategori SSOT & 6 hub fisik
 python bbk_pipeline.py normalize [--limit 10] [--dry-run]
 
-# 3. Replikasi database master SQLite ke seluruh repositori holding
+# 3. Replikasi database master SQLite ke repo storefront & control tower
 python bbk_pipeline.py sync
 
 # 4. EKSEKUSI LENGKAP END-TO-END (Dipakai untuk jadwal otomatis harian / cloud)
@@ -69,15 +69,15 @@ Seluruh kerumitan kode internal disimpan rapi di dalam folder [`core/`](core/), 
   - Mengirim prompt ke AI Gateway untuk mengekstrak nama alat, merk, dimensi, dan taksiran harga baru.
   - Memvalidasi slug ke **58 Kategori Resmi WooCommerce** ([`categories_ssot.json`](../Jarvis-OS/domains/business/bbkitchen/config/categories_ssot.json)).
   - Memetakan channel Telegram asli ke **6 Hub Fisik Jabodetabek** ([`warehouses_ssot.json`](../Jarvis-OS/domains/business/bbkitchen/config/warehouses_ssot.json)) tanpa halusinasi gudang fiktif.
-  - Menyimpan hasil kurasi ke tabel `products` dengan flag `is_dirty = 1`.
+  - Menyimpan hasil kurasi ke tabel `products`.
 
 ### 4. `core/ai_gateway.py` *(Gateway Multi-LLM Failover)*
 * **Fungsi:** Penyedia kecerdasan buatan tanpa jeda.
 * **Tugas:** Menghubungi Google AI Studio (**Gemini 3.6 Flash**) sebagai model utama, dan otomatis failover ke Groq Cloud (**Qwen / Llama**) jika terjadi limit atau gangguan jaringan, dengan jaminan output JSON terstruktur.
 
-### 5. `core/sync_repos.py` *(Replikasi Sovereign SQLite Holding)*
-* **Fungsi:** Replikasi cepat database master `bbk.db` ke seluruh repositori holding.
-* **Tugas:** Menjamin integritas database SQLite, memverifikasi katalog SKU tertinggi, dan menyalin master `bbk.db` ke Storefront Web, Control Tower ERP, dan Jarvis-OS secara atomik.
+### 5. `core/sync_repos.py` *(Replikasi SQLite SSOT)*
+* **Fungsi:** Replikasi master `bbk.db` ke repositori `bbk-storefront`, `bbk-control-tower`, dan `Jarvis-OS`.
+* **Tugas:** Menjamin seluruh aplikasi holding membaca SQLite SSOT yang identik secara embedded tanpa network latency.
 
 ### 6. `core/sync_photos_to_r2.py` *(Pengunggah Aset Cloud)*
 * **Fungsi:** Pengunggah foto multi-threading.

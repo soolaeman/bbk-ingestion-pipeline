@@ -112,15 +112,12 @@ def heal_all():
 
     conn.close()
 
-    # 3. Replicate healed master db across holding repos
+    # 3. Sync all fixed products across repositories
     if fixed_products:
-        print("\n🔄 Replicating healed SQLite master db across repositories...")
-        try:
-            from sync_repos import replicate_master_db
-            replicate_master_db()
-            print("🎉 Repositories successfully synchronized with healed SQLite master db!")
-        except Exception as e:
-            print(f"⚠️ Repo replication skipped: {e}")
+        print("\n☁️ Syncing healed records across repositories...")
+        from sync_repos import sync_master_db
+        sync_master_db()
+        print("🎉 SQLite DB successfully synced and healed!")
     else:
         print("\n✨ All records were already clean and matched!")
 

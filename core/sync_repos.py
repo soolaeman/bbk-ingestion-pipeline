@@ -1,7 +1,7 @@
 """
 👑 BBKitchen Sovereign SQLite Repository Synchronizer (sync_repos.py)
-Replicates the master bbk.db across all local holding repos
-(bbk-storefront, bbk-control-tower, Jarvis-OS).
+Synchronizes SQLite SSOT by replicating the master bbk.db 
+across all local repos (bbk-storefront, bbk-control-tower, Jarvis-OS).
 Guarantees zero-network-latency embedded SQLite operation.
 """
 

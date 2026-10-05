@@ -112,7 +112,8 @@ def main():
         epilog="""
 Examples:
   python bbk_pipeline.py normalize --limit 10   # Test normalize 10 pending items
-  python bbk_pipeline.py sync                   # Replicate master bbk.db across repos
+  python bbk_pipeline.py sync                   # Replicate master SQLite db to repos
+  python bbk_pipeline.py sync --master          # Sync categories & warehouses SSOT
   python bbk_pipeline.py run-all                # Execute fetch -> normalize -> sync
         """
     )
