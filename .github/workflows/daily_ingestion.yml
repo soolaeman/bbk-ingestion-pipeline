@@ -109,7 +109,7 @@ jobs:
             echo "Updated bbk.db successfully committed and pushed to origin main."
           fi
 
-      - name: Auto-Sync Master DB to Storefront & Control Tower (Option A)
+      - name: Auto-Sync Master DB to Storefront & Control Tower (Option B)
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GH_PAT }}
         run: |
@@ -118,9 +118,9 @@ jobs:
             git config --global user.name "BBKitchen Sovereign Bot"
             git config --global user.email "bot@bukanbarukitchen.com"
 
-            # 1. Push to Storefront (triggers instant Vercel auto-deploy)
+            # 1. Smart Reconcile & Push to Storefront (triggers instant Vercel auto-deploy)
             git clone "https://x-access-token:${PAT_TOKEN}@github.com/soolaeman/Front-End-BBKitchen.git" temp_storefront
-            cp bbk.db temp_storefront/data/bbk.db
+            python core/smart_merge_db.py bbk.db temp_storefront/data/bbk.db
             cd temp_storefront
             git add data/bbk.db
             if ! git diff --staged --quiet; then
@@ -133,9 +133,9 @@ jobs:
             cd ..
             rm -rf temp_storefront
 
-            # 2. Push to Control Tower
+            # 2. Smart Reconcile & Push to Control Tower
             git clone "https://x-access-token:${PAT_TOKEN}@github.com/soolaeman/BBKitchenBTC.git" temp_tower
-            cp bbk.db temp_tower/data/bbk.db
+            python core/smart_merge_db.py bbk.db temp_tower/data/bbk.db
             cd temp_tower
             git add data/bbk.db
             if ! git diff --staged --quiet; then
